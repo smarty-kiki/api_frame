@@ -1,90 +1,15 @@
 <?php
 
-/**
- * get complete database config.
- *
- * @param array $config
- *
- * @return array
- */
-function db_config_complete($config = null)
-{
-    static $defaults = [
-        'host' => '127.0.0.1',
-        'port' => '3306',
-        'username' => 'root',
-        'password' => '',
-        'database' => 'test',
-        'charset' => 'utf8',
-        'collation' => 'utf8_unicode_ci',
-        'options' => [
-            PDO::ATTR_CASE => PDO::CASE_NATURAL,
-            PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_STRINGIFY_FETCHES => false,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::ATTR_PERSISTENT => false,
-        ],
-
-    ];
-
-    if (!empty($config)) {
-        return array_replace_recursive($defaults, $config);
-    }
-
-    return $defaults;
-}
-
-/**
- * Set or get default database config.
- *
- * @param array $config
- *
- * @return array
- */
-function db_config($config = null)
-{
+function _mysql_connection($host, $port, $database, $username, $password, $charset, $collation, $options = [])
+{/*{{{*/
     static $container = [];
-
-    if (!empty($config)) {
-        return $container = db_config_complete($config);
-    }
-
-    if (empty($container)) {
-        return $container = db_config_complete();
-    }
-
-    return $container;
-}
-
-/**
- * db_connection.
- * 
- * @param mixed $config
- */
-function db_connection($config)
-{
-    $host = $config['host'];
-    $database = $config['database'];
-    $port = $config['port'];
-    $username = $config['username'];
-    $password = $config['password'];
-    $charset = $config['charset'];
-    $collation = $config['collation'];
-    $options = $config['options'];
 
     $dsn = "mysql:host={$host};dbname={$database};port={$port}";
-
-    return db_pdo($dsn, $username, $password, $charset, $collation, $options);
-}
-
-function db_pdo($dsn, $username, $password, $charset, $collation, $options = [])
-{
-    static $container = [];
 
     $identifier = $dsn.'|'.$username.'|'.$password;
 
     if (!isset($container[$identifier])) {
+
         $connection = new PDO($dsn, $username, $password, $options);
 
         $connection->prepare("set names '{$charset}' collate '{$collation}'")->execute();
@@ -93,10 +18,36 @@ function db_pdo($dsn, $username, $password, $charset, $collation, $options = [])
     }
 
     return $container[$identifier];
-}
+}/*}}}*/
 
-function db_binds($sql_template, array $binds)
-{
+function _mysql_database_closure($database, $type, closure $closure)
+{/*{{{*/
+    static $configs = [];
+
+    if (empty($configs)) {
+        $configs = config('mysql');
+    }
+
+    $type = db_force_type_write()? 'write': $type;
+
+    $config = $configs[$database];
+
+    $connection = _mysql_connection(
+        $host = array_rand($config[$type]),
+        $port = $config[$type][$host],
+        $database,
+        $config['username'],
+        $config['password'],
+        $config['charset'],
+        $config['collation'],
+        $configs['options']
+    );
+
+    return call_user_func($closure, $connection);
+}/*}}}*/
+
+function _mysql_sql_binds($sql_template, array $binds)
+{/*{{{*/
     $res_binds = [];
 
     foreach ($binds as $key => $value) {
@@ -114,42 +65,52 @@ function db_binds($sql_template, array $binds)
     }
 
     return [$sql_template, $res_binds];
-}
+}/*}}}*/
 
-function db_execute($sql_template, $binds = [])
-{
-    $config = db_config();
+function db_force_type_write($bool = null)
+{/*{{{*/
+    static $container = false;
 
-    $connection = db_connection($config);
+    if (! is_null($bool)) {
+        $container = $bool;
+    }
 
-    list($sql_template, $binds) = db_binds($sql_template, (array) $binds);
+    return $container;
+}/*}}}*/
 
-    $st = $connection->prepare($sql_template);
+function db_query($sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    list($sql_template, $binds) = _mysql_sql_binds($sql_template, $binds);
 
-    $st->execute((array) $binds);
+    return _mysql_database_closure($database, 'read', function ($connection) use ($sql_template, $binds) {
 
-    return [$st, $connection];
-}
+        $st = $connection->prepare($sql_template);
 
-function db_query($sql_template, $binds = [])
-{
-    list($st) = db_execute($sql_template, $binds);
+        $st->execute($binds);
 
-    return $st->fetchAll(PDO::FETCH_ASSOC);
-}
+        return $st->fetchAll(PDO::FETCH_ASSOC);
+    });
+}/*}}}*/
 
-function db_query_first($sql_template, $binds = [])
-{
+function db_query_first($sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
     $sql_template = str_finish($sql_template, ' limit 1');
 
-    list($st) = db_execute($sql_template, $binds);
+    list($sql_template, $binds) = _mysql_sql_binds($sql_template, $binds);
 
-    return $st->fetch(PDO::FETCH_ASSOC);
-}
+    return _mysql_database_closure($database, 'read', function ($connection) use ($sql_template, $binds) {
 
-function db_query_column($column, $sql_template, $binds = [])
-{
-    $rows = db_query($sql_template, $binds);
+        $st = $connection->prepare($sql_template);
+
+        $st->execute($binds);
+
+        return $st->fetch(PDO::FETCH_ASSOC);
+    });
+}/*}}}*/
+
+function db_query_column($column, $sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    $rows = db_query($sql_template, $binds, $database);
 
     $res = [];
 
@@ -158,64 +119,93 @@ function db_query_column($column, $sql_template, $binds = [])
     }
 
     return $res;
-}
+}/*}}}*/
 
-function db_query_value($value, $sql_template, $binds = [])
-{
-    $row = db_query_first($sql_template, $binds);
+function db_query_value($value, $sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    $row = db_query_first($sql_template, $binds, $database);
 
     return $row[$value];
-}
+}/*}}}*/
 
-function db_update($sql_template, $binds = [])
-{
-    list($st) = db_execute($sql_template, $binds);
+function db_update($sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    list($sql_template, $binds) = _mysql_sql_binds($sql_template, $binds);
 
-    return $st->rowCount();
-}
+    return _mysql_database_closure($database, 'write', function ($connection) use ($sql_template, $binds) {
 
-function db_delete($sql_template, $binds = [])
-{
-    list($st) = db_execute($sql_template, $binds);
+        $st = $connection->prepare($sql_template);
 
-    return $st->rowCount();
-}
+        $st->execute($binds);
 
-function db_insert($sql_template, $binds = [])
-{
-    list($st, $connection) = db_execute($sql_template, $binds);
+        return $st->rowCount();
+    });
+}/*}}}*/
 
-    return $connection->lastInsertId();
-}
+function db_delete($sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    list($sql_template, $binds) = _mysql_sql_binds($sql_template, $binds);
 
-function db_structure($sql)
-{
-    list($st, $connection) = db_execute($sql);
+    return _mysql_database_closure($database, 'write', function ($connection) use ($sql_template, $binds) {
 
-    return $st->rowCount();
-}
+        $st = $connection->prepare($sql_template);
 
-function transaction(closure $action)
-{
-    $config = db_config();
+        $st->execute($binds);
 
-    $connection = db_connection($config);
+        return $st->rowCount();
+    });
+}/*}}}*/
 
-    $began = $connection->beginTransaction();
+function db_insert($sql_template, array $binds = [], $database = 'default')
+{/*{{{*/
+    list($sql_template, $binds) = _mysql_sql_binds($sql_template, $binds);
 
-    if (!$began) {
-        throw new Exception('can not start transaction');
-    }
+    return _mysql_database_closure($database, 'write', function ($connection) use ($sql_template, $binds) {
 
-    try {
-        $res = $action();
+        $st = $connection->prepare($sql_template);
 
-        $connection->commit();
+        $st->execute($binds);
 
-        return $res;
-    } catch (Exception $ex) {
-        $connection->rollBack();
+        return $connection->lastInsertId();
+    });
+}/*}}}*/
 
-        throw $ex;
-    }
-}
+function db_structure($sql, $database = 'default')
+{/*{{{*/
+    return _mysql_database_closure($database, 'schema', function ($connection) use ($sql) {
+
+        $st = $connection->prepare($sql_template);
+
+        $st->execute();
+
+        return $st->rowCount();
+    });
+}/*}}}*/
+
+function db_transaction(closure $action, $database = 'default')
+{/*{{{*/
+    db_force_type_write(true);
+
+    return _mysql_database_closure($database, 'write', function ($connection) use ($action) {
+
+        $began = $connection->beginTransaction();
+
+        if (!$began) {
+            throw new Exception('can not start transaction');
+        }
+
+        try {
+            $res = $action();
+
+            $connection->commit();
+
+            return $res;
+        } catch (Exception $ex) {
+            $connection->rollBack();
+
+            throw $ex;
+        } finally {
+            db_force_type_write(false);
+        }
+    });
+}/*}}}*/

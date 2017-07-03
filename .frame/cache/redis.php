@@ -2,16 +2,30 @@
 
 function _redis_connection($config)
 {/*{{{*/
-    $redis = new Redis();
+    static $container = [];
 
-    if (isset($config['sock'])) {
-        $redis->pconnect($config['sock'], $config['timeout']);
+    $is_sock = isset($config['sock']);
+
+    $sign = $is_sock ?
+        $config['sock'] . $config['timeout']:
+        $config['host'] . $config['port'] . $config['timeout'];
+
+    if (empty($container[$sign])) {
+        $redis = new Redis();
+
+        if ($is_sock) {
+            $redis->pconnect($config['sock'], $config['timeout']);
+        } else {
+            $redis->pconnect($config['host'], $config['port'], $config['timeout']);
+        }
+
+        if (isset($config['auth'])) {
+            $redis->auth($config['auth']);
+        }
+
+        $container[$sign] = $redis;
     } else {
-        $redis->pconnect($config['host'], $config['port'], $config['timeout']);
-    }
-
-    if (isset($config['password'])) {
-        $redis->auth($config['password']);
+        $redis = $container[$sign];
     }
 
     if (isset($config['database'])) {

@@ -20,10 +20,10 @@ return [
 
         //
         // Authenticate the connection using a password:
-        // 'password' => '',
-        //
+        // 'auth' => 'foobared',
 
         'options' => [
+            Redis::OPT_SERIALIZER => Redis::SERIALIZER_PHP,
         ],
     ],
 ];
