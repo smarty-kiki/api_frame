@@ -32,7 +32,7 @@ function unit_of_work(Closure $action)
 
         $dao = $entity->get_dao();
 
-        if ($entity->is_deleted()) {
+        if ($entity->is_force_deleted()) {
             if (!$entity->is_new()) {
                 $sqls[] = $dao->dump_delete_sql($entity);
             }
@@ -45,14 +45,14 @@ function unit_of_work(Closure $action)
 
     if ($sqls) {
         if (count($sqls) > 1) {
-            transaction(function () use ($sqls) {
+            db_transaction(function () use ($sqls) {
                 foreach ($sqls as $sql) {
-                    db_execute($sql['sql_template'], $sql['binds']);
+                    db_write($sql['sql_template'], $sql['binds']);
                 }
             });
         } else {
             $sql = reset($sqls);
-            db_execute($sql['sql_template'], $sql['binds']);
+            db_write($sql['sql_template'], $sql['binds']);
         }
     }
 

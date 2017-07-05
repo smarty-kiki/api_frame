@@ -11,6 +11,7 @@ function db_query_value($value, $sql_template, array $binds = [], $database = 'd
 function db_update($sql_template, array $binds = [], $database = 'default') { }
 function db_delete($sql_template, array $binds = [], $database = 'default') { }
 function db_insert($sql_template, array $binds = [], $database = 'default') { }
+function db_write($sql_template, array $binds = [], $database = 'default') { }
 
 function db_structure($sql, $database = 'default') { }
 

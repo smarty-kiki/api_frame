@@ -13,10 +13,6 @@ function array_get($array, $key, $default = null)
         return $default;
     }
 
-    if (isset($array[$key])) {
-        return $array[$key];
-    }
-
     foreach (explode('.', $key) as $segment) {
         if (!is_array($array) || !array_key_exists($segment, $array)) {
             return value($default);
@@ -461,7 +457,7 @@ function date_between($date, $start, $end)
  * @return string
  */
 function remote_post($url, $data = [], $timeout = 3, $retry = 3, $host = null)
-{
+{/*{{{*/
     $ch = curl_init();
 
     curl_setopt_array($ch, array(
@@ -495,7 +491,7 @@ function remote_post($url, $data = [], $timeout = 3, $retry = 3, $host = null)
     }
 
     return $res;
-}
+}/*}}}*/
 
 /**
  * remote_get.
@@ -507,7 +503,7 @@ function remote_post($url, $data = [], $timeout = 3, $retry = 3, $host = null)
  * @return string
  */
 function remote_get($url, $timeout = 3, $retry = 3, $host = null)
-{
+{/*{{{*/
     $ch = curl_init();
 
     curl_setopt_array($ch, array(
@@ -539,10 +535,10 @@ function remote_get($url, $timeout = 3, $retry = 3, $host = null)
     }
 
     return $res;
-}
+}/*}}}*/
 
 function instance($class_name)
-{
+{/*{{{*/
     static $container = [];
 
     if (!isset($container[$class_name])) {
@@ -550,4 +546,4 @@ function instance($class_name)
     }
 
     return $container[$class_name];
-}
+}/*}}}*/

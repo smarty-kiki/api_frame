@@ -1,7 +1,5 @@
 <?php
-
 spl_autoload_register(function ($class_name) {
-
     $class_maps = array(
         'customer_dao' => 'dao/customer.php',
         'good_dao' => 'dao/good.php',
@@ -12,7 +10,6 @@ spl_autoload_register(function ($class_name) {
         'order' => 'entity/order.php',
         'order_item' => 'entity/order_item.php',
     );
-
     if (isset($class_maps[$class_name])) {
          include __DIR__.'/'.$class_maps[$class_name];
     }

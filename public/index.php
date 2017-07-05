@@ -19,8 +19,10 @@ if_not_found(function () {
     return '404';
 });
 
-// init controller
-include '../controller/index.php';
+unit_of_work(function () {
+    // init controller
+    include CONTROLLER_DIR.'/index.php';
+});
 
 // fix
 not_found();
