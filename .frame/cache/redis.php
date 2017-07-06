@@ -60,7 +60,7 @@ function cache_get($key, $config_key = 'default')
 {/*{{{*/
     return _redis_cache_closure($config_key, function ($redis) use ($key) {
 
-        return $redis->get((string) $key);
+        return $redis->get($key);
 
     });
 }/*}}}*/
@@ -69,7 +69,7 @@ function cache_multi_get(array $keys, $config_key = 'default')
 {/*{{{*/
     return _redis_cache_closure($config_key, function ($redis) use ($keys) {
 
-        $values = $redis->mGet((string) $keys);
+        $values = $redis->mGet($keys);
 
         return array_combine($keys, $values);
     });
@@ -80,7 +80,7 @@ function cache_set($key, $value, $expires = 0, $config_key = 'default')
     return _redis_cache_closure($config_key, function ($redis) use ($key, $value, $expires) {
 
         if ($expires) {
-            return $redis->set($key, $value, (int) $expires);
+            return $redis->set($key, $value, $expires);
         } else {
             return $redis->set($key, $value);
         }
@@ -92,7 +92,7 @@ function cache_add($key, $value, $expires = 0, $config_key = 'default')
     return _redis_cache_closure($config_key, function ($redis) use ($key, $value, $expires) {
 
         if ($expires) {
-            return $redis->set($key, $value, ['nx', 'ex' => (int) $expires]);
+            return $redis->set($key, $value, ['nx', 'ex' => $expires]);
         } else {
             return $redis->setNx($key, $value);
         }
@@ -104,7 +104,7 @@ function cache_replace($key, $value, $expires = 0, $config_key = 'default')
     return _redis_cache_closure($config_key, function ($redis) use ($key, $value, $expires) {
 
         if ($expires) {
-            return $redis->set($key, $value, ['xx', 'ex' => (int) $expires]);
+            return $redis->set($key, $value, ['xx', 'ex' => $expires]);
         } else {
             return $redis->setNx($key, $value);
         }
@@ -134,7 +134,7 @@ function cache_increment($key, $number = 1, $expires = 0, $config_key = 'default
         $res = $redis->incr($key, $number);
 
         if ($expires) {
-            $redis->setTimeout($key, (int) $expires);
+            $redis->setTimeout($key, $expires);
         }
 
         return $res;
@@ -148,7 +148,7 @@ function cache_decrement($key, $number = 1, $expires = 0, $config_key = 'default
         $res = $redis->decr($key, $number);
 
         if ($expires) {
-            $redis->setTimeout($key, (int) $expires);
+            $redis->setTimeout($key, $expires);
         }
 
         return $res;

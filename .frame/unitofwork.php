@@ -11,16 +11,23 @@ function unit_of_work_system_code($system_code = null)
     return $container;
 }
 
+function _unit_of_work_write($sql_template, array $binds = [])
+{
+    $row_count = db_write($sql_template, $binds);
+
+    otherwise($row_count === 1, 'data in unit of work is expired');
+}
+
 function unit_of_work(Closure $action)
 {
-    local_cache_clean_all();
+    local_cache_delete_all();
 
     try {
         $res = $action();
 
         $entities = local_cache_get_all();
     } finally {
-        local_cache_clean_all();
+        local_cache_delete_all();
     }
 
     $sqls = [];
@@ -47,19 +54,19 @@ function unit_of_work(Closure $action)
         if (count($sqls) > 1) {
             db_transaction(function () use ($sqls) {
                 foreach ($sqls as $sql) {
-                    db_write($sql['sql_template'], $sql['binds']);
+                    _unit_of_work_write($sql['sql_template'], $sql['binds']);
                 }
             });
         } else {
             $sql = reset($sqls);
-            db_write($sql['sql_template'], $sql['binds']);
+            _unit_of_work_write($sql['sql_template'], $sql['binds']);
         }
     }
 
     return $res;
 }
 
-function generate_id($mark = '')
+function generate_id($mark = 'idgenter')
 {
     static $step = 1;
 

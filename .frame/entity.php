@@ -37,7 +37,7 @@ abstract class entity implements JsonSerializable, Serializable
         $static->create_time = $static->update_time = now();
         $static->delete_time = null;
 
-        local_cache_put($static);
+        local_cache_set($static);
 
         return $static;
     }
@@ -374,10 +374,10 @@ class dao
         $entity = local_cache_get($this->class_name, $id);
 
         if (is_null($entity)) {
-            $row = db_query_first('select * from '.$this->table_name.' where id = ?', [$id]);
+            $row = db_query_first('select * from `'.$this->table_name.'` where id = ?', [$id]);
             if ($row) {
                 $entity = $this->row_to_entity($row);
-                local_cache_put($entity);
+                local_cache_set($entity);
             } else {
                 $entity = null_entity::create($this->class_name);
             }
@@ -388,7 +388,7 @@ class dao
 
     public function find_by_foreign_key(string $foreign_key, $value)
     {/*{{{*/
-        $sql_template = "select * from $this->table_name where $foreign_key = :foreign_key";
+        $sql_template = "select * from `$this->table_name` where $foreign_key = :foreign_key";
 
         return $this->find_by_sql($sql_template, [
             ':foreign_key' => $value,
@@ -397,7 +397,7 @@ class dao
 
     protected function find_by_condition($condition, array $binds = [])
     {/*{{{*/
-        return $this->find_by_sql('select * from '.$this->table_name.' where '.$condition, $binds);
+        return $this->find_by_sql('select * from `'.$this->table_name.'` where '.$condition, $binds);
     }/*}}}*/
 
     protected function find_by_sql($sql_template, array $binds = [])
@@ -414,7 +414,7 @@ class dao
         }
 
         $entity = $this->row_to_entity($row);
-        local_cache_put($entity);
+        local_cache_set($entity);
 
         return $entity;
     }/*}}}*/
@@ -426,7 +426,7 @@ class dao
         }
 
         $sql = [
-            'sql_template' => 'select * from '.$this->table_name.' where id in :ids order by find_in_set(id, :set)',
+            'sql_template' => 'select * from `'.$this->table_name.'` where id in :ids order by find_in_set(id, :set)',
             'binds' => [
                 ':ids' => $ids,
                 ':set' => implode(',', $ids),
@@ -441,7 +441,7 @@ class dao
             $entity = local_cache_get($this->class_name, $row['id']);
             if (is_null($entity)) {
                 $entity = $this->row_to_entity($row);
-                local_cache_put($entity);
+                local_cache_set($entity);
             }
             $entities[$entity->id] = $entity;
         }
@@ -451,7 +451,7 @@ class dao
 
     public function find_all_by_foreign_key(string $foreign_key, $value)
     {/*{{{*/
-        $sql_template = "select * from $this->table_name where $foreign_key = :foreign_key";
+        $sql_template = "select * from `$this->table_name` where $foreign_key = :foreign_key";
 
         return $this->find_all_by_sql($sql_template, [
             ':foreign_key' => $value,
@@ -460,7 +460,7 @@ class dao
 
     protected function find_all_by_condition($condition, array $binds = [])
     {/*{{{*/
-        return $this->find_all_by_sql('select * from '.$this->table_name.' where '.$condition, $binds);
+        return $this->find_all_by_sql('select * from `'.$this->table_name.'` where '.$condition, $binds);
     }/*}}}*/
 
     protected function find_all_by_sql($sql_template, array $binds = [])
@@ -473,7 +473,7 @@ class dao
             $entity = local_cache_get($this->class_name, $row['id']);
             if (is_null($entity)) {
                 $entity = $this->row_to_entity($row);
-                local_cache_put($entity);
+                local_cache_set($entity);
             }
             $entities[$entity->id] = $entity;
         }
@@ -650,7 +650,7 @@ function local_cache_get_all()
     return _local_cache();
 }
 
-function local_cache_put(entity $entity)
+function local_cache_set(entity $entity)
 {
     $cached = _local_cache();
 
@@ -661,7 +661,7 @@ function local_cache_put(entity $entity)
     _local_cache($cached);
 }
 
-function local_cache_clean($entity_type, $id)
+function local_cache_delete($entity_type, $id)
 {
     $cached = _local_cache();
 
@@ -672,7 +672,7 @@ function local_cache_clean($entity_type, $id)
     _local_cache($cached);
 }
 
-function local_cache_clean_all()
+function local_cache_delete_all()
 {
     _local_cache([]);
 }
@@ -696,8 +696,6 @@ function local_cache_flush_all()
  */
 function input_entity($entity_name, $message = null, $name = null)
 {
-    $dao_name = $entity_name.'_dao';
-
     if (is_null($name)) {
         $name = $entity_name.'_id';
     }
@@ -707,12 +705,12 @@ function input_entity($entity_name, $message = null, $name = null)
     }
 
     if ($id = input($name)) {
-        $entity = $dao_name::find($id);
+        $entity = dao($entity_name)->find($id);
 
-        assert($entity->is_not_null(), sprintf($message, $id));
+        otherwise($entity->is_not_null(), sprintf($message, $id));
 
         return $entity;
     }
 
-    assert(false, sprintf($message, $id));
+    otherwise(false, sprintf($message, $id));
 }

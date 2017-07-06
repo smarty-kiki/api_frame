@@ -2,8 +2,8 @@
 
 if_get('/', function ()
 {
-    unit_of_work(function () {
-    });
+    $time = microtime(true);
+    echo microtime(true) - $time;
 
     return 'ok';
 });
