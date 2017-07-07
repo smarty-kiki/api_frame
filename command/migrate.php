@@ -2,8 +2,13 @@
 
 define('MIGRATION_DIR', COMMAND_DIR.'/migration');
 
+function migration_file_path($name)
+{/*{{{*/
+    return MIGRATION_DIR.'/'.date('Y_m_d_H_i_s_').$name.'.sql';
+}/*}}}*/
+
 function _migration_file_explode($filepath)
-{
+{/*{{{*/
     $ups = $downs = [];
     if (ends_with($filepath, '.sql')) {
         $content = file_get_contents($filepath);
@@ -18,10 +23,10 @@ function _migration_file_explode($filepath)
     }
 
     return [$ups, $downs];
-}
+}/*}}}*/
 
 command('migrate:install', '初始化 migrate 所需的表结构', function ()
-{
+{/*{{{*/
     db_structure(
         'CREATE TABLE IF NOT EXISTS `migrations` (
             `id` int(10) unsigned NOT NULL auto_increment,
@@ -29,15 +34,15 @@ command('migrate:install', '初始化 migrate 所需的表结构', function ()
             `batch` int(11) NOT NULL,
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
-});
+});/*}}}*/
 
 command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
-{
+{/*{{{*/
     db_structure('DROP TABLE `migrations`');
-});
+});/*}}}*/
 
 command('migrate', '执行 migrate', function ()
-{
+{/*{{{*/
     $files = scandir(MIGRATION_DIR);
     $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from migrations'));
     $new_migrations = array_diff($files, $old_migrations);
@@ -58,10 +63,10 @@ command('migrate', '执行 migrate', function ()
 
         echo $filename." up!\n";
     }
-});
+});/*}}}*/
 
 command('migrate:dry-run', '展示将要跑的 sql', function ()
-{
+{/*{{{*/
     $files = scandir(MIGRATION_DIR);
     $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from migrations'));
     $new_migrations = array_diff($files, $old_migrations);
@@ -77,10 +82,10 @@ command('migrate:dry-run', '展示将要跑的 sql', function ()
         }
     }
 
-});
+});/*}}}*/
 
 command('migrate:rollback', '回滚最后一次 migrate', function ()
-{
+{/*{{{*/
     $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from migrations');
     $last_batch_migrations = db_query_column('migration', 'select migration from migrations where batch = :batch order by id desc', [
         ':batch' => $last_batch,
@@ -99,22 +104,22 @@ command('migrate:rollback', '回滚最后一次 migrate', function ()
 
         echo "$filename down!\n";
     }
-});
+});/*}}}*/
 
 command('migrate:make', '新建 migration', function ($name)
-{
+{/*{{{*/
     if (! $name) {
         echo "需要加 --name=xxx\n";
         return 1;
     }
 
-    $file = MIGRATION_DIR.'/'.date('Y_m_d_H_i_s_').$name.'.sql';
+    $file = migration_file_path($name);
     error_log("# up\n这里写结构变更 SQL\n\n# down\n这里写回滚 SQL", 3, $file);
     echo "generate $file success!\n";
-});
+});/*}}}*/
 
 command('migrate:reset', '回滚所有 migrate', function ()
-{
+{/*{{{*/
     $migrations = db_query_column('migration', 'select migration from migrations order by id desc');
 
     foreach ($migrations as $filename) {
@@ -128,4 +133,4 @@ command('migrate:reset', '回滚所有 migrate', function ()
 
         echo "$filename down!\n";
     }
-});
+});/*}}}*/

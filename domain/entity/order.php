@@ -2,7 +2,7 @@
 
 class order extends entity
 {
-    public $original = [
+    public $structs = [
         'customer_id' => '',
     ];
 

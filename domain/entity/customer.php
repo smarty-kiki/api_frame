@@ -2,7 +2,7 @@
 
 class customer extends entity
 {
-    public $original = [
+    public $structs = [
         'name' => '',
     ];
 

@@ -13,7 +13,7 @@ abstract class entity implements JsonSerializable, Serializable
 
     private $is_force_deleted;
 
-    public $original = [];
+    public $structs = [];
     public $attributes = [];
     protected $json_attributes = [];
 
@@ -30,7 +30,7 @@ abstract class entity implements JsonSerializable, Serializable
     protected static function init()
     {
         $static = new static();
-        $static->attributes = $static->original;
+        $static->attributes = $static->structs;
         $static->id = self::generate_id();
         $static->version = self::INIT_VERSION;
         $static->is_force_deleted = false;
@@ -54,7 +54,7 @@ abstract class entity implements JsonSerializable, Serializable
 
     final public function is_updated()
     {
-        return $this->attributes != $this->original;
+        return $this->attributes != $this->structs;
     }
 
     final public function is_deleted()
@@ -527,7 +527,7 @@ class dao
         $rows = [];
 
         foreach ($entity->attributes as $column => $value) {
-            if ($entity->original[$column] !== $value) {
+            if ($entity->structs[$column] !== $value) {
                 $rows[$column] = $value;
             }
         }
@@ -545,7 +545,7 @@ class dao
 
         $entity->id = $rows['id'];
         $entity->version = $rows['version'];
-        $entity->attributes = $entity->original = $rows;
+        $entity->attributes = $entity->structs = $rows;
 
         return $entity;
     }/*}}}*/

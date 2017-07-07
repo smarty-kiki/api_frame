@@ -2,7 +2,7 @@
 
 class good extends entity
 {
-    public $original = [
+    public $structs = [
         'price' => '',
     ];
 

@@ -19,7 +19,7 @@ function _command_prepare_arguments()
                 $arguments[$res[1]] = true;
                 break;
 
-            case preg_match('/^--([a-zA-Z-]+)=(.*)$/', $argument, $res):
+            case preg_match('/^--([a-zA-Z_]+)=(.*)$/', $argument, $res):
                 $arguments[$res[1]] = $res[2];
                 break;
             }
@@ -70,4 +70,36 @@ function command_not_found($rule = null, $description = null)
         $rules[] = $rule;
         $descriptions[] = $description;
     }
+}/*}}}*/
+
+function command_read($prompt, $default = true, array $options = [])
+{/*{{{*/
+    if ($options) {
+        $prompt = "$prompt\n\n";
+        foreach ($options as $key => $option) {
+            $prompt .= "  $key) $option\n";
+        }
+
+        $prompt .= "\n> ";
+
+        do {
+            fwrite(STDOUT, $prompt);  
+            $result = trim(fgets(STDIN));  
+            $result = ($result === '')? $default: $result;
+        } while (! isset($options[$result]));
+
+        return $options[$result];
+    } else {
+        $prompt = "$prompt\n> ";
+        fwrite(STDOUT, $prompt);  
+        $result = trim(fgets(STDIN));  
+        return ($result === '')? $default: $result;
+    }
+}/*}}}*/
+
+function command_read_bool($prompt)
+{/*{{{*/
+    $res = command_read("$prompt [y/n]?", 'y');
+
+    return ('y' === $res);
 }/*}}}*/

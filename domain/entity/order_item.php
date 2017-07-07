@@ -2,7 +2,7 @@
 
 class order_item extends entity
 {
-    public $original = [
+    public $structs = [
         'order_id' => '',
         'good_id' => '',
     ];
