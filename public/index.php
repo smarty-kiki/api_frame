@@ -2,7 +2,7 @@
 
 // init
 include __DIR__.'/../bootstrap.php';
-include FRAME_DIR.'/micro_service_api.php';
+include FRAME_DIR.'/api.php';
 
 set_error_handler('api_err_action', E_ALL);
 set_exception_handler('api_ex_action');
