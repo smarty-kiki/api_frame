@@ -12,14 +12,10 @@ if_command_not_found(function ($rules, $descriptions) {
     }
 });
 
-unit_of_work(function () {
-    // registe command
-
-});
-
-// registe migrate
+// registe command
 include COMMAND_DIR.'/migrate.php';
 include COMMAND_DIR.'/entity.php';
+include COMMAND_DIR.'/queue.php';
 
 // fix
 command_not_found();

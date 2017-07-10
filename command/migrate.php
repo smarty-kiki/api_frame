@@ -106,12 +106,9 @@ command('migrate:rollback', '回滚最后一次 migrate', function ()
     }
 });/*}}}*/
 
-command('migrate:make', '新建 migration', function ($name)
+command('migrate:make', '新建 migration', function ()
 {/*{{{*/
-    if (! $name) {
-        echo "需要加 --name=xxx\n";
-        return 1;
-    }
+    $name = command_paramater('name');
 
     $file = migration_file_path($name);
     error_log("# up\n这里写结构变更 SQL\n\n# down\n这里写回滚 SQL", 3, $file);

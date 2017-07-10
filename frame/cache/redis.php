@@ -51,9 +51,7 @@ function _redis_cache_closure($config_key, closure $closure)
 
     $redis = _redis_connection($configs[$config_key]);
 
-    $res = call_user_func($closure, $redis);
-
-    return $res;
+    return call_user_func($closure, $redis);
 }/*}}}*/
 
 function cache_get($key, $config_key = 'default')

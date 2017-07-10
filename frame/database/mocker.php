@@ -1,6 +1,5 @@
 <?php
 
-
 function db_force_type_write($bool = null) { }
 
 function db_query($sql_template, array $binds = [], $database = 'default') { }

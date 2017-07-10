@@ -103,11 +103,9 @@ drop table `%s`;";
     return sprintf($content, $entity_name, implode("\n    ", array_merge($columns, $indexs)), $entity_name);
 }/*}}}*/
 
-command('entity:generate', '初始化 entity、dao、migration', function ($entity_name)
+command('entity:make', '初始化 entity、dao、migration', function ()
 {/*{{{*/
-    if (! $entity_name) {
-        echo "需要加 --entity_name=xxx\n"; return 1;
-    }
+    $entity_name = command_paramater('entity_name');
 
     $entity_structs = [];
 

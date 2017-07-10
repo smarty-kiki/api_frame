@@ -29,20 +29,28 @@ function _command_prepare_arguments()
     return [$file_name, $command, $arguments];
 }/*}}}*/
 
+function command_paramater($key, $default = null)
+{/*{{{*/
+    list($file_name, $command, $arguments) = _command_prepare_arguments();
+
+    if (! isset($arguments[$key])) {
+        if (is_null($default)) {
+            echo "需要加 --$key=xxx 或者 -$key\n";
+            exit(1);
+        } else {
+            return $default;
+        }
+    }
+
+    return $arguments[$key];
+}/*}}}*/
+
 function command($rule, $description, closure $action)
 {/*{{{*/
     list($file_name, $command, $arguments) = _command_prepare_arguments();
 
     if ($command === $rule) {
-        $parameters = [];
-
-        $reflector = new ReflectionFunction($action);
-
-        foreach ($reflector->getParameters() as $parameter) {
-            $parameters[$parameter->name] = $arguments[$parameter->name];
-        }
-
-        exit(call_user_func_array($action, $parameters));
+        exit($action());
     } else {
         command_not_found($rule, $description);
     }
