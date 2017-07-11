@@ -9,13 +9,13 @@ return [
         'password' => 'password',
 
         'read' => [
-            '127.0.0.1' => '3306',
+            '/var/run/mysqld/mysqld.sock',
         ],
         'write' => [
-            '127.0.0.1' => '3306',
+            '/var/run/mysqld/mysqld.sock',
         ],
         'schema' => [
-            '127.0.0.1' => '3306',
+            '/var/run/mysqld/mysqld.sock',
         ],
     ],
 
