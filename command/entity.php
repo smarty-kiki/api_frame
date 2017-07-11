@@ -150,3 +150,57 @@ command('entity:make', '初始化 entity、dao、migration', function ()
     echo $file."\n";
 
 });/*}}}*/
+
+command('entity:make-from-db', '从数据库表结构初始化 entity、dao、migration', function ()
+{/*{{{*/
+    $table_infos = db_query('show tables');
+
+    foreach ($table_infos as $table_info) {
+        $entity_structs = $entity_relationships = [];
+        $entity_name = $table = reset($table_info);
+        $schema_infos = db_query("show create table `$table`");
+        $schema_info = reset($schema_infos);
+
+        foreach (explode("\n", $schema_info['Create Table']) as $line) {
+            $line = trim($line);
+
+            if (stristr($line, 'CREATE TABLE')) continue;
+            if (stristr($line, 'PRIMARY KEY')) continue;
+            if (stristr($line, ') ENGINE=')) continue;
+            if (stristr($line, '`id`')) continue;
+            if (stristr($line, '`version`')) continue;
+            if (stristr($line, '`create_time`')) continue;
+            if (stristr($line, '`update_time`')) continue;
+            if (stristr($line, '`delete_time`')) continue;
+
+
+            preg_match('/^`(.*)`/', $line, $matches);
+            if ($matches) {
+                $entity_structs[] = [
+                    'name' => $matches[1],
+                ];
+                continue;
+            }
+
+            preg_match('/^KEY.*\(`(.*)`\)/', $line, $matches);
+            if ($matches) {
+                $relate_to = str_replace('_id', '', $matches[1]);
+                $entity_relationships[] = [
+                    'type' => 'belongs_to',
+                    'relate_to' => $relate_to,
+                    'relation_name' => $relate_to,
+                ];
+            }
+        }
+
+        $migration = sprintf("# up\n%s;\n\n# down\ndrop table `%s`;", $schema_info['Create Table'], $entity_name);
+
+        echo $entity_name.":\n";
+        error_log(_generate_entity_file($entity_name, $entity_structs, $entity_relationships), 3, $file = ENTITY_DIR.'/'.$entity_name.'.php');
+        echo $file."\n";
+        error_log(_generate_dao_file($entity_name, $entity_structs, $entity_relationships), 3, $file = DAO_DIR.'/'.$entity_name.'.php');
+        echo $file."\n";
+        error_log($migration, 3, $file = migration_file_path($entity_name));
+        echo $file."\n";
+    }
+});/*}}}*/
