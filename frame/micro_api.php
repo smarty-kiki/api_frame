@@ -84,9 +84,11 @@ function route($rule)
  */
 function flush_action(closure $action, $args = [])
 {
-    $output = call_user_func_array($action, $args);
+    $output = unit_of_work(function () use ($action, $args) {
+        return call_user_func_array($action, $args);
+    });
 
-    if (!empty($output)) {
+    if (! is_null($output)) {
 
         header('Content-type: application/json');
         echo json($output);
