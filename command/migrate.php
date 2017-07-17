@@ -1,6 +1,7 @@
 <?php
 
 define('MIGRATION_DIR', COMMAND_DIR.'/migration');
+define('MIGRATION_TABLE', 'migrations');
 
 function migration_file_path($name)
 {/*{{{*/
@@ -28,7 +29,7 @@ function _migration_file_explode($filepath)
 command('migrate:install', '初始化 migrate 所需的表结构', function ()
 {/*{{{*/
     db_structure(
-        'CREATE TABLE IF NOT EXISTS `migrations` (
+        'CREATE TABLE IF NOT EXISTS `'.MIGRATION_TABLE.'` (
             `id` int(10) unsigned NOT NULL auto_increment,
             `migration` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
             `batch` int(11) NOT NULL,
@@ -38,16 +39,16 @@ command('migrate:install', '初始化 migrate 所需的表结构', function ()
 
 command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
 {/*{{{*/
-    db_structure('DROP TABLE `migrations`');
+    db_structure('DROP TABLE `'.MIGRATION_TABLE.'`');
 });/*}}}*/
 
 command('migrate', '执行 migrate', function ()
 {/*{{{*/
     $files = scandir(MIGRATION_DIR);
-    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from migrations'));
+    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
     $new_migrations = array_diff($files, $old_migrations);
 
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from migrations');
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
 
     foreach ($new_migrations as $filename) {
         list($ups, $downs) = _migration_file_explode(MIGRATION_DIR.'/'.$filename);
@@ -56,7 +57,7 @@ command('migrate', '执行 migrate', function ()
             db_structure($up);
         }
 
-        db_insert('insert into migrations set migration = :migration, batch = :batch', [
+        db_insert('insert into '.MIGRATION_TABLE.' set migration = :migration, batch = :batch', [
             ':migration' => $filename,
             ':batch' => $last_batch + 1,
         ]);
@@ -68,10 +69,10 @@ command('migrate', '执行 migrate', function ()
 command('migrate:dry-run', '展示将要跑的 sql', function ()
 {/*{{{*/
     $files = scandir(MIGRATION_DIR);
-    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from migrations'));
+    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
     $new_migrations = array_diff($files, $old_migrations);
 
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from migrations');
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
 
     foreach ($new_migrations as $filename) {
         list($ups, $downs) = _migration_file_explode(MIGRATION_DIR.'/'.$filename);
@@ -86,8 +87,8 @@ command('migrate:dry-run', '展示将要跑的 sql', function ()
 
 command('migrate:rollback', '回滚最后一次 migrate', function ()
 {/*{{{*/
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from migrations');
-    $last_batch_migrations = db_query_column('migration', 'select migration from migrations where batch = :batch order by id desc', [
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
+    $last_batch_migrations = db_query_column('migration', 'select migration from '.MIGRATION_TABLE.' where batch = :batch order by id desc', [
         ':batch' => $last_batch,
     ]);
 
@@ -98,7 +99,7 @@ command('migrate:rollback', '回滚最后一次 migrate', function ()
             db_structure($down);
         }
 
-        db_delete('delete from migrations where batch = :batch', [
+        db_delete('delete from '.MIGRATION_TABLE.' where batch = :batch', [
             ':batch' => $last_batch,
         ]);
 
@@ -117,7 +118,7 @@ command('migrate:make', '新建 migration', function ()
 
 command('migrate:reset', '回滚所有 migrate', function ()
 {/*{{{*/
-    $migrations = db_query_column('migration', 'select migration from migrations order by id desc');
+    $migrations = db_query_column('migration', 'select migration from '.MIGRATION_TABLE.' order by id desc');
 
     foreach ($migrations as $filename) {
         list($ups, $downs) = _migration_file_explode(MIGRATION_DIR.'/'.$filename);
@@ -126,7 +127,7 @@ command('migrate:reset', '回滚所有 migrate', function ()
             db_structure($down);
         }
 
-        db_delete('delete from migrations');
+        db_delete('delete from '.MIGRATION_TABLE);
 
         echo "$filename down!\n";
     }

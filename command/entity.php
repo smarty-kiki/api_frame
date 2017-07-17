@@ -158,6 +158,11 @@ command('entity:make-from-db', '从数据库表结构初始化 entity、dao、mi
     foreach ($table_infos as $table_info) {
         $entity_structs = $entity_relationships = [];
         $entity_name = $table = reset($table_info);
+
+        if ($entity_name === MIGRATION_TABLE) {
+            continue;
+        }
+
         $schema_infos = db_query("show create table `$table`");
         $schema_info = reset($schema_infos);
 
