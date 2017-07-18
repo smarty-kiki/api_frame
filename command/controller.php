@@ -20,7 +20,10 @@ if_get('/%s', function ()
 {/*{{{*/
     %s
 
-    return dao('%s')->find_all_by_column(\$inputs);
+    return [
+        'succ' => true,
+        'data' => dao('%s')->find_all_by_column(\$inputs),
+    ];
 });/*}}}*/
 
 if_put('/%s', function ()
@@ -32,7 +35,10 @@ if_put('/%s', function ()
         $%s->{\$property} = \$value;
     }
 
-    return $%s;
+    return [
+        'succ' => true,
+        'data' => $%s,
+    ];
 });/*}}}*/
 
 if_get('/%s/*', function ($%s)
@@ -40,7 +46,10 @@ if_get('/%s/*', function ($%s)
     $%s = dao('%s')->find($%s);
     otherwise($%s->is_not_null(), '%s not found');
 
-    return $%s;
+    return [
+        'succ' => true,
+        'data' => $%s,
+    ];
 });/*}}}*/
 
 if_post('/%s/*', function ($%s)
@@ -54,7 +63,10 @@ if_post('/%s/*', function ($%s)
         $%s->{\$property} = \$value;
     }
 
-    return $%s;
+    return [
+        'succ' => true,
+        'data' => $%s,
+    ];
 });/*}}}*/
 
 if_delete('/%s/*', function ($%s)
@@ -64,7 +76,10 @@ if_delete('/%s/*', function ($%s)
 
     $%s->delete();
 
-    return $%s;
+    return [
+        'succ' => true,
+        'data' => $%s,
+    ];
 });/*}}}*/";
 
     return sprintf($content, 

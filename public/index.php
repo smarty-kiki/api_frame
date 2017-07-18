@@ -9,14 +9,14 @@ set_exception_handler('api_ex_action');
 register_shutdown_function('api_fatel_err_action');
 
 if_has_exception(function ($ex) {
-    return ['exception' => $ex->getMessage()];
+    return ['succ' => false, 'msg' => $ex->getMessage()];
 });
 
 // init interceptor
 
 // init 404 handler
 if_not_found(function () {
-    return '404';
+    return ['succ' => false, 'msg' => '404 not found'];
 });
 
 // init controller
