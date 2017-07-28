@@ -12,6 +12,17 @@ if_has_exception(function ($ex) {
     return ['succ' => false, 'msg' => $ex->getMessage()];
 });
 
+if_verify(function ($action, $args) {
+    return unit_of_work(function () use ($action, $args){
+
+        $data = call_user_func_array($action, $args);
+
+        header('Content-type: application/json');
+
+        return json($data);
+    });
+});
+
 // init interceptor
 
 // init 404 handler

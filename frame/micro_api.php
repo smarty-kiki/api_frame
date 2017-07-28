@@ -82,17 +82,16 @@ function route($rule)
  * @param closure $action
  * @param array   $args
  */
-function flush_action(closure $action, $args = [])
+function flush_action(closure $action, $args = [], closure $verify = null)
 {
-    $output = unit_of_work(function () use ($action, $args) {
-        return call_user_func_array($action, $args);
-    });
+    if (is_null($verify)) {
+        $output = call_user_func_array($action, $args);
+    } else {
+        $output = $verify($action, $args);
+    }
 
     if (! is_null($output)) {
-
-        header('Content-type: application/json');
-        echo json($output);
-
+        echo $output;
         flush();
     }
 }
@@ -109,8 +108,7 @@ function if_any($rule, closure $action)
 
     if ($matched) {
 
-        verify();   // API鉴权
-        flush_action($action, $args);
+        flush_action($action, $args, if_verify());
         exit;
     }
 }
@@ -189,20 +187,6 @@ function if_verify(closure $action = null)
     }
 
     return $container;
-}
-
-/**
- * Verify query.
- *
- * @param mix $action
- */
-function verify()
-{
-    $action = if_verify();
-
-    if ($action instanceof closure) {
-        flush_action($action, func_get_args());
-    }
 }
 
 /**
