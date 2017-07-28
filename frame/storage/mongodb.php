@@ -7,7 +7,8 @@ function _mongodb_connection($host, $port, $database)
     $identifier = "mongodb://$host:$port";
 
     if (! isset($container[$identifier])) {
-        $connection = new MongoClient($identifier);
+
+        $connection = new MongoDB\Client($identifier);
 
         $container[$identifier] = $connection->{$database};
     }

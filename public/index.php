@@ -9,7 +9,10 @@ set_exception_handler('api_ex_action');
 register_shutdown_function('api_fatel_err_action');
 
 if_has_exception(function ($ex) {
-    return ['succ' => false, 'msg' => $ex->getMessage()];
+    return json([
+        'succ' => false,
+        'msg' => $ex->getMessage()
+    ]);
 });
 
 if_verify(function ($action, $args) {
