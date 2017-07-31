@@ -1,19 +1,34 @@
 <?php
 
-function _mongodb_connection($host, $port, $database)
+use \MongoDB\Driver\BulkWrite;
+use \MongoDB\Driver\WriteConcern;
+use \MongoDB\Driver\Manager;
+use \MongoDB\Driver\Query;
+
+use \MongoDB\BSON\ObjectID;
+
+function _mongodb_connection($host, $port, $database, $username, $password)
 {/*{{{*/
     static $container = [];
 
-    $identifier = "mongodb://$host:$port";
+    $dsn = "mongodb://{$host}:{$port}/{$database}";
 
-    if (! isset($container[$identifier])) {
+    if (! isset($container[$dsn])) {
 
-        $connection = new MongoDB\Client($identifier);
+        $options = [];
 
-        $container[$identifier] = $connection->{$database};
+        if ($username) {
+            $options['username'] = $username;
+        }
+
+        if ($password) {
+            $options['password'] = $password;
+        }
+
+        $container[$dsn] = new Manager($dsn, $options);
     }
 
-    return $container[$identifier];
+    return $container[$dsn];
 }/*}}}*/
 
 function _mongodb_database_closure($config_key, closure $closure)
@@ -29,58 +44,122 @@ function _mongodb_database_closure($config_key, closure $closure)
     $connection = _mongodb_connection(
         $config['host'],
         $config['port'],
-        $config['database']
+        $config['database'],
+        $config['username'],
+        $config['password']
     );
 
-    return call_user_func($closure, $connection);
+    return call_user_func($closure, $connection, $config);
+}/*}}}*/
+
+function __mongodb_dbc($database, $table)
+{/*{{{*/
+    return $database.'.'.$table;
+}/*}}}*/
+
+function _mongodb_database_write($config_key, $table, BulkWrite $bulk)
+{/*{{{*/
+    return _mongodb_database_closure($config_key, function ($connection, $config) use ($table, $bulk) {
+
+        $wc = new WriteConcern(WriteConcern::MAJORITY, $config['timeout'] * 1000);
+
+        return $connection->executeBulkWrite(__mongodb_dbc($config['database'], $table), $bulk, $wc);
+
+    });
+}/*}}}*/
+
+function _mongodb_database_read($config_key, $table, Query $query)
+{/*{{{*/
+    return _mongodb_database_closure($config_key, function ($connection, $config) use ($table, $query) {
+
+        return $connection->executeQuery(__mongodb_dbc($config['database'], $table), $query);
+
+    });
 }/*}}}*/
 
 function storage_insert($table, array $data, $config_key = 'default')
 {/*{{{*/
-    return _mongodb_database_closure($config_key, function ($connection) use ($table, $data) {
+    $bulk = new BulkWrite();
 
-        $collection = $connection->{$table};
+    $bulk->insert($data);
 
-        return $collection->insert($data);
-    });
+    $result = _mongodb_database_write($config_key, $table, $bulk);
+
+    return $result->getInsertedCount();
 }/*}}}*/
 
-function storage_find($table, array $query = [], $config_key = 'default')
+function storage_multi_insert($table, array $datas, $config_key = 'default')
 {/*{{{*/
-    return _mongodb_database_closure($config_key, function ($connection) use ($table, $query) {
+    $bulk = new BulkWrite();
 
-        $collection = $connection->{$table};
+    foreach ($datas as $data) {
+        $bulk->insert($data);
+    }
 
-        return $collection->find($query);
-    });
+    $result = _mongodb_database_write($config_key, $table, $bulk);
+
+    return $result->getInsertedCount();
 }/*}}}*/
 
-function storage_update($table, $query = [], array $new_data, $config_key = 'default')
+function storage_query($table, array $selections = [],  array $queries = [], array $sorts = [], $offset = 0, $limit = 1000, $config_key = 'default')
 {/*{{{*/
-    return _mongodb_database_closure($config_key, function ($connection) use ($table, $query, $new_data) {
+    $query = new Query($queries, [
+        'projection' => $selections,
+        "sort" => $sorts,
+        "skip" => $offset,
+        "limit" => $limit,
+    ]);
 
-        $collection = $connection->{$table};
+    $results = _mongodb_database_read($config_key, $table, $query);
 
-        return $collection->update($query, $new_data);
-    });
+    $res = [];
+    foreach ($results as $result) {
+        $res[] = (array) $result;
+    }
+
+    return $res;
 }/*}}}*/
 
-function storage_find_one($table, array $query = [], $config_key = 'default')
+function storage_find($table, $id, $config_key = 'default')
 {/*{{{*/
-    return _mongodb_database_closure($config_key, function ($connection) use ($table, $query) {
-
-        $collection = $connection->{$table};
-
-        return $collection->findOne($query);
-    });
+    return storage_query(
+        $table,
+        $selections = [],
+        $queries = [
+            '_id' => new ObjectID($id),
+        ],
+        $sorts = [],
+        $offset = 0,
+        $limit = 1,
+        $config_key
+    );
 }/*}}}*/
 
-function storage_remove($table, array $query = [], $config_key = 'default')
+function storage_update($table, array $queries = [], array $new_data, $config_key = 'default')
 {/*{{{*/
-    return _mongodb_database_closure($config_key, function ($connection) use ($table, $query) {
+    $bulk = new BulkWrite();
+    $bulk->update(
+        $queries,
+        $new_data,
+        [
+            'multi' => true,
+            'upsert' => false
+        ]
+    );
 
-        $collection = $connection->{$table};
+    $result = _mongodb_database_write($config_key, $table, $bulk);
 
-        return $collection->remove($query);
-    });
+    return $result->getModifiedCount();
+}/*}}}*/
+
+function storage_delete($table, array $queries = [], $config_key = 'default')
+{/*{{{*/
+    $bulk = new BulkWrite();
+    $bulk->delete($queries, [
+        'limit' => 0,
+    ]);
+
+    $result = _mongodb_database_write($config_key, $table, $bulk);
+
+    return $result->getDeletedCount();
 }/*}}}*/
