@@ -11,7 +11,7 @@ register_shutdown_function('api_fatel_err_action');
 if_has_exception(function ($ex) {
     return json([
         'succ' => false,
-        'msg' => $ex->getMessage()
+        'msg' => $ex->getMessage(),
     ]);
 });
 
@@ -30,7 +30,10 @@ if_verify(function ($action, $args) {
 
 // init 404 handler
 if_not_found(function () {
-    return ['succ' => false, 'msg' => '404 not found'];
+    return json([
+        'succ' => false,
+        'msg' => '404 not found',
+    ]);
 });
 
 // init controller
