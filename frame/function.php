@@ -537,6 +537,11 @@ function remote_get($url, $timeout = 3, $retry = 3, $host = null)
     return $res;
 }/*}}}*/
 
+function remote_get_json($url, $timeout = 3, $retry = 3, $host = null)
+{/*{{{*/
+    return json_decode(remote_get($url, $timeout, $retry, $host), true);
+}/*}}}*/
+
 function instance($class_name)
 {/*{{{*/
     static $container = [];
