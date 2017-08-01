@@ -352,7 +352,7 @@ function config($key)
  */
 function env()
 {
-    return isset($_SERVER['ENV']) ? $_SERVER['ENV'] : 'development';
+    return isset($_SERVER['ENV']) ? $_SERVER['ENV'] : 'production';
 }
 
 /**
