@@ -45,7 +45,7 @@ command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
 command('migrate', '执行 migrate', function ()
 {/*{{{*/
     $files = scandir(MIGRATION_DIR);
-    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
+    $old_migrations = array_merge(['.', '..', '.gitkeep'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
     $new_migrations = array_diff($files, $old_migrations);
 
     $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
@@ -69,7 +69,7 @@ command('migrate', '执行 migrate', function ()
 command('migrate:dry-run', '展示将要跑的 sql', function ()
 {/*{{{*/
     $files = scandir(MIGRATION_DIR);
-    $old_migrations = array_merge(['.', '..'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
+    $old_migrations = array_merge(['.', '..', '.gitkeep'], db_query_column('migration', 'select * from '.MIGRATION_TABLE));
     $new_migrations = array_diff($files, $old_migrations);
 
     $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
