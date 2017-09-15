@@ -425,6 +425,8 @@ function now($expression = null, $format = 'Y-m-d H:i:s')
 {
     if (is_null($expression)) {
         $time = time();
+    } elseif (is_numeric($expression)) {
+        $time = $expression;
     } else {
         $time = strtotime($expression);
     }
@@ -456,21 +458,26 @@ function date_between($date, $start, $end)
  *
  * @return string
  */
-function remote_post($url, $data = [], $timeout = 3, $retry = 3, $host = null)
+function remote_post($url, $data = [], $timeout = 3, $retry = 3, array $headers = [], array $cookies = [])
 {/*{{{*/
     $ch = curl_init();
 
-    curl_setopt_array($ch, array(
+    curl_setopt_array($ch, [
         CURLOPT_URL => $url,
         CURLOPT_POST => 1,
         CURLOPT_TIMEOUT => $timeout,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POSTFIELDS => $data,
         CURLOPT_ENCODING => 'gzip',
-    ));
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36',
+    ]);
 
-    if ($host) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('host:'.$host));
+    if ($headers) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+
+    if ($cookies) {
+        curl_setopt ($ch, CURLOPT_COOKIE, http_build_query($cookies, '', ';').';');
     }
 
     while ($retry-- > 0) {
@@ -502,19 +509,24 @@ function remote_post($url, $data = [], $timeout = 3, $retry = 3, $host = null)
  *
  * @return string
  */
-function remote_get($url, $timeout = 3, $retry = 3, $host = null)
+function remote_get($url, $timeout = 3, $retry = 3, array $headers = [], array $cookies = [])
 {/*{{{*/
     $ch = curl_init();
 
-    curl_setopt_array($ch, array(
+    curl_setopt_array($ch, [
         CURLOPT_URL => $url,
         CURLOPT_TIMEOUT => $timeout,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => 'gzip',
-    ));
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36',
+    ]);
 
-    if ($host) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('host:'.$host));
+    if ($headers) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+
+    if ($cookies) {
+        curl_setopt ($ch, CURLOPT_COOKIE, http_build_query($cookies, '', ';').';');
     }
 
     while ($retry-- > 0) {
@@ -537,9 +549,9 @@ function remote_get($url, $timeout = 3, $retry = 3, $host = null)
     return $res;
 }/*}}}*/
 
-function remote_get_json($url, $timeout = 3, $retry = 3, $host = null)
+function remote_get_json($url, $timeout = 3, $retry = 3, array $headers = [])
 {/*{{{*/
-    return json_decode(remote_get($url, $timeout, $retry, $host), true);
+    return json_decode(remote_get($url, $timeout, $retry, $headers), true);
 }/*}}}*/
 
 function instance($class_name)
