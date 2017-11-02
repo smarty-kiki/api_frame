@@ -1,7 +1,7 @@
 <?php
 
 function _generate_controller_file($table, $entity_structs, $entity_relationships)
-{
+{/*{{{*/
     $resource_plural = $table.'s';
     $resource_id_key = $table.'_id';
 
@@ -111,7 +111,7 @@ if_delete('/%s/*', function ($%s)
         $table,
         $table
     );
-}
+}/*}}}*/
 
 command('controller:make-restful-from-db', '初始化 controller', function ()
 {/*{{{*/
