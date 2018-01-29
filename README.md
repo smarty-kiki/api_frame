@@ -8,7 +8,7 @@
 │   ├── migration (数据库迁移文件目录)  
 │   ├── queue_job (队列 job 文件目录)  
 │   │   └── load.php (队列 job 加载文件)  
-│   ├── controller.php (controller 命令，可以快速的基于表结构生成 restful 接口)  
+│   ├── controller.php (controller 命令，可以快速的基于表结构生成 restful 接口)  
 │   ├── entity.php (entity 命令)  
 │   ├── migrate.php (migrate 命令)  
 │   └── queue.php (queue 命令)  
