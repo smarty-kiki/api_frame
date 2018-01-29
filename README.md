@@ -53,7 +53,8 @@
 
 ## 10 秒看到 helloworld
 
-确保机器上安装了 docker-engine，执行以下脚本快速启动环境：  
-sh project/tool/start_dev_server.sh  
-注：为了开发方便映射了 80 和 3306 端口，所以启动脚本时需要 root 权限，若不允许使用 80 可以手动修改脚本更换端口
+1. 先将代码 clone 或者下载到本地
+2. 确保机器上有 docker 环境
+3. 执行代码中的脚本快速启动环境 sh project/tool/start_dev_server.sh  
+4. 输入当前用户密码。此处是为了开发方便映射了 80 和 3306 端口，若不允许使用 80 可以手动修改第三条提到的脚本更换端口
 
