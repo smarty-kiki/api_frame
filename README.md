@@ -30,12 +30,12 @@
 │   ├── config (配置文件目录)  
 │   │   ├── development (开发环境)  
 │   │   │   ├── nginx (nginx 配置)  
-│   │   │   │   └── micro_api.conf (框架推荐的 nginx 配置)  
+│   │   │   │   └── api_frame.conf (框架推荐的 nginx 配置)  
 │   │   │   └── supervisor  (supervisor 配置)  
 │   │   │       └── queue_worker.conf (worker 的管理配置)  
 │   │   └── production (线上环境)   
 │   │       ├── nginx  
-│   │       │   └── micro_service.conf  
+│   │       │   └── api_frame.conf  
 │   │       └── supervisor  
 │   │           └── queue_worker.conf  
 │   ├── tool (工具脚本目录)  
