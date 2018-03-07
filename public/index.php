@@ -4,7 +4,7 @@ header('Access-Control-Allow-Origin: *');
 
 // init
 include __DIR__.'/../bootstrap.php';
-include FRAME_DIR.'/http/api.php';
+include FRAME_DIR.'/http/application.php';
 
 set_error_handler('http_err_action', E_ALL);
 set_exception_handler('http_ex_action');
