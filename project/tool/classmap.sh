@@ -9,7 +9,7 @@ if [ ! -n "$1" ] ;then
     exit
 fi
 
-output=load.php
+output=autoload.php
 
 cd -P $1 || exit 1
 
@@ -26,4 +26,4 @@ echo "         include __DIR__.'/'.\$class_maps[\$class_name];" >> $output
 echo '    }' >> $output
 echo '});' >> $output
 
-echo generate $1/load.php success!
+echo generate $1/$output success!
