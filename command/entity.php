@@ -18,11 +18,6 @@ class %s extends entity
         %s
     }/*}}}*/
 
-    public static function get_system_code()
-    {/*{{{*/
-        return null;
-    }/*}}}*/
-
     public static function create()
     {/*{{{*/
         return parent::init();
@@ -39,7 +34,7 @@ class %s extends entity
         if ($relationship['relation_name'] === $relationship['relate_to']) {
             $relationship_str[] = "\$this->{$relationship['type']}('{$relationship['relate_to']}');";
         } else {
-            $relationship_str[] = "\$this->{$relationship['type']}('{$relationship['relation_name']}', '{$relationship['relate_to']}');";
+            $relationship_str[] = "\$this->{$relationship['type']}('{$relationship['relation_name']}', '{$relationship['relate_to']}', '{$relationship['relation_name']}_id');";
         }
     }
 
@@ -53,24 +48,25 @@ function _generate_dao_file($entity_name, $entity_structs, $entity_relationships
 class {$entity_name}_dao extends dao
 {
     protected \$table_name = '{$entity_name}';
+    protected \$db_config_key = '".unit_of_work_db_config_key()."';
 }";
 }/*}}}*/
 
 function _generate_migration_file($entity_name, $entity_structs, $entity_relationships)
 {/*{{{*/
     $content = "# up
-CREATE TABLE `%s` (
-    `id` bigint(20) NOT NULL,
-    `version` int(11) NOT NULL,
-    `create_time` datetime DEFAULT NULL,
-    `update_time` datetime DEFAULT NULL,
-    `delete_time` datetime DEFAULT NULL,
-    %s
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        CREATE TABLE `%s` (
+            `id` bigint(20) NOT NULL,
+            `version` int(11) NOT NULL,
+            `create_time` datetime DEFAULT NULL,
+            `update_time` datetime DEFAULT NULL,
+            `delete_time` datetime DEFAULT NULL,
+            %s
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-# down
-drop table `%s`;";
+    # down
+    drop table `%s`;";
 
     $columns = [];
 
@@ -96,7 +92,7 @@ drop table `%s`;";
     foreach ($entity_relationships as $relationship) {
         if ($relationship['type'] === 'belongs_to') {
             $columns[] = "`{$relationship['relate_to']}_id` bigint(20) NOT NULL,";
-            $indexs[] = "KEY `fk_{$entity_name}_{$relationship['relate_to']}_idx` (`{$relationship['relate_to']}_id`),";
+            $indexs[] = "KEY `fk_{$entity_name}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`),";
         }
     }
 
@@ -108,6 +104,8 @@ command('entity:make', '初始化 entity、dao、migration', function ()
     $entity_name = command_paramater('entity_name');
 
     $entity_structs = [];
+
+    $s = 0;
 
     while (command_read_bool('Add struct')) {
 
@@ -126,6 +124,8 @@ command('entity:make', '初始化 entity、dao、migration', function ()
     }
 
     $entity_relationships = [];
+
+    $r = 0;
 
     while (command_read_bool('Add relationship')) {
 
@@ -153,7 +153,7 @@ command('entity:make', '初始化 entity、dao、migration', function ()
 
 command('entity:make-from-db', '从数据库表结构初始化 entity、dao、migration', function ()
 {/*{{{*/
-    $table_infos = db_query('show tables');
+    $table_infos = db_query('show tables', [], unit_of_work_db_config_key());
 
     foreach ($table_infos as $table_info) {
         $entity_structs = $entity_relationships = [];
@@ -163,7 +163,7 @@ command('entity:make-from-db', '从数据库表结构初始化 entity、dao、mi
             continue;
         }
 
-        $schema_infos = db_query("show create table `$table`");
+        $schema_infos = db_query("show create table `$table`", [], unit_of_work_db_config_key());
         $schema_info = reset($schema_infos);
 
         foreach (explode("\n", $schema_info['Create Table']) as $line) {
@@ -187,13 +187,14 @@ command('entity:make-from-db', '从数据库表结构初始化 entity、dao、mi
                 continue;
             }
 
-            preg_match('/^KEY.*\(`(.*)`\)/', $line, $matches);
+            preg_match('/^KEY `fk_'.$entity_name.'_(.*)_idx` \(`(.*)`\)/', $line, $matches);
             if ($matches) {
-                $relate_to = str_replace('_id', '', $matches[1]);
+                $relate_to = preg_replace('/[0-9]/', '', $matches[1]);
+                $relation_name = str_replace('_id', '', $matches[2]);
                 $entity_relationships[] = [
                     'type' => 'belongs_to',
                     'relate_to' => $relate_to,
-                    'relation_name' => $relate_to,
+                    'relation_name' => $relation_name,
                 ];
             }
         }
