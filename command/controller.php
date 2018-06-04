@@ -30,8 +30,9 @@ if_put('/%s', function ()
 {/*{{{*/
     %s
 
+    $%s = %s::create();
+
     foreach (\$inputs as \$property => \$value) {
-        $%s = %s::create();
         $%s->{\$property} = \$value;
     }
 
@@ -123,7 +124,13 @@ command('controller:make-restful-from-db', '初始化 controller', function ()
     $entity_structs = $entity_relationships = [];
 
     foreach (explode("\n", $schema_info['Create Table']) as $line) {
+
         $line = trim($line);
+
+        if (stristr($line, 'CONSTRAINT')) {
+            unset($lines[$i]);
+            continue;
+        }
 
         if (stristr($line, 'CREATE TABLE')) continue;
         if (stristr($line, 'PRIMARY KEY')) continue;
@@ -141,10 +148,15 @@ command('controller:make-restful-from-db', '初始化 controller', function ()
             continue;
         }
 
-        preg_match('/^KEY.*\(`(.*)`\)/', $line, $matches);
+        preg_match('/^KEY `fk_'.$entity_name.'_(.*)_idx` \(`(.*)`\)/', $line, $matches);
         if ($matches) {
-            $relate_to = str_replace('_id', '', $matches[1]);
-            $entity_relationships[] = $relate_to;
+            $relate_to = preg_replace('/[0-9]/', '', $matches[1]);
+            $relation_name = str_replace('_id', '', $matches[2]);
+            $entity_relationships[] = [
+                'type' => 'belongs_to',
+                'relate_to' => $relate_to,
+                'relation_name' => $relation_name,
+            ];
         }
     }
 
