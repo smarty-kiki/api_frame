@@ -123,7 +123,9 @@ command('controller:make-restful-from-db', '初始化 controller', function ()
 
     $entity_structs = $entity_relationships = [];
 
-    foreach (explode("\n", $schema_info['Create Table']) as $line) {
+    $lines = explode("\n", $schema_info['Create Table']);
+
+    foreach ($lines as $i => $line) {
 
         $line = trim($line);
 
@@ -148,7 +150,7 @@ command('controller:make-restful-from-db', '初始化 controller', function ()
             continue;
         }
 
-        preg_match('/^KEY `fk_'.$entity_name.'_(.*)_idx` \(`(.*)`\)/', $line, $matches);
+        preg_match('/^KEY `fk_'.$table.'_(.*)_idx` \(`(.*)`\)/', $line, $matches);
         if ($matches) {
             $relate_to = preg_replace('/[0-9]/', '', $matches[1]);
             $relation_name = str_replace('_id', '', $matches[2]);
