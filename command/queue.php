@@ -8,6 +8,11 @@ command('queue:worker', '启动队列 worker', function ()
 
     ini_set('memory_limit', $memory_limit.'b');
 
+    queue_finish_action(function () {
+        cache_close();
+        db_close();
+    });
+
     queue_watch($tube, $config_key, $memory_limit);
 });/*}}}*/
 
