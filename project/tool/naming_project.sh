@@ -10,7 +10,7 @@ if [ ! -n "$1" ] ;then
     exit
 fi
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/../../
+ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../
 
 mv $ROOT_DIR/project/config/development/nginx/api_frame.conf $ROOT_DIR/project/config/development/nginx/$1.conf
 mv $ROOT_DIR/project/config/production/nginx/api_frame.conf $ROOT_DIR/project/config/production/nginx/$1.conf
