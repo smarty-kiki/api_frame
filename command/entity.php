@@ -55,18 +55,18 @@ class {$entity_name}_dao extends dao
 function _generate_migration_file($entity_name, $entity_structs, $entity_relationships)
 {/*{{{*/
     $content = "# up
-        CREATE TABLE `%s` (
-            `id` bigint(20) NOT NULL,
-            `version` int(11) NOT NULL,
-            `create_time` datetime DEFAULT NULL,
-            `update_time` datetime DEFAULT NULL,
-            `delete_time` datetime DEFAULT NULL,
-            %s
-            PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `%s` (
+    `id` bigint(20) NOT NULL,
+    `version` int(11) NOT NULL,
+    `create_time` datetime DEFAULT NULL,
+    `update_time` datetime DEFAULT NULL,
+    `delete_time` datetime DEFAULT NULL,
+    %s
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-    # down
-    drop table `%s`;";
+# down
+drop table `%s`;";
 
     $columns = [];
 
