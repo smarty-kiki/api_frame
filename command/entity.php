@@ -111,11 +111,21 @@ command('entity:make', '初始化 entity、dao、migration', function ()
 
         $s += 1;
 
+        $name = command_read("#$s Column Name:");
+
+        $datatype = command_read("#$s Data type:", 0, ['varchar', 'int(11)', 'datetime', 'date', 'time', 'bigint(20)']);
+        if ($datatype === 'varchar') {
+            $datatype = $datatype.'('.command_read("#$s Varchar length:", 45).')';
+        }
+
+        $allow_null = command_read_bool("#$s Allow Null");
+        $default = command_read("#$s Default:", null);
+
         $entity_structs[] = [
-            'name' => command_read("#$s Column Name:"),
-            'datatype' => command_read("#$s Data type:", 0, ['varchar(45)', 'int(11)', 'datetime', 'date', 'time', 'bigint(20)']),
-            'allow_null' => command_read_bool("#$s Allow Null"),
-            'default' => command_read("#$s Default:", null),
+            'name' => $name,
+            'datatype' => $datatype,
+            'allow_null' => $allow_null,
+            'default' => $default,
         ];
 
         foreach ($entity_structs as $struct) {
