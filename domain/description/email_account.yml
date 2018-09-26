@@ -1,0 +1,17 @@
+display_name: 邮件账户
+config_key: default
+structs:
+    email:
+        type: varchar(40)
+        display_name: 邮箱
+        description: 登陆邮箱
+
+    password:
+        type: varchar(80)
+        display_name: 登陆密码
+        description: 用户登陆所使用的密码
+
+relationships:
+    email_account:
+        entity: customer
+        type: belongs_to

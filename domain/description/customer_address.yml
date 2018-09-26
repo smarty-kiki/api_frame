@@ -1,0 +1,39 @@
+display_name: 顾客地址
+config_key: default
+structs:
+    name:
+        type: varchar(11)
+        display_name: 顾客姓名
+        description: 顾客姓名
+
+    mobile_phone_number_prefix:
+        type: varchar(4)
+        format:
+            china: 86
+        display_name: 手机号前缀
+        description: 手机号国际码前缀
+
+    mobile_phone_number:
+        type: varchar(11)
+        display_name: 手机号码
+        description: 手机号码
+
+    address:
+        type: varchar(200)
+        display_name: 收货地址
+        description: 顾客姓名
+
+    longitude:
+        type: varchar(20)
+        display_name: 经度
+        description: 用户地址对应的经度
+
+    latitude:
+        type: varchar(20)
+        display_name: 纬度
+        description: 用户地址对应的纬度
+
+relationships:
+    customer:
+        entity: customer
+        type: belongs_to

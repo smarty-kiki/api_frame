@@ -1,0 +1,7 @@
+display_name: 商品
+config_key: default
+structs:
+    name:
+        type: varchar(11)
+        display_name: 名称
+        description: 商品名称

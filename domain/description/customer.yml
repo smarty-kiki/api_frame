@@ -1,0 +1,11 @@
+display_name: 顾客
+config_key: default
+structs:
+    status:
+        type: varchar(10)
+        format:
+            valid: 有效
+            invalid: 无效
+        format_description:
+        display_name: 状态
+        description: 顾客有无效状态

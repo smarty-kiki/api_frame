@@ -2,6 +2,22 @@
 
 define('DAO_DIR', DOMAIN_DIR.'/dao');
 define('ENTITY_DIR', DOMAIN_DIR.'/entity');
+define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
+
+function _get_value_from_description_file($entity_name, $key = null, $default = null)
+{/*{{{*/
+    $entity_file_path = DESCRIPTION_DIR.'/'.$entity_name.'.yml';
+
+    otherwise(file_exists($entity_file_path), "实体 $entity_name 描述文件没找到");
+
+    $description = yaml_parse_file(DESCRIPTION_DIR.'/'.$entity_name.'.yml');
+
+    if (is_null($key)) {
+        return $description;
+    }
+
+    return array_get($description, $key, $default);
+}/*}}}*/
 
 function _generate_entity_file($entity_name, $entity_structs, $entity_relationships)
 {/*{{{*/
@@ -31,10 +47,19 @@ class %s extends entity
 
     $relationship_str = [];
     foreach ($entity_relationships as $relationship) {
-        if ($relationship['relation_name'] === $relationship['relate_to']) {
-            $relationship_str[] = "\$this->{$relationship['type']}('{$relationship['relate_to']}');";
+
+        $relationship_type = $relationship['type'];
+        $relationship_name = $relationship['relation_name'];
+        $relationship_relate_to = $relationship['relate_to'];
+
+        if ($relationship_name === $relationship_relate_to) {
+            $relationship_str[] = "\$this->{$relationship_type}('{$relationship_relate_to}');";
         } else {
-            $relationship_str[] = "\$this->{$relationship['type']}('{$relationship['relation_name']}', '{$relationship['relate_to']}', '{$relationship['relation_name']}_id');";
+            $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_name}_id');";
+        }
+
+        if ($relationship_type !== 'has_many') {
+            $structs_str[] = "'".$relationship_name."_id' => '',";
         }
     }
 
@@ -159,6 +184,7 @@ command('entity:make', '初始化 entity、dao、migration', function ()
     error_log(_generate_migration_file($entity_name, $entity_structs, $entity_relationships), 3, $file = migration_file_path($entity_name));
     echo $file."\n";
 
+    echo "\n 需要重新生成 domain/autoload.php 以加载 $entity_name\n";
 });/*}}}*/
 
 command('entity:make-from-db', '从数据库表结构初始化 entity、dao、migration', function ()
@@ -229,4 +255,86 @@ command('entity:make-from-db', '从数据库表结构初始化 entity、dao、mi
         error_log($migration, 3, $file = migration_file_path($entity_name));
         echo $file."\n";
     }
+
+    echo "\n 需要重新生成 domain/autoload.php 以加载新类\n";
+});/*}}}*/
+
+command('entity:make-from-description', '从实体描述文件初始化 entity、dao、migration', function ()
+{/*{{{*/
+
+    $entity_name = command_paramater('entity_name');
+
+    $description = _get_value_from_description_file($entity_name);
+
+    $structs = array_get($description, 'structs', []);
+
+    foreach ($structs as $column => $struct) {
+        $entity_structs[] = [
+            'name' => $column,
+            'datatype' => $struct['type'],
+            'allow_null' => array_get($struct, 'allow_null', false),
+            'default' => array_get($struct, 'default', null),
+        ];
+    }
+
+    $relationships = array_get($description, 'relationships', []);
+
+    foreach ($relationships as $relation_name => $relationship) {
+
+        $relation_entity_name = $relationship['entity'];
+        $relation_type = $relationship['type'];
+
+        $entity_relationships[] = [
+            'type' => $relation_type,
+            'relate_to' => $relation_entity_name,
+            'relation_name' => $relation_name,
+        ];
+
+        if ($relation_type !== 'has_many') {
+
+            _get_value_from_description_file($relation_entity_name);
+        }
+    }
+
+    $snaps = array_get($description, 'snaps', []);
+
+    foreach ($snaps as $snap_relation_to_with_dot => $snap) {
+
+        $parent_description = $description;
+
+        foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
+
+            $snap_relation = array_get($parent_description, "relationships.".$snap_relation_to, false);
+
+            otherwise($snap_relation, "与冗余的 $snap_relation_to 没有关联关系");
+            otherwise($snap_relation['type'] !== 'has_many', "冗余的 $snap_relation_to 为 has_many 关系，无法冗余字段");
+
+            $parent_description = _get_value_from_description_file($snap_relation['entity']);
+        }
+
+        $snap_relation_to_structs = $parent_description['structs'];
+
+        foreach ($snap['structs'] as $column) {
+
+            otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap 中不存在");
+
+            $struct = $snap_relation_to_structs[$column];
+
+            $entity_structs[] = [
+                'name' => $column,
+                'datatype' => $struct['type'],
+                'allow_null' => array_get($struct, 'allow_null', false),
+                'default' => array_get($struct, 'default', null),
+            ];
+        }
+    }
+
+    error_log(_generate_entity_file($entity_name, $entity_structs, $entity_relationships), 3, $file = ENTITY_DIR.'/'.$entity_name.'.php');
+    echo $file."\n";
+    error_log(_generate_dao_file($entity_name, $entity_structs, $entity_relationships), 3, $file = DAO_DIR.'/'.$entity_name.'.php');
+    echo $file."\n";
+    error_log(_generate_migration_file($entity_name, $entity_structs, $entity_relationships), 3, $file = migration_file_path($entity_name));
+    echo $file."\n";
+
+    echo "\n 需要重新生成 domain/autoload.php 以加载 $entity_name\n";
 });/*}}}*/
