@@ -1,10 +1,11 @@
 display_name: 订单项
-config_key: default
 structs:
     count:
         type: int(11)
-        display_name: 编号
-        description: 订单可读编号
+        format: .*
+        format_description: 无效的商品数量
+        display_name: 商品数量
+        description: 订单中某个商品的购买数量
 
 relationships:
     order:

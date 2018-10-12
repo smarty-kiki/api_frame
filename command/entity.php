@@ -28,7 +28,7 @@ class %s extends entity
     public $structs = [
         %s
     ];
-
+%s
     public function __construct()
     {/*{{{*/
         %s
@@ -38,12 +38,91 @@ class %s extends entity
     {/*{{{*/
         return parent::init();
     }/*}}}*/
+%s
 }';
 
     $structs_str = [];
+    $maps_str = [];
+    $formats_str = [];
+    $format_descriptions_str = [];
     foreach ($entity_structs as $struct) {
-        $structs_str[] = "'".$struct['name']."' => '',";
+
+        $struct_name = $struct['name'];
+        $structs_str[] = "'".$struct_name."' => '',";
+
+        $format = $struct['format'];
+        if (! is_null($format)) {
+            if (is_array($format)) {
+                $formats_str[$struct_name] = [];
+
+                $maps_str[$struct_name] = $format;
+            } else {
+                $formats_str[$struct_name] = $format;
+            }
+        }
+
+        $format_description = $struct['format_description'];
+        if (! is_null($format)) {
+            $format_descriptions_str[$struct_name] = $format_description;
+        }
     }
+
+    $property_block = [];
+    $function_block = [];
+
+    if ($maps_str) {
+        foreach ($maps_str as $struct_name => $format) {
+
+            $const_str = [];
+            $map_str = ["    const ".strtoupper($struct_name)."_MAPS = ["];
+
+            foreach ($format as $value => $description) {
+                $const_name = strtoupper($struct_name.'_'.$value);
+                $const_str[] = sprintf("    const %s = '%s';", $const_name, strtoupper($value));
+                $map_str[] = sprintf("        self::%s => '%s',", $const_name, $description);
+            }
+
+            $map_str[] = '    ];';
+
+            $property_block[] = implode("\n", $const_str);
+            $property_block[] = implode("\n", $map_str);
+
+            $function_block[] = sprintf(
+                "    public function get_%s_description()\n".
+                "    {\n".
+                "        return self::%s[\$this->%s];\n".
+                "    }",
+                $struct_name, strtoupper($struct_name)."_MAPS", $struct_name);
+        }
+    }
+
+    if ($formats_str) {
+
+        $format_str = ['    public static $struct_formats = ['];
+        $format_description_str = ['    public static $struct_format_descriptions = ['];
+
+        foreach ($formats_str as $struct_name => $format) {
+            if (is_array($format)) {
+                $format_str[] = "        '$struct_name' => self::".strtoupper($struct_name)."_MAPS,";
+            } else {
+                $format_str[] = "        '$struct_name' => '$format',";
+            }
+        }
+
+        $format_str[] = "    ];";
+
+        foreach ($format_descriptions_str as $struct_name => $format_description) {
+            $format_description_str[] = "        '$struct_name' => '$format_description',";
+        }
+
+        $format_description_str[] = "    ];";
+
+        $property_block[] = implode("\n", $format_str);
+        $property_block[] = implode("\n", $format_description_str);
+    }
+
+    $property_str = $property_block? "\n".implode("\n\n", $property_block)."\n": '';
+    $function_str = $function_block? "\n".implode("\n\n", $function_block)."\n": '';
 
     $relationship_str = [];
     foreach ($entity_relationships as $relationship) {
@@ -63,7 +142,7 @@ class %s extends entity
         }
     }
 
-    return sprintf($content, $entity_name, implode("\n        ", $structs_str), implode("\n        ", $relationship_str));
+    return sprintf($content, $entity_name, implode("\n        ", $structs_str), $property_str, implode("\n        ", $relationship_str), $function_str);
 }/*}}}*/
 
 function _generate_dao_file($entity_name, $entity_structs, $entity_relationships)
@@ -100,23 +179,24 @@ drop table `%s`;";
         if (! $struct['allow_null']) {
             $column .= ' NOT NULL';
         }
-        if ($default = $struct['default']) {
+        if (array_key_exists('default', $struct)) {
+            $default = $struct['default'];
+
             if (is_string($default)) {
                 $column .= " DEFAULT '$default'";
+            } elseif (is_null($default)) {
+                $column .= " DEFAULT NULL";
             } else {
                 $column .= " DEFAULT $default";
             }
-        } else {
-            $column .= ' DEFAULT NULL';
-        }
-
+        } 
         $columns[] = $column.',';
     }
 
     $indexs = [];
     foreach ($entity_relationships as $relationship) {
         if ($relationship['type'] === 'belongs_to') {
-            $columns[] = "`{$relationship['relate_to']}_id` bigint(20) NOT NULL,";
+            $columns[] = "`{$relationship['relation_name']}_id` bigint(20) NOT NULL,";
             $indexs[] = "KEY `fk_{$entity_name}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`),";
         }
     }
@@ -144,14 +224,20 @@ command('entity:make', '初始化 entity、dao、migration', function ()
         }
 
         $allow_null = command_read_bool("#$s Allow Null");
-        $default = command_read("#$s Default:", null);
 
-        $entity_structs[] = [
+        $tmp = [
             'name' => $name,
             'datatype' => $datatype,
+            'format' => null,
+            'format_description' => null,
             'allow_null' => $allow_null,
-            'default' => $default,
         ];
+
+        if ($allow_null) {
+            $tmp['default'] = null;
+        }
+
+        $entity_structs[] = $tmp;
 
         foreach ($entity_structs as $struct) {
             echo json_encode($struct)."\n";
@@ -261,7 +347,6 @@ command('entity:make-from-db', '从数据库表结构初始化 entity、dao、mi
 
 command('entity:make-from-description', '从实体描述文件初始化 entity、dao、migration', function ()
 {/*{{{*/
-
     $entity_name = command_paramater('entity_name');
 
     $description = _get_value_from_description_file($entity_name);
@@ -269,12 +354,20 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
     $structs = array_get($description, 'structs', []);
 
     foreach ($structs as $column => $struct) {
-        $entity_structs[] = [
+
+        $tmp = [
             'name' => $column,
             'datatype' => $struct['type'],
+            'format' => array_get($struct, 'format', null),
+            'format_description' => array_get($struct, 'format_description', null),
             'allow_null' => array_get($struct, 'allow_null', false),
-            'default' => array_get($struct, 'default', null),
         ];
+
+        if (array_key_exists('default', $struct)) {
+            $tmp['default'] = $struct['default'];
+        }
+
+        $entity_structs[] = $tmp;
     }
 
     $relationships = array_get($description, 'relationships', []);
@@ -302,6 +395,8 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
 
         $parent_description = $description;
 
+        $snap_relation_name = '';
+
         foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
 
             $snap_relation = array_get($parent_description, "relationships.".$snap_relation_to, false);
@@ -310,22 +405,30 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
             otherwise($snap_relation['type'] !== 'has_many', "冗余的 $snap_relation_to 为 has_many 关系，无法冗余字段");
 
             $parent_description = _get_value_from_description_file($snap_relation['entity']);
+            $snap_relation_name = $snap_relation_to;
         }
 
         $snap_relation_to_structs = $parent_description['structs'];
 
         foreach ($snap['structs'] as $column) {
 
-            otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap 中不存在");
+            otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap_relation_to_with_dot 中不存在");
 
             $struct = $snap_relation_to_structs[$column];
 
-            $entity_structs[] = [
-                'name' => $column,
+            $tmp = [
+                'name' => 'snap_'.$snap_relation_name.'_'.$column,
                 'datatype' => $struct['type'],
+                'format' => array_get($struct, 'format', null),
+                'format_description' => array_get($struct, 'format_description', null),
                 'allow_null' => array_get($struct, 'allow_null', false),
-                'default' => array_get($struct, 'default', null),
             ];
+
+            if (array_key_exists('default', $struct)) {
+                $tmp['default'] = $struct['default'];
+            }
+
+            $entity_structs[] = $tmp;
         }
     }
 
@@ -336,5 +439,5 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
     error_log(_generate_migration_file($entity_name, $entity_structs, $entity_relationships), 3, $file = migration_file_path($entity_name));
     echo $file."\n";
 
-    echo "\n 需要重新生成 domain/autoload.php 以加载 $entity_name\n";
+    echo "\n需要重新生成 domain/autoload.php 以加载 $entity_name\n";
 });/*}}}*/

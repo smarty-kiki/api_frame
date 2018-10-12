@@ -1,9 +1,9 @@
 display_name: 订单
-config_key: default
 structs:
     order_no:
         type: varchar(11)
-        format: reg|[1-9]([0-9]14)
+        format: /[1-9]([0-9]14)/i
+        format_description: 无效的订单可读编号
         display_name: 编号
         description: 订单可读编号
 
@@ -12,6 +12,7 @@ structs:
       format:
           valid: 有效
           invalid: 无效
+      format_description: 无效的订单状态
       display_name: 状态
       description: 订单有无效状态
 
@@ -24,7 +25,7 @@ relationships:
         entity: pay_order
         type: belongs_to
 
-    order_item:
+    order_items:
         entity: order_item
         type: has_many
 
