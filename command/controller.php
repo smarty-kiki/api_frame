@@ -20,7 +20,7 @@ function _generate_controller_file($table, $entity_structs, $entity_relationship
     ) = input_list(
         ".implode(",\n        ", $input_str)."
     );
-    \$inputs = array_filter(\$inputs);";
+    \$inputs = array_filter(\$inputs, 'not_null');";
 
     $content = "<?php
 
