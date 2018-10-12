@@ -14,6 +14,7 @@ if_command_not_found(function ($rules, $descriptions) {
 
 // registe command
 include COMMAND_DIR.'/migrate.php';
+include COMMAND_DIR.'/description.php';
 include COMMAND_DIR.'/entity.php';
 include COMMAND_DIR.'/controller.php';
 include COMMAND_DIR.'/queue.php';

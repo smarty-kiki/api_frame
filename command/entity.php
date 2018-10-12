@@ -2,7 +2,6 @@
 
 define('DAO_DIR', DOMAIN_DIR.'/dao');
 define('ENTITY_DIR', DOMAIN_DIR.'/entity');
-define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 
 function _get_value_from_description_file($entity_name, $key = null, $default = null)
 {/*{{{*/
@@ -203,75 +202,6 @@ drop table `%s`;";
 
     return sprintf($content, $entity_name, implode("\n    ", array_merge($columns, $indexs)), $entity_name);
 }/*}}}*/
-
-command('entity:make', '初始化 entity、dao、migration', function ()
-{/*{{{*/
-    $entity_name = command_paramater('entity_name');
-
-    $entity_structs = [];
-
-    $s = 0;
-
-    while (command_read_bool('Add struct')) {
-
-        $s += 1;
-
-        $name = command_read("#$s Column Name:");
-
-        $datatype = command_read("#$s Data type:", 0, ['varchar', 'int(11)', 'datetime', 'date', 'time', 'bigint(20)']);
-        if ($datatype === 'varchar') {
-            $datatype = $datatype.'('.command_read("#$s Varchar length:", 45).')';
-        }
-
-        $allow_null = command_read_bool("#$s Allow Null");
-
-        $tmp = [
-            'name' => $name,
-            'datatype' => $datatype,
-            'format' => null,
-            'format_description' => null,
-            'allow_null' => $allow_null,
-        ];
-
-        if ($allow_null) {
-            $tmp['default'] = null;
-        }
-
-        $entity_structs[] = $tmp;
-
-        foreach ($entity_structs as $struct) {
-            echo json_encode($struct)."\n";
-        }
-    }
-
-    $entity_relationships = [];
-
-    $r = 0;
-
-    while (command_read_bool('Add relationship')) {
-
-        $r += 1;
-
-        $entity_relationships[] = [
-            'type' => command_read("#$r Type:", 0, ['belongs_to', 'has_one', 'has_many']),
-            'relate_to' => command_read("#$r Relate to:"),
-            'relation_name' => command_read("#$r Relation name:"),
-        ];
-
-        foreach ($entity_relationships as $relationship) {
-            echo json_encode($relationship)."\n";
-        }
-    }
-
-    error_log(_generate_entity_file($entity_name, $entity_structs, $entity_relationships), 3, $file = ENTITY_DIR.'/'.$entity_name.'.php');
-    echo $file."\n";
-    error_log(_generate_dao_file($entity_name, $entity_structs, $entity_relationships), 3, $file = DAO_DIR.'/'.$entity_name.'.php');
-    echo $file."\n";
-    error_log(_generate_migration_file($entity_name, $entity_structs, $entity_relationships), 3, $file = migration_file_path($entity_name));
-    echo $file."\n";
-
-    echo "\n 需要重新生成 domain/autoload.php 以加载 $entity_name\n";
-});/*}}}*/
 
 command('entity:make-from-db', '从数据库表结构初始化 entity、dao、migration', function ()
 {/*{{{*/
