@@ -27,7 +27,19 @@ class %s extends entity
     public $structs = [
         %s
     ];
+
+    public static $struct_types = [
+        %s
+    ];
 %s
+    public static $struct_formats = [
+        %s
+    ];
+
+    public static $struct_format_descriptions = [
+        %s
+    ];
+
     public function __construct()
     {/*{{{*/
         %s
@@ -41,83 +53,80 @@ class %s extends entity
 }';
 
     $structs_str = [];
-    $maps_str = [];
+    $types_str = [];
     $formats_str = [];
     $format_descriptions_str = [];
-    foreach ($entity_structs as $struct) {
-
-        $struct_name = $struct['name'];
-        $structs_str[] = "'".$struct_name."' => '',";
-
-        $format = $struct['format'];
-        if (! is_null($format)) {
-            if (is_array($format)) {
-                $formats_str[$struct_name] = [];
-
-                $maps_str[$struct_name] = $format;
-            } else {
-                $formats_str[$struct_name] = $format;
-            }
-        }
-
-        $format_description = $struct['format_description'];
-        if (! is_null($format)) {
-            $format_descriptions_str[$struct_name] = $format_description;
-        }
-    }
 
     $property_block = [];
     $function_block = [];
 
-    if ($maps_str) {
-        foreach ($maps_str as $struct_name => $format) {
+    foreach ($entity_structs as $struct) {
 
-            $const_str = [];
-            $map_str = ["    const ".strtoupper($struct_name)."_MAPS = ["];
+        $struct_name = $struct['name'];
+        $struct_format = $struct['format'];
 
-            foreach ($format as $value => $description) {
-                $const_name = strtoupper($struct_name.'_'.$value);
-                $const_str[] = sprintf("    const %s = '%s';", $const_name, strtoupper($value));
-                $map_str[] = sprintf("        self::%s => '%s',", $const_name, $description);
+        // generate structs
+        $structs_str[] = "'$struct_name' => '',";
+
+        // generate struct_types
+        $struct_type = 'text';
+        $maps = [
+            'varchar' => 'text',
+            'text' => 'text',
+            'int' => 'number',
+            'bigint' => 'number',
+            'enum' => 'enum',
+        ];
+
+        foreach ($maps as $pattern => $type) {
+            if (is_array($struct_format)) {
+                $struct_type = 'enum';
+                break;
+            } else if (stristr($struct['datatype'], $pattern)) {
+                $struct_type = $type;
+                break;
             }
-
-            $map_str[] = '    ];';
-
-            $property_block[] = implode("\n", $const_str);
-            $property_block[] = implode("\n", $map_str);
-
-            $function_block[] = sprintf(
-                "    public function get_%s_description()\n".
-                "    {\n".
-                "        return self::%s[\$this->%s];\n".
-                "    }",
-                $struct_name, strtoupper($struct_name)."_MAPS", $struct_name);
         }
-    }
 
-    if ($formats_str) {
+        $types_str[] = "'$struct_name' => '$struct_type',";
 
-        $format_str = ['    public static $struct_formats = ['];
-        $format_description_str = ['    public static $struct_format_descriptions = ['];
+        // generate struct_formats
+        if (! is_null($struct_format)) {
+            if (is_array($struct_format)) {
 
-        foreach ($formats_str as $struct_name => $format) {
-            if (is_array($format)) {
-                $format_str[] = "        '$struct_name' => self::".strtoupper($struct_name)."_MAPS,";
+                // generate const and map
+                $const_str = [];
+                $map_str = ["    const ".strtoupper($struct_name)."_MAPS = ["];
+
+                foreach ($struct_format as $value => $description) {
+                    $const_name = strtoupper($struct_name.'_'.$value);
+                    $const_str[] = sprintf("    const %s = '%s';", $const_name, strtoupper($value));
+                    $map_str[] = sprintf("        self::%s => '%s',", $const_name, $description);
+                }
+
+                $map_str[] = '    ];';
+
+                $property_block[] = implode("\n", $const_str);
+                $property_block[] = implode("\n", $map_str);
+
+                $function_block[] = sprintf(
+                    "    public function get_%s_description()\n".
+                    "    {\n".
+                    "        return self::%s[\$this->%s];\n".
+                    "    }",
+                    $struct_name, strtoupper($struct_name)."_MAPS", $struct_name);
+
+                $formats_str[] = "'$struct_name' => self::".strtoupper($struct_name)."_MAPS,";
+
             } else {
-                $format_str[] = "        '$struct_name' => '$format',";
+                $formats_str[] = "'$struct_name' => '$struct_format',";
             }
         }
 
-        $format_str[] = "    ];";
-
-        foreach ($format_descriptions_str as $struct_name => $format_description) {
-            $format_description_str[] = "        '$struct_name' => '$format_description',";
+        $format_description = $struct['format_description'];
+        if (! is_null($struct_format)) {
+            $format_descriptions_str[] = "'$struct_name' => '$format_description',";
         }
-
-        $format_description_str[] = "    ];";
-
-        $property_block[] = implode("\n", $format_str);
-        $property_block[] = implode("\n", $format_description_str);
     }
 
     $property_str = $property_block? "\n".implode("\n\n", $property_block)."\n": '';
@@ -138,10 +147,20 @@ class %s extends entity
 
         if ($relationship_type !== 'has_many') {
             $structs_str[] = "'".$relationship_name."_id' => '',";
+            $types_str[] = "'".$relationship_name."_id' => 'number',";
         }
     }
 
-    return sprintf($content, $entity_name, implode("\n        ", $structs_str), $property_str, implode("\n        ", $relationship_str), $function_str);
+    return sprintf($content,
+        $entity_name,
+        implode("\n        ", $structs_str),
+        implode("\n        ", $types_str),
+        $property_str,
+        implode("\n        ", $formats_str),
+        implode("\n        ", $format_descriptions_str),
+        implode("\n        ", $relationship_str),
+        $function_str
+    );
 }/*}}}*/
 
 function _generate_dao_file($entity_name, $entity_structs, $entity_relationships)
