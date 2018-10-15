@@ -123,60 +123,6 @@ if_delete('/%s/*', function ($%s)
     );
 }/*}}}*/
 
-command('controller:make-restful-from-db', '从数据库表结构初始化 restful 风格 controller', function ()
-{/*{{{*/
-    $table = command_paramater('table_name');
-
-    $schema_infos = db_query("show create table `$table`");
-    $schema_info = reset($schema_infos);
-
-    $entity_structs = $entity_relationships = [];
-
-    $lines = explode("\n", $schema_info['Create Table']);
-
-    foreach ($lines as $i => $line) {
-
-        $line = trim($line);
-
-        if (stristr($line, 'CONSTRAINT')) {
-            unset($lines[$i]);
-            continue;
-        }
-
-        if (stristr($line, 'CREATE TABLE')) continue;
-        if (stristr($line, 'PRIMARY KEY')) continue;
-        if (stristr($line, ') ENGINE=')) continue;
-        if (stristr($line, '`id`')) continue;
-        if (stristr($line, '`version`')) continue;
-        if (stristr($line, '`create_time`')) continue;
-        if (stristr($line, '`update_time`')) continue;
-        if (stristr($line, '`delete_time`')) continue;
-
-
-        preg_match('/^`(.*)`/', $line, $matches);
-        if ($matches) {
-            $entity_structs[] = [
-                'name' => $matches[1],
-            ];
-            continue;
-        }
-
-        preg_match('/^KEY `fk_'.$table.'_(.*)_idx` \(`(.*)`\)/', $line, $matches);
-        if ($matches) {
-            $relate_to = preg_replace('/[0-9]/', '', $matches[1]);
-            $relation_name = str_replace('_id', '', $matches[2]);
-            $entity_relationships[] = [
-                'type' => 'belongs_to',
-                'relate_to' => $relate_to,
-                'relation_name' => $relation_name,
-            ];
-        }
-    }
-
-    error_log(_generate_controller_file($table, $entity_structs, $entity_relationships), 3, $file = CONTROLLER_DIR.'/'.$table.'.php');
-    echo $file."\n";
-});/*}}}*/
-
 command('controller:make-restful-from-description', '从实体描述文件初始化 restful 风格 controller', function ()
 {/*{{{*/
     $entity_name = command_paramater('entity_name');
