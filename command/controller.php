@@ -190,6 +190,8 @@ command('controller:make-restful-from-description', '从实体描述文件初始
         $tmp = [
             'name' => $column,
             'datatype' => $struct['type'],
+            'display_name' => $struct['display_name'],
+            'description' => $struct['description'],
             'format' => array_get($struct, 'format', null),
             'format_description' => array_get($struct, 'format_description', null),
             'allow_null' => array_get($struct, 'allow_null', false),
@@ -251,6 +253,8 @@ command('controller:make-restful-from-description', '从实体描述文件初始
             $tmp = [
                 'name' => 'snap_'.$snap_relation_name.'_'.$column,
                 'datatype' => $struct['type'],
+                'display_name' => $struct['display_name'],
+                'description' => $struct['description'],
                 'format' => array_get($struct, 'format', null),
                 'format_description' => array_get($struct, 'format_description', null),
                 'allow_null' => array_get($struct, 'allow_null', false),

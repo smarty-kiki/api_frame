@@ -1,4 +1,5 @@
 display_name: 订单
+description: 用户支付的订单
 structs:
     order_no:
         type: varchar(11)

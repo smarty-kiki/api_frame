@@ -27,7 +27,7 @@ structs:
         format: .*
         format_description: 收货地址
         display_name: 收货地址
-        description: 顾客姓名
+        description: 顾客收货地址
 
     longitude:
         type: varchar(20)

@@ -18,7 +18,7 @@ function _get_value_from_description_file($entity_name, $key = null, $default = 
     return array_get($description, $key, $default);
 }/*}}}*/
 
-function _generate_entity_file($entity_name, $entity_structs, $entity_relationships)
+function _generate_entity_file($entity_name, $entity_structs, $entity_relationships, $entity_options = [])
 {/*{{{*/
     $content = '<?php
 
@@ -28,7 +28,18 @@ class %s extends entity
         %s
     ];
 
+    public static $entity_display_name = \'%s\';
+    public static $entity_description = \'%s\';
+
     public static $struct_types = [
+        %s
+    ];
+
+    public static $struct_display_names = [
+        %s
+    ];
+
+    public static $struct_descriptions = [
         %s
     ];
 %s
@@ -54,6 +65,8 @@ class %s extends entity
 
     $structs_str = [];
     $types_str = [];
+    $display_names_str = [];
+    $descriptions_str = [];
     $formats_str = [];
     $format_descriptions_str = [];
 
@@ -64,6 +77,8 @@ class %s extends entity
 
         $struct_name = $struct['name'];
         $struct_format = $struct['format'];
+        $struct_display_name = $struct['display_name'];
+        $struct_description = $struct['description'];
 
         // generate structs
         $structs_str[] = "'$struct_name' => '',";
@@ -89,6 +104,12 @@ class %s extends entity
         }
 
         $types_str[] = "'$struct_name' => '$struct_type',";
+
+        // generate display_names
+        $display_names_str[] =  "'$struct_name' => '$struct_display_name',";
+
+        // generate descriptions
+        $descriptions_str[] =  "'$struct_name' => '$struct_description',";
 
         // generate struct_formats
         if (! is_null($struct_format)) {
@@ -154,7 +175,11 @@ class %s extends entity
     return sprintf($content,
         $entity_name,
         implode("\n        ", $structs_str),
+        array_get($entity_options, 'display_name', ''),
+        array_get($entity_options, 'description', ''),
         implode("\n        ", $types_str),
+        implode("\n        ", $display_names_str),
+        implode("\n        ", $descriptions_str),
         $property_str,
         implode("\n        ", $formats_str),
         implode("\n        ", $format_descriptions_str),
@@ -301,12 +326,16 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
     $description = _get_value_from_description_file($entity_name);
 
     $structs = array_get($description, 'structs', []);
+    $entity_display_name = array_get($description, 'display_name', '');
+    $entity_description = array_get($description, 'description', '');
 
     foreach ($structs as $column => $struct) {
 
         $tmp = [
             'name' => $column,
             'datatype' => $struct['type'],
+            'display_name' => $struct['display_name'],
+            'description' => $struct['description'],
             'format' => array_get($struct, 'format', null),
             'format_description' => array_get($struct, 'format_description', null),
             'allow_null' => array_get($struct, 'allow_null', false),
@@ -368,6 +397,8 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
             $tmp = [
                 'name' => 'snap_'.$snap_relation_name.'_'.$column,
                 'datatype' => $struct['type'],
+                'display_name' => $struct['display_name'],
+                'description' => $struct['description'],
                 'format' => array_get($struct, 'format', null),
                 'format_description' => array_get($struct, 'format_description', null),
                 'allow_null' => array_get($struct, 'allow_null', false),
@@ -381,7 +412,7 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
         }
     }
 
-    error_log(_generate_entity_file($entity_name, $entity_structs, $entity_relationships), 3, $file = ENTITY_DIR.'/'.$entity_name.'.php');
+    error_log(_generate_entity_file($entity_name, $entity_structs, $entity_relationships, ['display_name' => $entity_display_name, 'description' => $entity_description]), 3, $file = ENTITY_DIR.'/'.$entity_name.'.php');
     echo $file."\n";
     error_log(_generate_dao_file($entity_name, $entity_structs, $entity_relationships), 3, $file = DAO_DIR.'/'.$entity_name.'.php');
     echo $file."\n";
