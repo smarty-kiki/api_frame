@@ -1,8 +1,0 @@
-display_name: 商品
-structs:
-    name:
-        type: varchar(11)
-        format: .*
-        format_description: 无效的商品名
-        display_name: 名称
-        description: 商品名称
