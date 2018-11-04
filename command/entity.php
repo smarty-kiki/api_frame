@@ -257,6 +257,7 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
     $entity_display_name = array_get($description, 'display_name', '');
     $entity_description = array_get($description, 'description', '');
 
+    $entity_structs = [];
     foreach ($structs as $column => $struct) {
 
         $tmp = [
@@ -278,6 +279,7 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
 
     $relationships = array_get($description, 'relationships', []);
 
+    $entity_relationships = [];
     foreach ($relationships as $relation_name => $relationship) {
 
         $relation_entity_name = $relationship['entity'];
