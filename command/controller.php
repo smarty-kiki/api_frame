@@ -131,6 +131,8 @@ command('controller:make-restful-from-description', '从实体描述文件初始
 
     $structs = array_get($description, 'structs', []);
 
+    $entity_structs = [];
+
     foreach ($structs as $column => $struct) {
 
         $tmp = [
@@ -151,6 +153,8 @@ command('controller:make-restful-from-description', '从实体描述文件初始
     }
 
     $relationships = array_get($description, 'relationships', []);
+
+    $entity_relationships = [];
 
     foreach ($relationships as $relation_name => $relationship) {
 
