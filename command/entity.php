@@ -7,7 +7,7 @@ function _get_value_from_description_file($entity_name, $key = null, $default = 
 {/*{{{*/
     $entity_file_path = DESCRIPTION_DIR.'/'.$entity_name.'.yml';
 
-    otherwise(file_exists($entity_file_path), "实体 $entity_name 描述文件没找到");
+    otherwise(is_file($entity_file_path), "实体 $entity_name 描述文件没找到");
 
     $description = yaml_parse_file(DESCRIPTION_DIR.'/'.$entity_name.'.yml');
 
