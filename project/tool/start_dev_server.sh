@@ -2,7 +2,7 @@
 
 ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../
 
-sh $ROOT_DIR/project/tool/dep_build.sh link
+bash ${ROOT_DIR}project/tool/dep_build.sh link
 
 sudo docker run --rm -ti -p 80:80 -p 3306:3306 --name api_frame \
     -v $ROOT_DIR/../frame:/var/www/frame \
