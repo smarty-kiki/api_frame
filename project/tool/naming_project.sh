@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function sed_name
+sed_name()
 {
     cat $1 | sed -e "s/api_frame/$2/g" > $1.new && mv $1.new $1
 }
