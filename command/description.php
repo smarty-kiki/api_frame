@@ -58,7 +58,7 @@ function _generate_description_file($entity_name, $display_name, $description, $
         'snaps' => $snaps,
     ];
 
-    return yaml_emit($yaml);
+    return yaml_emit($yaml, YAML_UTF8_ENCODING, YAML_LN_BREAK);
 }/*}}}*/
 
 command('description:make-domain-description', '通过交互式输入创建领域实体描述文件', function ()
