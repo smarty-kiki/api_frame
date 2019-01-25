@@ -526,6 +526,16 @@ class frame_function_test extends phpunit_framework_testcase
         $this->assertFalse(all_empty('a', 1, true, ['a']));
     }/*}}}*/
 
+    public function test_all_null()
+    {/*{{{*/
+        $this->assertFalse(all_null('', 0, false, [], null));
+        $this->assertFalse(all_null('', 1, false, [], null));
+        $this->assertFalse(all_null('a', 1, true, ['a']));
+        $this->assertTrue(all_null(null));
+        $this->assertTrue(all_null(null, null));
+        $this->assertFalse(all_null(null, null, 'a'));
+    }/*}}}*/
+
     public function test_all_not_empty()
     {/*{{{*/
         $this->assertFalse(all_not_empty('', 0, false, [], null));
@@ -533,11 +543,31 @@ class frame_function_test extends phpunit_framework_testcase
         $this->assertTrue(all_not_empty('a', 1, true, ['a']));
     }/*}}}*/
 
+    public function test_all_not_null()
+    {/*{{{*/
+        $this->assertFalse(all_not_null('', 0, false, [], null));
+        $this->assertFalse(all_not_null('', 1, false, [], null));
+        $this->assertTrue(all_not_null('a', 1, true, ['a']));
+        $this->assertFalse(all_not_null(null));
+        $this->assertFalse(all_not_null(null, null));
+        $this->assertFalse(all_not_null(null, null, ''));
+    }/*}}}*/
+
     public function test_has_empty()
     {/*{{{*/
         $this->assertTrue(has_empty('', 0, false, [], null));
         $this->assertTrue(has_empty('', 1, false, [], null));
         $this->assertFalse(has_empty('a', 1, true, ['a']));
+    }/*}}}*/
+
+    public function test_has_null()
+    {/*{{{*/
+        $this->assertTrue(has_null('', 0, false, [], null));
+        $this->assertTrue(has_null('', 1, false, [], null));
+        $this->assertFalse(has_null('a', 1, true, ['a']));
+        $this->assertFalse(has_null('', 0, false, []));
+        $this->assertTrue(has_null(null));
+        $this->assertTrue(has_null(null, ''));
     }/*}}}*/
 
     public function test_datetime()
