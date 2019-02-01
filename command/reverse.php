@@ -134,7 +134,7 @@ function _create_yaml_file($table)
  *
  * 自动排除 migrations 表，如果这张表存在的话
  */
-command('reverse', '将数据库的表装换成实体描述文件', function ()
+command('reverse', '将数据库的表转换成实体描述文件', function ()
 {
     echo 'Directory:' . DESCRIPTION_DIR . PHP_EOL;
     echo 'Start...' . PHP_EOL;
