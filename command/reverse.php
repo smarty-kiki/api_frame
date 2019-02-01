@@ -19,7 +19,7 @@
  */
 function _build_yaml_structs_unit($type, $format, $format_description, $display_name, $description, $allow_null, $default)
 {
-    return [
+    return array_filter([
         'type' => $type,
         'format' => $format,
         'format_description' => $format_description,
@@ -27,7 +27,7 @@ function _build_yaml_structs_unit($type, $format, $format_description, $display_
         'description' => $description,
         'allow_null' => $allow_null,
         'default' => $default,
-    ];
+    ], 'not_null');
 }
 
 /**
@@ -112,7 +112,7 @@ function _create_yaml_file($table)
         }
         $structure['structs'][$column_data['COLUMN_NAME']] = _build_yaml_structs_unit(
             $column_data['COLUMN_TYPE'],
-            '~',
+            null,
             $column_data['COLUMN_COMMENT'],
             $column_data['COLUMN_COMMENT'],
             $column_data['COLUMN_COMMENT'],
