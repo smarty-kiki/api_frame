@@ -107,6 +107,9 @@ function _create_yaml_file($table)
     $structure['display_name'] = _get_table_comment($table);
     $structure['description'] = $structure['display_name'];
     foreach (_get_query_columns_datas($table) as $column_data) {
+        if (in_array($column_data['COLUMN_NAME'], ['id', 'create_time', 'update_time', 'delete_time', 'version'])) {
+            continue;
+        }
         $structure['structs'][$column_data['COLUMN_NAME']] = _build_yaml_structs_unit(
             $column_data['COLUMN_TYPE'],
             '~',
