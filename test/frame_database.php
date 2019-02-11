@@ -2,7 +2,7 @@
 
 include __DIR__.'/../bootstrap.php';
 
-class frame_database_mysql_test extends phpunit_framework_testcase
+class frame_database_test extends phpunit_framework_testcase
 {
     public function setUp()
     {/*{{{*/
