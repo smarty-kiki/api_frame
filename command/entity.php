@@ -159,16 +159,20 @@ class %s extends entity
         $relationship_type = $relationship['type'];
         $relationship_name = $relationship['relation_name'];
         $relationship_relate_to = $relationship['relate_to'];
+        $relationship_struct_display_name = $relationship['entity_display_name'].'主键';
+        $relationship_struct_name = $relationship_name.'_id';
 
         if ($relationship_name === $relationship_relate_to) {
             $relationship_str[] = "\$this->{$relationship_type}('{$relationship_relate_to}');";
         } else {
-            $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_name}_id');";
+            $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_struct_name}');";
         }
 
         if ($relationship_type !== 'has_many') {
-            $structs_str[] = "'".$relationship_name."_id' => '',";
-            $types_str[] = "'".$relationship_name."_id' => 'number',";
+            $structs_str[] = "'$relationship_struct_name' => '',";
+            $types_str[] = "'$relationship_struct_name' => 'number',";
+            $display_names_str[] =  "'$relationship_struct_name' => '$relationship_struct_display_name',";
+            $descriptions_str[] =  "'$relationship_struct_name' => '$relationship_struct_display_name',";
         }
     }
 
@@ -290,16 +294,14 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
         $relation_entity_name = $relationship['entity'];
         $relation_type = $relationship['type'];
 
+        $relation_description = _get_value_from_description_file($relation_entity_name);
+
         $entity_relationships[] = [
             'type' => $relation_type,
             'relate_to' => $relation_entity_name,
             'relation_name' => $relation_name,
+            'entity_display_name' => $relation_description['display_name'],
         ];
-
-        if ($relation_type !== 'has_many') {
-
-            _get_value_from_description_file($relation_entity_name);
-        }
     }
 
     $snaps = array_get($description, 'snaps', []);
