@@ -332,7 +332,7 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
             $tmp = [
                 'name' => 'snap_'.$snap_relation_name.'_'.$column,
                 'datatype' => $struct['type'],
-                'display_name' => $struct['display_name'],
+                'display_name' => $parent_description['display_name'].$struct['display_name'],
                 'description' => $struct['description'],
                 'format' => array_get($struct, 'format', null),
                 'format_description' => array_get($struct, 'format_description', null),
