@@ -159,7 +159,7 @@ class %s extends entity
         $relationship_type = $relationship['type'];
         $relationship_name = $relationship['relation_name'];
         $relationship_relate_to = $relationship['relate_to'];
-        $relationship_struct_display_name = $relationship['entity_display_name'].'主键';
+        $relationship_struct_display_name = $relationship['entity_display_name'].'ID';
         $relationship_struct_name = $relationship_name.'_id';
 
         if ($relationship_name === $relationship_relate_to) {
