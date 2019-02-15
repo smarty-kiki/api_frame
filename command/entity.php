@@ -240,7 +240,12 @@ drop table `%s`;";
     foreach ($entity_relationships as $relationship) {
         if ($relationship['type'] === 'belongs_to') {
             $columns[] = "`{$relationship['relation_name']}_id` bigint(20) NOT NULL,";
-            $indexs[] = "KEY `fk_{$relationship['relation_name']}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`),";
+
+            if ($relationship['relation_name'] === $relationship['relate_to']) {
+                $indexs[] = "KEY `fk_{$relationship['relation_name']}_idx` (`{$relationship['relation_name']}_id`),";
+            } else {
+                $indexs[] = "KEY `fk_{$relationship['relation_name']}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`),";
+            }
         }
     }
 
