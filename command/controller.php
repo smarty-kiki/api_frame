@@ -14,6 +14,18 @@ function _generate_controller_file($table, $entity_structs, $entity_relationship
         $input_str[] = "'$struct_name'";
     }
 
+    foreach ($entity_relationships as $relationship) {
+
+        $relationship_type = $relationship['type'];
+        $relationship_name = $relationship['relation_name'];
+
+        if ($relationship_type !== 'has_many') {
+
+            $list_str[] = "\$inputs['".$relationship_name."_id']";
+            $input_str[] = "'".$relationship_name."_id'";
+        }
+    }
+
     $input_content = "\$inputs = [];
     list(
         ".implode(",\n        ", $list_str)."
@@ -34,7 +46,7 @@ if_get('/%s', function ()
     ];
 });/*}}}*/
 
-if_put('/%s', function ()
+if_post('/%s/add', function ()
 {/*{{{*/
     %s
 
@@ -61,7 +73,7 @@ if_get('/%s/*', function ($%s)
     ];
 });/*}}}*/
 
-if_post('/%s/*', function ($%s)
+if_post('/%s/update/*', function ($%s)
 {/*{{{*/
     $%s = dao('%s')->find($%s);
     otherwise($%s->is_not_null(), '%s not found');
@@ -78,7 +90,7 @@ if_post('/%s/*', function ($%s)
     ];
 });/*}}}*/
 
-if_delete('/%s/*', function ($%s)
+if_post('/%s/delete/*', function ($%s)
 {/*{{{*/
     $%s = dao('%s')->find($%s);
     otherwise($%s->is_not_null(), '%s not found');
