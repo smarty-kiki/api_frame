@@ -246,9 +246,9 @@ drop table `%s`;";
             $columns[] = "`{$relationship['relation_name']}_id` bigint(20) NOT NULL,";
 
             if ($relationship['relation_name'] === $relationship['relate_to']) {
-                $indexs[] = "KEY `fk_{$relationship['relation_name']}_idx` (`{$relationship['relation_name']}_id`),";
+                $indexs[] = "KEY `fk_{$relationship['relation_name']}_idx` (`{$relationship['relation_name']}_id`, `delete_time`),";
             } else {
-                $indexs[] = "KEY `fk_{$relationship['relation_name']}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`),";
+                $indexs[] = "KEY `fk_{$relationship['relation_name']}_{$relationship['relate_to']}_idx` (`{$relationship['relation_name']}_id`, `delete_time`),";
             }
         }
     }
