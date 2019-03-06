@@ -63,6 +63,14 @@ class %s extends entity
 %s
 }';
 
+    $struct_type_maps = [
+        'varchar' => 'text',
+        'text' => 'text',
+        'int' => 'number',
+        'bigint' => 'number',
+        'enum' => 'enum',
+    ];
+
     $structs_str = [];
     $types_str = [];
     $display_names_str = [];
@@ -81,19 +89,25 @@ class %s extends entity
         $struct_description = $struct['description'];
 
         // generate structs
-        $structs_str[] = "'$struct_name' => '',";
+        if (array_key_exists('default', $struct)) {
+
+            $struct_default = $struct['default'];
+
+            if (is_string($struct_default)) {
+                $structs_str[] = "'$struct_name' => '$struct_default',";
+            } elseif (is_null($struct_default)) {
+                $structs_str[] = "'$struct_name' => '',";
+            } else {
+                $structs_str[] = "'$struct_name' => $struct_default,";
+            }
+        } else {
+            $structs_str[] = "'$struct_name' => '',";
+        }
 
         // generate struct_types
         $struct_type = 'text';
-        $maps = [
-            'varchar' => 'text',
-            'text' => 'text',
-            'int' => 'number',
-            'bigint' => 'number',
-            'enum' => 'enum',
-        ];
 
-        foreach ($maps as $pattern => $type) {
+        foreach ($struct_type_maps as $pattern => $type) {
             if (is_array($struct_format)) {
                 $struct_type = 'enum';
                 break;
@@ -232,7 +246,9 @@ drop table `%s`;";
             if (is_string($default)) {
                 $column .= " DEFAULT '$default'";
             } elseif (is_null($default)) {
-                $column .= " DEFAULT NULL";
+                if ($struct['allow_null']) {
+                    $column .= " DEFAULT NULL";
+                }
             } else {
                 $column .= " DEFAULT $default";
             }
