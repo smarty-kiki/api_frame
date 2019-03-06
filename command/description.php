@@ -2,6 +2,25 @@
 
 define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 
+function _get_entity_name_by_command_paramater()
+{/*{{{*/
+    $entity_name = command_paramater('entity_name', '*');
+
+    if ($entity_name === '*') {
+
+        $file_paths = glob(DESCRIPTION_DIR.'/*.yml');
+
+        $entity_names = array_build($file_paths, function ($k, $file_path) {
+
+            return [$k, pathinfo($file_path)['filename']];
+        });
+    } else {
+        $entity_names = [$entity_name];
+    }
+
+    return $entity_names;
+}/*}}}*/
+
 function _generate_description_file($entity_name, $display_name, $description, $entity_structs, $entity_relationships, $entity_snaps)
 {/*{{{*/
     $structs = [];

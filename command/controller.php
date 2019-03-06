@@ -137,83 +137,20 @@ if_post('/%s/delete/*', function ($%s)
 
 command('controller:make-restful-from-description', '从实体描述文件初始化 restful 风格 controller', function ()
 {/*{{{*/
-    $entity_name = command_paramater('entity_name');
+    $entity_names = _get_entity_name_by_command_paramater();
 
-    $description = _get_value_from_description_file($entity_name);
+    foreach ($entity_names as $entity_name) {
 
-    $structs = array_get($description, 'structs', []);
+        $description = _get_value_from_description_file($entity_name);
 
-    $entity_structs = [];
+        $structs = array_get($description, 'structs', []);
 
-    foreach ($structs as $column => $struct) {
+        $entity_structs = [];
 
-        $tmp = [
-            'name' => $column,
-            'datatype' => $struct['type'],
-            'display_name' => $struct['display_name'],
-            'description' => $struct['description'],
-            'format' => array_get($struct, 'format', null),
-            'format_description' => array_get($struct, 'format_description', null),
-            'allow_null' => array_get($struct, 'allow_null', false),
-        ];
-
-        if (array_key_exists('default', $struct)) {
-            $tmp['default'] = $struct['default'];
-        }
-
-        $entity_structs[] = $tmp;
-    }
-
-    $relationships = array_get($description, 'relationships', []);
-
-    $entity_relationships = [];
-
-    foreach ($relationships as $relation_name => $relationship) {
-
-        $relation_entity_name = $relationship['entity'];
-        $relation_type = $relationship['type'];
-
-        $entity_relationships[] = [
-            'type' => $relation_type,
-            'relate_to' => $relation_entity_name,
-            'relation_name' => $relation_name,
-        ];
-
-        if ($relation_type !== 'has_many') {
-
-            _get_value_from_description_file($relation_entity_name);
-        }
-    }
-
-    $snaps = array_get($description, 'snaps', []);
-
-    foreach ($snaps as $snap_relation_to_with_dot => $snap) {
-
-        $parent_description = $description;
-
-        $snap_relation_name = '';
-
-        foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
-
-            $snap_relation = array_get($parent_description, "relationships.".$snap_relation_to, false);
-
-            otherwise($snap_relation, "与冗余的 $snap_relation_to 没有关联关系");
-            otherwise($snap_relation['type'] !== 'has_many', "冗余的 $snap_relation_to 为 has_many 关系，无法冗余字段");
-
-            $parent_description = _get_value_from_description_file($snap_relation['entity']);
-            $snap_relation_name = $snap_relation_to;
-        }
-
-        $snap_relation_to_structs = $parent_description['structs'];
-
-        foreach ($snap['structs'] as $column) {
-
-            otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap_relation_to_with_dot 中不存在");
-
-            $struct = $snap_relation_to_structs[$column];
+        foreach ($structs as $column => $struct) {
 
             $tmp = [
-                'name' => 'snap_'.$snap_relation_name.'_'.$column,
+                'name' => $column,
                 'datatype' => $struct['type'],
                 'display_name' => $struct['display_name'],
                 'description' => $struct['description'],
@@ -228,8 +165,74 @@ command('controller:make-restful-from-description', '从实体描述文件初始
 
             $entity_structs[] = $tmp;
         }
-    }
 
-    error_log(_generate_controller_file($entity_name, $entity_structs, $entity_relationships), 3, $file = CONTROLLER_DIR.'/'.$entity_name.'.php');
-    echo $file."\n";
+        $relationships = array_get($description, 'relationships', []);
+
+        $entity_relationships = [];
+
+        foreach ($relationships as $relation_name => $relationship) {
+
+            $relation_entity_name = $relationship['entity'];
+            $relation_type = $relationship['type'];
+
+            $entity_relationships[] = [
+                'type' => $relation_type,
+                'relate_to' => $relation_entity_name,
+                'relation_name' => $relation_name,
+            ];
+
+            if ($relation_type !== 'has_many') {
+
+                _get_value_from_description_file($relation_entity_name);
+            }
+        }
+
+        $snaps = array_get($description, 'snaps', []);
+
+        foreach ($snaps as $snap_relation_to_with_dot => $snap) {
+
+            $parent_description = $description;
+
+            $snap_relation_name = '';
+
+            foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
+
+                $snap_relation = array_get($parent_description, "relationships.".$snap_relation_to, false);
+
+                otherwise($snap_relation, "与冗余的 $snap_relation_to 没有关联关系");
+                otherwise($snap_relation['type'] !== 'has_many', "冗余的 $snap_relation_to 为 has_many 关系，无法冗余字段");
+
+                $parent_description = _get_value_from_description_file($snap_relation['entity']);
+                $snap_relation_name = $snap_relation_to;
+            }
+
+            $snap_relation_to_structs = $parent_description['structs'];
+
+            foreach ($snap['structs'] as $column) {
+
+                otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap_relation_to_with_dot 中不存在");
+
+                $struct = $snap_relation_to_structs[$column];
+
+                $tmp = [
+                    'name' => 'snap_'.$snap_relation_name.'_'.$column,
+                    'datatype' => $struct['type'],
+                    'display_name' => $struct['display_name'],
+                    'description' => $struct['description'],
+                    'format' => array_get($struct, 'format', null),
+                    'format_description' => array_get($struct, 'format_description', null),
+                    'allow_null' => array_get($struct, 'allow_null', false),
+                ];
+
+                if (array_key_exists('default', $struct)) {
+                    $tmp['default'] = $struct['default'];
+                }
+
+                $entity_structs[] = $tmp;
+            }
+        }
+
+        error_log(_generate_controller_file($entity_name, $entity_structs, $entity_relationships), 3, $file = CONTROLLER_DIR.'/'.$entity_name.'.php');
+        echo $file."\n";
+    }
 });/*}}}*/
