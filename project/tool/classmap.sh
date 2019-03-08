@@ -17,12 +17,12 @@ echo "<?php" > $output
 echo "" >> $output
 echo "spl_autoload_register(function (\$class_name) {" >> $output
 echo "" >> $output
-echo '    $class_maps = array(' >> $output
+echo '    $class_maps = [' >> $output
 grep -rE "^(class|abstract class|interface) \S+\s*" * | awk -F ':class |:abstract class |:interface | ' '{if(length($2)>0) printf("        \047%s\047 => \047%s\047,\n",$2,$1)}' >> $output
-echo '    );' >> $output
+echo '    ];' >> $output
 echo "" >> $output
 echo '    if (isset($class_maps[$class_name])) {' >> $output
-echo "         include __DIR__.'/'.\$class_maps[\$class_name];" >> $output
+echo "        include __DIR__.'/'.\$class_maps[\$class_name];" >> $output
 echo '    }' >> $output
 echo '});' >> $output
 
