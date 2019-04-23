@@ -312,6 +312,49 @@ class frame_function_test extends phpunit_framework_testcase
         $this->assertFalse(array_exists($from_array, 'd'));
     }/*}}}*/
 
+    public function test_array_forget()
+    {/*{{{*/
+        $from_array = [
+            'a' => 'A',
+            'b' => 2,
+            'c' => null,
+        ];
+
+        array_forget($from_array, 'a');
+
+        $this->assertFalse(array_key_exists('a', $from_array));
+        $this->assertTrue(array_key_exists('b', $from_array));
+        $this->assertTrue(array_key_exists('c', $from_array));
+
+
+        $from_array = [
+            'a' => 'A',
+            'b' => 2,
+            'c' => null,
+        ];
+
+        array_forget($from_array, 'b');
+
+        $this->assertTrue(array_key_exists('a', $from_array));
+        $this->assertFalse(array_key_exists('b', $from_array));
+        $this->assertTrue(array_key_exists('c', $from_array));
+
+        $from_array = [
+            'a' => 'A',
+            'b' => 2,
+            'c' => null,
+        ];
+
+        array_forget($from_array, 'c');
+
+        $this->assertTrue(array_key_exists('a', $from_array));
+        $this->assertTrue(array_key_exists('b', $from_array));
+        $this->assertFalse(array_key_exists('c', $from_array));
+
+
+
+    }/*}}}*/
+
     public function test_array_divide()
     {/*{{{*/
         $from_array = [
