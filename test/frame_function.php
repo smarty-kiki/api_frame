@@ -388,6 +388,41 @@ class frame_function_test extends phpunit_framework_testcase
         }));
     }/*}}}*/
 
+    public function test_array_indexed()
+    {/*{{{*/
+        $from_array = [
+            'a.A',
+            '2.3',
+            '.',
+        ];
+
+        $this->assertEquals([
+            'a' => ['A'],
+            2 => ['3'],
+            '' => [''],
+        ], array_indexed($from_array, function ($key, $value) {
+            $tmp = explode('.', $value);
+
+            return [$tmp[0], null, $tmp[1]];
+        }));
+
+        $this->assertEquals([
+            'a' => [
+                'a' => 'A',
+            ],
+            2 => [
+                2 => '3',
+            ],
+            '' => [
+                '' => '',
+            ],
+        ], array_indexed($from_array, function ($key, $value) {
+            $tmp = explode('.', $value);
+
+            return [$tmp[0], $tmp[0], $tmp[1]];
+        }));
+    }/*}}}*/
+
     public function test_array_list()
     {/*{{{*/
         $from_array = [
@@ -511,6 +546,68 @@ class frame_function_test extends phpunit_framework_testcase
         $this->assertTrue(is_url('tel://15012345678'));
         $this->assertTrue(is_url('https://php-frame.cn'));
         $this->assertTrue(is_url('sftp://php-frame.cn'));
+    }/*}}}*/
+
+    public function test_unparse_url()
+    {/*{{{*/
+        $this->assertEquals(
+            '//www.baidu.com',
+            unparse_url([
+                'host' => 'www.baidu.com',
+            ]));
+
+        $this->assertEquals(
+            '//www.baidu.com?name=kiki&age=18',
+            unparse_url([
+                'host' => 'www.baidu.com',
+                'query' => 'name=kiki&age=18',
+            ]));
+
+        $this->assertEquals(
+            '//www.baidu.com?name=kiki&age=18#haha',
+            unparse_url([
+                'host' => 'www.baidu.com',
+                'query' => 'name=kiki&age=18',
+                'fragment' => 'haha',
+            ]));
+
+        $this->assertEquals(
+            '//www.baidu.com?name=kiki&age=18#haha',
+            unparse_url([
+                'host' => 'www.baidu.com',
+                'query' => 'name=kiki&age=18',
+                'fragment' => 'haha',
+            ]));
+
+        $this->assertEquals(
+            'http://www.baidu.com?name=kiki&age=18',
+            unparse_url([
+                'host' => 'www.baidu.com',
+                'query' => 'name=kiki&age=18',
+                'scheme' => 'http',
+            ]));
+
+        $this->assertEquals(
+            'http://www.baidu.com/action?name=kiki&age=18',
+            unparse_url([
+                'host' => 'www.baidu.com',
+                'path' => '/action',
+                'query' => 'name=kiki&age=18',
+                'scheme' => 'http',
+            ]));
+    }/*}}}*/
+
+    public function test_url_transfer()
+    {/*{{{*/
+        $this->assertEquals(
+            'http://www.baidu.com/action?name=kiki&age=19',
+            url_transfer('http://www.baidu.com/action?name=kiki&age=18', function ($url_info) {
+
+                $url_info['query']['age'] = 19;
+
+                return $url_info;
+            })
+        );
     }/*}}}*/
 
     public function test_config_dir()
@@ -667,5 +764,24 @@ class frame_function_test extends phpunit_framework_testcase
             'b' => 2,
             '' => null,
         ]));
+    }/*}}}*/
+
+    public function test_option()
+    {/*{{{*/
+        option_define(
+            'OPTION_TEST_1',
+            'OPTION_TEST_2',
+            'OPTION_TEST_3',
+            'OPTION_TEST_4',
+            'OPTION_TEST_5'
+        );
+
+        $option = OPTION_TEST_1 | OPTION_TEST_3;
+
+        $this->assertTrue(has_option($option, OPTION_TEST_1));
+        $this->assertFalse(has_option($option, OPTION_TEST_2));
+        $this->assertTrue(has_option($option, OPTION_TEST_3));
+        $this->assertFalse(has_option($option, OPTION_TEST_4));
+        $this->assertFalse(has_option($option, OPTION_TEST_5));
     }/*}}}*/
 }

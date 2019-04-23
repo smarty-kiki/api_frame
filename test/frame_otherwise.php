@@ -1,6 +1,6 @@
 <?php
 
-include __DIR__.'/../bootstrap.php';
+include __DIR__.'/../bootstrap.php'; 
 
 class frame_otherwise_test extends phpunit_framework_testcase
 {
