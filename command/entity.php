@@ -63,14 +63,6 @@ class %s extends entity
 %s
 }';
 
-    $struct_type_maps = [
-        'varchar' => 'text',
-        'text' => 'text',
-        'int' => 'number',
-        'bigint' => 'number',
-        'enum' => 'enum',
-    ];
-
     $structs_str = [];
     $types_str = [];
     $display_names_str = [];
@@ -105,17 +97,7 @@ class %s extends entity
         }
 
         // generate struct_types
-        $struct_type = 'text';
-
-        foreach ($struct_type_maps as $pattern => $type) {
-            if (is_array($struct_format)) {
-                $struct_type = 'enum';
-                break;
-            } else if (stristr($struct['datatype'], $pattern)) {
-                $struct_type = $type;
-                break;
-            }
-        }
+        $struct_type = entity::convert_struct_format($struct['datatype'], $struct_format);
 
         $types_str[] = "'$struct_name' => '$struct_type',";
 
@@ -286,6 +268,12 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
 
         $entity_structs = [];
         foreach ($structs as $column => $struct) {
+
+            if ($extension = array_get($struct, 'extension', null)) {
+                if ($extension_struct = _get_struct_info_from_extension($extension)) {
+                    $struct = array_merge($extension_struct, array_filter($struct));
+                }
+            }
 
             $tmp = [
                 'name' => $column,

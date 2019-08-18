@@ -1,6 +1,9 @@
 <?php
 
 define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
+define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
+define('DESCRIPTION_STRUCT_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct');
+define('DESCRIPTION_TEMPLATE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/template');
 
 function _get_entity_name_by_command_paramater()
 {/*{{{*/
@@ -19,6 +22,36 @@ function _get_entity_name_by_command_paramater()
     }
 
     return $entity_names;
+}/*}}}*/
+
+function _get_struct_info_from_extension($extension)
+{/*{{{*/
+    $path = DESCRIPTION_STRUCT_EXTENSION_DIR.'/'.$extension.'.php';
+    if (is_file($path)) {
+        return include $path;
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_struct_template_from_extension($action, $type)
+{/*{{{*/
+    $path = DESCRIPTION_TEMPLATE_EXTENSION_DIR.'/'.$action.'/struct/'.$type.'.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_page_template_from_extension($action)
+{/*{{{*/
+    $path = DESCRIPTION_TEMPLATE_EXTENSION_DIR.'/'.$action.'/page.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
 }/*}}}*/
 
 function _generate_description_file($entity_name, $display_name, $description, $entity_structs, $entity_relationships, $entity_snaps)
@@ -80,6 +113,7 @@ function _generate_description_file($entity_name, $display_name, $description, $
     return yaml_emit($yaml, YAML_UTF8_ENCODING, YAML_LN_BREAK);
 }/*}}}*/
 
+//todo 支持 extension
 command('description:make-domain-description', '通过交互式输入创建领域实体描述文件', function ()
 {/*{{{*/
 
