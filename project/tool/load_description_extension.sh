@@ -30,7 +30,10 @@ git_clone()
     git clone $1 $2 || (echo "获取项目 $3 失败" && exit)
 }
 
-
+if [ "$1" != "" ]
+then
+    DESCRIPTION_EXTENSION_REPOSITORY=$1
+fi
 
 if [ ! -d $DESCRIPTION_EXTENSION_DIR ]
 then
