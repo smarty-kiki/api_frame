@@ -19,7 +19,7 @@ function _generate_controller_file($table, $entity_structs, $entity_relationship
         $relationship_type = $relationship['type'];
         $relationship_name = $relationship['relation_name'];
 
-        if ($relationship_type !== 'has_many') {
+        if ($relationship_type === 'belongs_to') {
 
             $list_str[] = "\$inputs['".$relationship_name."_id']";
             $input_str[] = "'".$relationship_name."_id'";

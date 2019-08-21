@@ -164,7 +164,7 @@ class %s extends entity
             $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_struct_name}');";
         }
 
-        if ($relationship_type !== 'has_many') {
+        if ($relationship_type === 'belongs_to') {
             $structs_str[] = "'$relationship_struct_name' => '',";
             $types_str[] = "'$relationship_struct_name' => 'number',";
             $display_names_str[] =  "'$relationship_struct_name' => '$relationship_struct_display_name',";
