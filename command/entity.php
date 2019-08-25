@@ -161,7 +161,11 @@ class %s extends entity
         if ($relationship_name === $relationship_relate_to) {
             $relationship_str[] = "\$this->{$relationship_type}('{$relationship_relate_to}');";
         } else {
-            $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_struct_name}');";
+            if ($relationship_type === 'belongs_to') {
+                $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}', '{$relationship_struct_name}');";
+            } else {
+                $relationship_str[] = "\$this->{$relationship_type}('{$relationship_name}', '{$relationship_relate_to}');";
+            }
         }
 
         if ($relationship_type === 'belongs_to') {

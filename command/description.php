@@ -4,6 +4,7 @@ define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
 define('DESCRIPTION_STRUCT_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct');
 define('DESCRIPTION_TEMPLATE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/template');
+define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
 
 function _get_entity_name_by_command_paramater()
 {/*{{{*/
@@ -47,6 +48,16 @@ function _get_struct_template_from_extension($action, $type)
 function _get_page_template_from_extension($action)
 {/*{{{*/
     $path = DESCRIPTION_TEMPLATE_EXTENSION_DIR.'/'.$action.'/page.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_controller_template_from_extension($action)
+{/*{{{*/
+    $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
