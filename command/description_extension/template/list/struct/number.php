@@ -1,1 +1,0 @@
-^{^{ ${{ $entity_name }}->{{$struct}} ^}^}

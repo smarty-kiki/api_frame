@@ -17,5 +17,8 @@ if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $e
     ${{ $entity_name }}->{{ $struct }} = input('{{ $struct }}');
 @endforeach
 
-    return redirect('/{{ english_word_pluralize($entity_name) }}');
+    return [
+        'code' => 0,
+        'msg' => '',
+    ];
 });

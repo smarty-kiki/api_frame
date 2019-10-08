@@ -5,5 +5,8 @@ if_post('/{{ english_word_pluralize($entity_name) }}/delete/*', function (${{ $e
 
     ${{ $entity_name }}->delete();
 
-    return redirect('/{{ english_word_pluralize($entity_name) }}');
+    return [
+        'code' => 0,
+        'msg' => '',
+    ];
 });
