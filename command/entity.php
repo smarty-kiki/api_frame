@@ -119,6 +119,20 @@ class %s extends entity
                     $const_name = strtoupper($struct_name.'_'.$value);
                     $const_str[] = sprintf("    const %s = '%s';", $const_name, strtoupper($value));
                     $map_str[] = sprintf("        self::%s => '%s',", $const_name, $description);
+                    $function_block[] = sprintf(
+                        "    public function %s_is_%s()\n".
+                        "    {/*{{{*/\n".
+                        "        return \$this->%s === self::%s;\n".
+                        "    }/*}}}*/",
+                        $struct_name, strtolower($value), $struct_name, $const_name
+                    );
+                    $function_block[] = sprintf(
+                        "    public function set_%s_%s()\n".
+                        "    {/*{{{*/\n".
+                        "        return \$this->%s = self::%s;\n".
+                        "    }/*}}}*/",
+                        $struct_name, strtolower($value), $struct_name, $const_name
+                    );
                 }
 
                 $map_str[] = '    ];';
@@ -128,9 +142,9 @@ class %s extends entity
 
                 $function_block[] = sprintf(
                     "    public function get_%s_description()\n".
-                    "    {\n".
+                    "    {/*{{{*/\n".
                     "        return self::%s[\$this->%s];\n".
-                    "    }",
+                    "    }/*}}}*/",
                     $struct_name, strtoupper($struct_name)."_MAPS", $struct_name);
 
                 $formats_str[] = "'$struct_name' => self::".strtoupper($struct_name)."_MAPS,";
