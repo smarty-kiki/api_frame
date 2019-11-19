@@ -14,6 +14,8 @@ if_has_exception(function ($ex) {
 
     log_exception($ex);
 
+    header('Content-type: application/json');
+
     return json([
         'succ' => false,
         'msg' => $ex->getMessage(),

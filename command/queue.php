@@ -23,3 +23,14 @@ command('queue:status', '队列状态', function ()
 
     echo queue_status($tube, $config_key);
 });/*}}}*/
+
+command('queue:pause', '暂停队列任务派发', function ()
+{/*{{{*/
+    $tube = command_paramater('tube', 'default');
+    $config_key = command_paramater('config_key', 'default');
+    $delay = command_paramater('delay', 3600);
+
+    queue_pause($tube, $config_key, $delay);
+
+    sleep($delay);
+});/*}}}*/
