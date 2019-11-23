@@ -252,7 +252,10 @@ drop table `%s`;";
             } else {
                 $column .= " DEFAULT $default";
             }
-        } 
+        }
+        if (!empty($struct['description'])) {
+            $column .= " COMMENT \"{$struct['description']}\"";
+        }
         $columns[] = $column.',';
     }
 
