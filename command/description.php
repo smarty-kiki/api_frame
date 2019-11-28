@@ -4,6 +4,8 @@ define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
 define('DESCRIPTION_STRUCT_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct');
 define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
+define('DESCRIPTION_ENTITY_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/entity');
+define('DESCRIPTION_MIGRATION_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/migration');
 
 function _get_entity_name_by_command_paramater()
 {/*{{{*/
@@ -47,6 +49,26 @@ function _get_struct_controller_from_extension($action, $type)
 function _get_controller_template_from_extension($action)
 {/*{{{*/
     $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/controller.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_entity_template_from_extension()
+{/*{{{*/
+    $path = DESCRIPTION_ENTITY_EXTENSION_DIR.'/entity.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_migration_template_from_extension()
+{/*{{{*/
+    $path = DESCRIPTION_MIGRATION_EXTENSION_DIR.'/migration.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
