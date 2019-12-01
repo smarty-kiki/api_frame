@@ -173,4 +173,20 @@ $struct_name = $struct['name'];
 @endif
 @endif
 @endforeach
+@foreach ($entity_relationships as $relationship)
+@php
+$relationship_type = $relationship['type'];
+$relationship_name = $relationship['relation_name'];
+$relationship_relate_to = $relationship['relate_to'];
+$relationship_struct_display_name = $relationship['entity_display_name'].'ID';
+$relationship_struct_name = $relationship_name.'_id';
+@endphp
+@if ($relationship_type === 'belongs_to')
+
+    public function belongs_to_{{ $relationship_name }}({{ $relationship_relate_to }} ${{ $relationship_relate_to }})
+    {/*^{^{^{*/
+        return $this->{{ $relationship_struct_name }} == ${{ $relationship_relate_to }}->id;
+    }/*}}}*/
+@endif
+@endforeach
 }
