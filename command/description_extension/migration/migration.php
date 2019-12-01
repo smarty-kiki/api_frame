@@ -1,6 +1,6 @@
 # up
 CREATE TABLE `{{ $entity_name }}` (
-    `id` bigint(20) NOT NULL,
+    `id` bigint(20) UNSIGNED NOT NULL,
     `version` int(11) NOT NULL,
     `create_time` datetime DEFAULT NULL,
     `update_time` datetime DEFAULT NULL,
@@ -31,7 +31,7 @@ if (array_key_exists('default', $struct)) {
 @endforeach
 @foreach ($entity_relationships as $relationship)
 @if ($relationship['type'] === 'belongs_to')
-    `{{ $relationship['relation_name'] }}_id` bigint(20) NOT NULL,
+    `{{ $relationship['relation_name'] }}_id` bigint(20) UNSIGNED NOT NULL,
 @endif
 @endforeach
 @foreach ($entity_relationships as $relationship)
