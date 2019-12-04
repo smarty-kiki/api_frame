@@ -1,20 +1,34 @@
 class {{ $entity_name }} extends entity
 {
+    /* generated code start */
     public $structs = [
-@foreach ($entity_relationships as $relationship)
+@foreach ($relationship_infos as $attritube_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attritube_name }}_id' => '',
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+@if (array_key_exists('default', $struct['database_field']))
 @php
-$relationship_name = $relationship['relation_name'];
-$relationship_struct_name = $relationship_name.'_id';
+$struct_default = $struct['database_field']['default'];
 @endphp
-        '{{ $relationship_struct_name }}' => '',
+@if (is_string($struct_default))
+        '{{ $struct_name }}' => '{{ $struct_default }}',
+@elseif (is_null($struct_default))
+        '{{ $struct_name }}' => '',
+@else
+        '{{ $struct_name }}' => {{ $struct_default }},
+@endif
+@else
+        '{{ $struct_name }}' => '',
+@endif
 @endforeach
-@foreach ($entity_structs as $struct)
+@endforeach
+@endif
+@endforeach
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@if (array_key_exists('default', $struct['database_field']))
 @php
-$struct_name = $struct['name'];
-@endphp
-@if (array_key_exists('default', $struct))
-@php
-$struct_default = $struct['default'];
+$struct_default = $struct['database_field']['default'];
 @endphp
 @if (is_string($struct_default))
         '{{ $struct_name }}' => '{{ $struct_default }}',
@@ -29,114 +43,85 @@ $struct_default = $struct['default'];
 @endforeach
     ];
 
-    public static $entity_display_name = '{{ array_get($entity_options, 'display_name', $entity_name) }}';
-    public static $entity_description = '{{ array_get($entity_options, 'description', $entity_name) }}';
+    public static $entity_display_name = '{{ $entity_info['display_name'] }}';
+    public static $entity_description = '{{ $entity_info['description'] }}';
 
     public static $struct_types = [
-@foreach ($entity_relationships as $relationship)
-@php
-$relationship_name = $relationship['relation_name'];
-$relationship_struct_name = $relationship_name.'_id';
-@endphp
-        '{{ $relationship_struct_name }}' => 'number',
+@foreach ($relationship_infos as $attritube_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attritube_name }}_id' => 'number',
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['data_type'] }}',
 @endforeach
-@foreach ($entity_structs as $struct)
-        '{{ $struct['name'] }}' => '{{ entity::convert_struct_format($struct['datatype'], $struct['format']) }}',
+@endforeach
+@endif
+@endforeach
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['data_type'] }}',
 @endforeach
     ];
 
     public static $struct_display_names = [
-@foreach ($entity_relationships as $relationship)
-@php
-$relationship_name = $relationship['relation_name'];
-$relationship_struct_name = $relationship_name.'_id';
-@endphp
-        '{{ $relationship_struct_name }}' => '{{ $relationship['entity_display_name'] }}ID',
+@foreach ($relationship_infos as $attritube_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['display_name'] }}',
 @endforeach
-@foreach ($entity_structs as $struct)
-        '{{ $struct['name'] }}' => '{{ $struct['display_name'] }}',
+@endforeach
+@endif
+@endforeach
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['display_name'] }}',
 @endforeach
     ];
 
     public static $struct_descriptions = [
-@foreach ($entity_relationships as $relationship)
-@php
-$relationship_name = $relationship['relation_name'];
-$relationship_struct_name = $relationship_name.'_id';
-@endphp
-        '{{ $relationship_struct_name }}' => '{{ $relationship['entity_display_name'] }}ID',
+@foreach ($relationship_infos as $attritube_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['description'] }}',
 @endforeach
-@foreach ($entity_structs as $struct)
-        '{{ $struct['name'] }}' => '{{ $struct['description'] }}',
+@endforeach
+@endif
+@endforeach
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        '{{ $struct_name }}' => '{{ $struct['description'] }}',
 @endforeach
     ];
-@foreach ($entity_structs as $struct)
-@php
-$struct_format = $struct['format'];
-$struct_name = $struct['name'];
-@endphp
-@if (! is_null($struct_format))
-@if (is_array($struct_format))
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@if ($struct['data_type'] === 'enum')
 
-@foreach ($struct_format as $value => $description)
+@foreach ($struct['formater'] as $value => $description)
     const {{ strtoupper($struct_name.'_'.$value) }} = '{{ strtoupper($struct_name) }}';
 @endforeach
 
     const {{ strtoupper($struct_name) }}_MAPS = [
-@foreach ($struct_format as $value => $description)
+@foreach ($struct['formater'] as $value => $description)
         self::{{ strtoupper($struct_name.'_'.$value) }} => '{{ $description }}',
 @endforeach
     ];
 @endif
-@endif
 @endforeach
-
-    public static $struct_formats = [
-@foreach ($entity_structs as $struct)
-@php
-$struct_format = $struct['format'];
-$struct_name = $struct['name'];
-@endphp
-@if (! is_null($struct_format))
-@if (is_array($struct_format))
-        '{{ $struct_name }}' => self::{{ strtoupper($struct_name) }}_MAPS,
-@else
-        '{{ $struct_name }}' => '{{ $struct_format }}',
-@endif
-@endif
-@endforeach
-    ];
-
-    public static $struct_format_descriptions = [
-@foreach ($entity_structs as $struct)
-@php
-$struct_format = $struct['format'];
-$struct_name = $struct['name'];
-$format_description = $struct['format_description'];
-@endphp
-@if (! is_null($struct_format))
-        '{{ $struct_name }}' => '{{ $format_description }}',
-@endif
-@endforeach
-    ];
 
     public function __construct()
     {/*^{^{^{*/
-@foreach ($entity_relationships as $relationship)
+@foreach ($relationship_infos as $attritube_name => $relationship)
 @php
-$relationship_type = $relationship['type'];
-$relationship_name = $relationship['relation_name'];
-$relationship_relate_to = $relationship['relate_to'];
-$relationship_struct_display_name = $relationship['entity_display_name'].'ID';
-$relationship_struct_name = $relationship_name.'_id';
+$entity_name = $relationship['entity'];
+$relationship_type = $relationship['relationship_type'];
 @endphp
-@if ($relationship_name === $relationship_relate_to)
-        $this->{{ $relationship_type }}('{{ $relationship_relate_to }}');
+@if ($attritube_name === $entity_name)
+        $this->{{ $relationship_type }}('{{ $attritube_name }}');
 @else
 @if ($relationship_type === 'belongs_to')
-        $this->{{ $relationship_type }}('{{ $relationship_name }}', '{{ $relationship_relate_to }}', '{{ $relationship_struct_name }}');
+        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity_name }}', '{{ $attritube_name }}_id');
 @else
-        $this->{{ $relationship_type }}('{{ $relationship_name }}', '{{ $relationship_relate_to }}');
+        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity_name }}');
 @endif
 @endif
 @endforeach
@@ -146,19 +131,45 @@ $relationship_struct_name = $relationship_name.'_id';
     {/*^{^{^{*/
         return parent::init();
     }/*}}}*/
-@foreach ($entity_structs as $struct)
-@php
-$struct_format = $struct['format'];
-$struct_name = $struct['name'];
-@endphp
-@if (! is_null($struct_format))
-@if (is_array($struct_format))
+
+    protected function struct_formaters($property)
+    {/*^{^{^{*/
+        $formaters = [
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@if (isset($struct['formater']))
+@if ($struct['data_type'] === 'enum')
+            '{{ $struct_name }}' => self::{{ strtoupper($struct_name) }}_MAPS,
+@else
+            '{{ $struct_name }}' => [
+@foreach ($struct['formater'] as $formater)
+                [
+@if (isset($formater['reg']))
+                    'reg' => '{{ $formater['reg'] }}',
+                    'failed_message' => '{{ $formater['failed_message'] }}',
+@elseif (isset($formater['function']))
+                    'function' => function ($value) {
+                        return {{ $formater['function'] }};
+                    },
+                    'failed_message' => '{{ $formater['failed_message'] }}',
+@endif
+                ],
+@endforeach
+            ],
+@endif
+@endif
+@endforeach
+        ];
+
+        return $formaters($property) ?? false;
+    }/*}}}*/
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@if ($struct['data_type'] === 'enum')
 
     public function get_{{ $struct_name }}_description()
     {/*^{^{^{*/
-        return self::{{ strtoupper($struct_name) }}_MAPS[$this->{{ $struct_name  }}];
+        return self::{{ strtoupper($struct_name) }}_MAPS[$this->{{ $struct_name }}];
     }/*}}}*/
-@foreach ($struct_format as $value => $description)
+@foreach ($struct['formater'] as $value => $description)
 
     public function {{ $struct_name }}_is_{{ strtolower($value) }}()
     {/*^{^{^{*/
@@ -171,22 +182,18 @@ $struct_name = $struct['name'];
     }/*}}}*/
 @endforeach
 @endif
-@endif
 @endforeach
-@foreach ($entity_relationships as $relationship)
+@foreach ($relationship_infos as $attritube_name => $relationship)
 @php
-$relationship_type = $relationship['type'];
-$relationship_name = $relationship['relation_name'];
-$relationship_relate_to = $relationship['relate_to'];
-$relationship_struct_display_name = $relationship['entity_display_name'].'ID';
-$relationship_struct_name = $relationship_name.'_id';
+$entity_name = $relationship['entity'];
 @endphp
-@if ($relationship_type === 'belongs_to')
+@if ($relationship['relationship_type'] === 'belongs_to')
 
-    public function belongs_to_{{ $relationship_name }}({{ $relationship_relate_to }} ${{ $relationship_relate_to }})
+    public function belongs_to_{{ $attritube_name }}({{ $entity_name }} ${{ $entity_name }})
     {/*^{^{^{*/
-        return $this->{{ $relationship_struct_name }} == ${{ $relationship_relate_to }}->id;
+        return $this->{{ $attritube_name }}_id == ${{ $entity_name }}->id;
     }/*}}}*/
 @endif
 @endforeach
+    /* generated code end */
 }

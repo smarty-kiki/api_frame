@@ -17,8 +17,8 @@ then
             ENV=$env /usr/bin/php $PROJECT_PATH/public/cli.php migrate:reset
 
             rm -rf $PROJECT_PATH/view/$entity_name
-            rm -rf $PROJECT_PATH/domain/dao/$entity_name.php
-            rm -rf $PROJECT_PATH/domain/entity/$entity_name.php
+            #rm -rf $PROJECT_PATH/domain/dao/$entity_name.php
+            #rm -rf $PROJECT_PATH/domain/entity/$entity_name.php
             rm -rf $PROJECT_PATH/command/migration/*_$entity_name.sql
             rm -rf $PROJECT_PATH/controller/$entity_name.php
 

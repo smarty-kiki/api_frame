@@ -2,9 +2,11 @@
 
 define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
-define('DESCRIPTION_STRUCT_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct');
+define('DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_type');
+define('DESCRIPTION_DATA_TYPE_EXTENSION_DIR', DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/data_type');
 define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
 define('DESCRIPTION_ENTITY_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/entity');
+define('DESCRIPTION_DAO_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/dao');
 define('DESCRIPTION_MIGRATION_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/migration');
 
 function _get_entity_name_by_command_paramater()
@@ -24,16 +26,6 @@ function _get_entity_name_by_command_paramater()
     }
 
     return $entity_names;
-}/*}}}*/
-
-function _get_struct_info_from_extension($extension)
-{/*{{{*/
-    $path = DESCRIPTION_STRUCT_EXTENSION_DIR.'/'.$extension.'.php';
-    if (is_file($path)) {
-        return include $path;
-    }
-
-    return false;
 }/*}}}*/
 
 function _get_struct_controller_from_extension($action, $type)
@@ -59,6 +51,16 @@ function _get_controller_template_from_extension($action)
 function _get_entity_template_from_extension()
 {/*{{{*/
     $path = DESCRIPTION_ENTITY_EXTENSION_DIR.'/entity.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_dao_template_from_extension()
+{/*{{{*/
+    $path = DESCRIPTION_DAO_EXTENSION_DIR.'/dao.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
@@ -260,3 +262,256 @@ command('description:make-domain-description', '通过交互式输入创建领�
     error_log(_generate_description_file($entity_name, $display_name, $description, $entity_structs, $entity_relationships, $entity_snaps), 3, $file = DESCRIPTION_DIR.'/'.$entity_name.'.yml');
     echo $file."\n";
 });/*}}}*/
+
+function description_get_entity($entity_name)
+{/*{{{*/
+    $path = DESCRIPTION_DIR.'/'.$entity_name.'.yml';
+
+    otherwise(is_file($path), "实体 $entity_name 描述文件没找到");
+
+    $description = yaml_parse_file($path);
+
+    otherwise(isset($description['display_name']), "$path 中需设置 display_name");
+
+    if (! isset($description['description'])) {
+        $description['description'] = $description['display_name'];
+    }
+
+    foreach ($description['structs'] as $struct_name => &$struct) {
+
+        if (isset($struct['type'])) {
+
+            $struct = array_replace_recursive(description_get_struct_type($struct['type']), $struct);
+
+            unset($struct['type']);
+        }
+
+        otherwise(isset($struct['data_type']), '字段必须设置 data_type');
+
+        $struct = array_replace_recursive(description_get_data_type($struct['data_type']), $struct);
+
+        if (! isset($struct['require'])) {
+
+            $struct['require'] = true;
+        }
+
+        if (! isset($struct['display_name'])) {
+
+            $struct['display_name'] = $struct_name;
+        }
+
+        if (! isset($struct['description'])) {
+
+            $struct['description'] = $struct['display_name'];
+        }
+
+        if ($struct['data_type'] === 'enum') {
+
+            otherwise(isset($struct['formater']), 'data_type 为 enum 时需要设置 formater');
+            otherwise(is_array($struct['formater']), 'data_type 为 enum 时 formater 需要是数组');
+        } else {
+
+            if (isset($struct['formater'])) {
+
+                foreach ($struct['formater'] as &$formater) {
+
+                    otherwise(is_array($formater), 'formater 中的元素需要是数组');
+
+                    if (isset($formater['reg'])) {
+
+                        if (! isset($formater['failed_message'])) {
+
+                            $formater['failed_message'] = "$struct_name 需满足正则表达式 {$formater['reg']}";
+                        }
+                    } elseif (isset($formater['function'])) {
+
+                        if (! isset($formater['failed_message'])) {
+
+                            $formater['failed_message'] = "$struct_name 需满足逻辑 {$formater['function']}";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return $description;
+}/*}}}*/
+
+function description_get_struct_type($struct_type)
+{/*{{{*/
+    $path = DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/'.$struct_type.'.php';
+
+    otherwise(is_file($path), "字段类型 $struct_type 配置文件没找到");
+
+    $res = include $path;
+
+    otherwise(isset($res['data_type']), "$path 中需设置 data_type");
+    otherwise(isset($res['display_name']), "$path 中需设置 display_name");
+
+    if (! isset($res['description'])) {
+        $res['description'] = $res['display_name'];
+    }
+
+    return $res;
+}/*}}}*/
+
+function description_get_data_type($data_type)
+{/*{{{*/
+    $path = DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/'.$data_type.'.php';
+
+    otherwise(is_file($path), "数据类型 $data_type 配置文件没找到");
+
+    $res = include $path;
+
+    otherwise(isset($res['database_field']), "$path 中需设置 database_field");
+    otherwise(array_key_exists('type', $res['database_field']), "$path 中的 database_field 中需设置 type");
+    otherwise(array_key_exists('length', $res['database_field']), "$path 中的 database_field 中需设置 length");
+
+    return $res;
+}/*}}}*/
+
+function description_get_relationship()
+{/*{{{*/
+    $path = DESCRIPTION_DIR.'/.relationship.yml';
+
+    if (! is_file($path)) {
+
+        return [];
+    }
+
+    $relationships = yaml_parse_file($path);
+
+    $res = [];
+
+    foreach ($relationships as $n => $relationship) {
+
+        $num = $n + 1;
+
+        otherwise(isset($relationship['from']), "第 $num 条记录需要设置 from");
+        otherwise(isset($relationship['to']), "第 $num 条记录需要设置 to");
+        otherwise(isset($relationship['relationship_type']), "第 $num 条记录需要设置 relationship_type");
+        otherwise(isset($relationship['association_type']), "第 $num 条记录需要设置 association_type");
+
+        // from
+        $from = $relationship['from'];
+        otherwise(isset($from['entity']), "第 $num 条记录的 from 记录需要设置 entity");
+        $from_entity = $from['entity'];
+
+        if (! isset($from['to_attribute_name'])) {
+            $from['to_attribute_name'] = $from['entity'];
+        }
+        if (! isset($from['to_display_name'])) {
+            $from['to_display_name'] = '$this->id';
+        }
+        if (! isset($from['to_snaps'])) {
+            $from['to_snaps'] = [];
+        }
+
+        // to
+        $to = $relationship['to'];
+        otherwise(isset($to['entity']), "第 $num 条记录的 to 记录需要设置 entity");
+        $to_entity = $to['entity'];
+
+        if (! isset($to['from_attribute_name'])) {
+            $to['from_attribute_name'] = $to['entity'];
+        }
+        if (! isset($to['from_display_name'])) {
+            $to['from_display_name'] = '$this->id';
+        }
+        if (! isset($to['from_snaps'])) {
+            $to['from_snaps'] = [];
+        }
+
+        $relationship_type = $relationship['relationship_type'];
+        otherwise(in_array($relationship_type, ['has_many', 'has_one']), "第 $num 条记录的 relationship_type 只能为 has_many 或 has_one");
+
+        $association_type = $relationship['association_type'];
+        otherwise(in_array($association_type, ['aggregation', 'composition']), "第 $num 条记录的 association_type 只能为 aggregation 或 composition");
+
+        if (! isset($res[$from_entity])) {
+            $res[$from_entity] = [];
+        }
+
+        $to_entity_info = description_get_entity($to_entity);
+        $res[$from_entity][$to['from_attribute_name']] = [
+            'entity' => $to_entity,
+            'entity_display_name' => $to_entity_info['display_name'],
+            'attribute_name' => $to['from_attribute_name'],
+            'display_name' => $to['from_display_name'],
+            'snaps' => $to['from_snaps'],
+            'relationship_type' => $relationship_type,
+            'association_type' => $association_type,
+        ];
+
+        if (! isset($res[$to_entity])) {
+            $res[$to_entity] = [];
+        }
+
+        $from_entity_info = description_get_entity($from_entity);
+        $res[$to_entity][$from['to_attribute_name']] = [
+            'entity' => $from_entity,
+            'entity_display_name' => $from_entity_info['display_name'],
+            'attribute_name' => $from['to_attribute_name'],
+            'display_name' => $from['to_display_name'],
+            'snaps' => $from['to_snaps'],
+            'relationship_type' => 'belongs_to',
+            'association_type' => null,
+        ];
+    }
+
+    return $res;
+}/*}}}*/
+
+function description_get_relationship_with_snaps_by_entity($entity_name)
+{/*{{{*/
+    static $container = [];
+
+    if (empty($container)) {
+
+        $container = description_get_relationship();
+    }
+
+    if (! isset($container[$entity_name])) {
+
+        return [];
+    }
+
+    $relationship_infos = $container[$entity_name];
+
+    foreach ($relationship_infos as $attritube_name => &$relationship) {
+
+        foreach ($relationship['snaps'] as $snap_relation_to_with_dot => &$structs) {
+
+            $last_entity_name = $entity_name;
+
+            foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
+
+                otherwise(isset($container[$last_entity_name]) && isset($container[$last_entity_name][$snap_relation_to]),
+                    "$entity_name 的 snap $snap_relation_to_with_dot 中 $last_entity_name 与 $snap_relation_to 没有关联关系");
+
+                $last_entity_name = $container[$last_entity_name][$snap_relation_to]['entity'];
+            }
+
+            $last_entity_info = description_get_entity($last_entity_name);
+            $last_entity_structs = $last_entity_info['structs'];
+
+            $new_structs = [];
+
+            foreach ($structs as $struct_name) {
+
+                otherwise(isset($last_entity_structs[$struct_name]), "$entity_name 的 snap $snap_relation_to_with_dot 中 $last_entity_name 没有字段 $struct_name");
+
+                $tmp = $last_entity_structs[$struct_name];
+                $tmp['display_name'] = $last_entity_info['display_name'].$tmp['display_name'];
+                $tmp['description'] = '冗余自'.$last_entity_info['display_name'].','.$tmp['description'];
+
+                $new_structs['snap_'.$last_entity_name.'_'.$struct_name] = $tmp;
+            }
+
+            $structs = $new_structs;
+        }
+    }
+
+    return $relationship_infos;
+}/*}}}*/
