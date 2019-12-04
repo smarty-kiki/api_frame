@@ -1,5 +1,5 @@
 if_get('/{{ english_word_pluralize($entity_name) }}', function ()
-{
+{/*{^{^{*/
     list(
         {{ implode(', ', array_map(function($v) { return "\$inputs['".$v."']"; }, $entity_structs)) }}
 
@@ -29,4 +29,4 @@ if_get('/{{ english_word_pluralize($entity_name) }}', function ()
             ];
         }),
     ];
-});
+});/*}^}^}*/

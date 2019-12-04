@@ -1,19 +1,23 @@
 <?php
 
-function _generate_controller_file($entity_name, $entity_structs, $entity_relationships)
+function _generate_controller_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
     $inputs = [];
-    foreach ($entity_structs as $struct) {
-        $inputs[] = $struct['name'];
+
+    foreach ($entity_info['structs'] as $struct_name => $struct) {
+        $inputs[] = $struct_name;
     }
 
-    foreach ($entity_relationships as $relationship) {
+    foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
 
-        $relationship_type = $relationship['type'];
-        $relationship_name = $relationship['relation_name'];
+        if ($relationship['relationship_type'] === 'belongs_to') {
+            $inputs[] = $attritube_name.'_id';
+        }
 
-        if ($relationship_type === 'belongs_to') {
-            $inputs[] = $relationship_name.'_id';
+        foreach ($relationship['snaps'] as $structs) {
+            foreach ($structs as $struct_name => $struct) {
+                $inputs[] = $struct_name;
+            }
         }
     }
 
@@ -113,101 +117,13 @@ function _generate_controller_struct_list($struct_type)
 
 command('crud:make-from-description', '通过描述文件生成 CRUD 控制器', function ()
 {/*{{{*/
-
     $entity_name = command_paramater('entity_name');
 
-    $description = _get_value_from_description_file($entity_name);
+    $entity_info = description_get_entity($entity_name);
 
-    $structs = array_get($description, 'structs', []);
-    $entity_display_name = array_get($description, 'display_name', '');
-    $entity_description = array_get($description, 'description', '');
+    $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
 
-    $entity_structs = [];
-    foreach ($structs as $column => $struct) {
-
-        $tmp = [
-            'name' => $column,
-            'datatype' => $struct['type'],
-            'display_name' => $struct['display_name'],
-            'description' => $struct['description'],
-            'format' => array_get($struct, 'format', null),
-            'format_description' => array_get($struct, 'format_description', null),
-            'allow_null' => array_get($struct, 'allow_null', false),
-        ];
-
-        if (array_key_exists('default', $struct)) {
-            $tmp['default'] = $struct['default'];
-        }
-
-        $entity_structs[] = $tmp;
-    }
-
-    $relationships = array_get($description, 'relationships', []);
-
-    $entity_relationships = [];
-    foreach ($relationships as $relation_name => $relationship) {
-
-        $relation_entity_name = $relationship['entity'];
-        $relation_type = $relationship['type'];
-
-        $entity_relationships[] = [
-            'type' => $relation_type,
-            'relate_to' => $relation_entity_name,
-            'relation_name' => $relation_name,
-        ];
-
-        if ($relation_type !== 'has_many') {
-
-            _get_value_from_description_file($relation_entity_name);
-        }
-    }
-
-    $snaps = array_get($description, 'snaps', []);
-
-    foreach ($snaps as $snap_relation_to_with_dot => $snap) {
-
-        $parent_description = $description;
-
-        $snap_relation_name = '';
-
-        foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
-
-            $snap_relation = array_get($parent_description, "relationships.".$snap_relation_to, false);
-
-            otherwise($snap_relation, "与冗余的 $snap_relation_to 没有关联关系");
-            otherwise($snap_relation['type'] !== 'has_many', "冗余的 $snap_relation_to 为 has_many 关系，无法冗余字段");
-
-            $parent_description = _get_value_from_description_file($snap_relation['entity']);
-            $snap_relation_name = $snap_relation_to;
-        }
-
-        $snap_relation_to_structs = $parent_description['structs'];
-
-        foreach ($snap['structs'] as $column) {
-
-            otherwise(array_key_exists($column, $snap_relation_to_structs), "需要冗余的字段 $column 在 $snap_relation_to_with_dot 中不存在");
-
-            $struct = $snap_relation_to_structs[$column];
-
-            $tmp = [
-                'name' => 'snap_'.$snap_relation_name.'_'.$column,
-                'datatype' => $struct['type'],
-                'display_name' => $struct['display_name'],
-                'description' => $struct['description'],
-                'format' => array_get($struct, 'format', null),
-                'format_description' => array_get($struct, 'format_description', null),
-                'allow_null' => array_get($struct, 'allow_null', false),
-            ];
-
-            if (array_key_exists('default', $struct)) {
-                $tmp['default'] = $struct['default'];
-            }
-
-            $entity_structs[] = $tmp;
-        }
-    }
-
-    $controller_file_string = _generate_controller_file($entity_name, $entity_structs, $entity_relationships);
+    $controller_file_string = _generate_controller_file($entity_name, $entity_info, $relationship_infos);
 
     // 写文件
     error_log($controller_file_string, 3, $controller_file = CONTROLLER_DIR.'/'.$entity_name.'.php');

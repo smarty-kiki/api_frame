@@ -2,8 +2,8 @@
 
 return [
     'database_field' => [
-        'type' => 'varchar',
-        'length' => '255',
+        'type' => 'int',
+        'length' => 11,
         'allow_null' => true,
         'default' => null,
     ],

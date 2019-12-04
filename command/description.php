@@ -137,7 +137,6 @@ function _generate_description_file($entity_name, $display_name, $description, $
     return yaml_emit($yaml, YAML_UTF8_ENCODING, YAML_LN_BREAK);
 }/*}}}*/
 
-//todo 支持 extension
 command('description:make-domain-description', '通过交互式输入创建领域实体描述文件', function ()
 {/*{{{*/
 
@@ -401,8 +400,8 @@ function description_get_relationship()
         if (! isset($from['to_attribute_name'])) {
             $from['to_attribute_name'] = $from['entity'];
         }
-        if (! isset($from['to_display_name'])) {
-            $from['to_display_name'] = '$this->id';
+        if (! isset($from['to_display'])) {
+            $from['to_display'] = '$this->id';
         }
         if (! isset($from['to_snaps'])) {
             $from['to_snaps'] = [];
@@ -416,8 +415,8 @@ function description_get_relationship()
         if (! isset($to['from_attribute_name'])) {
             $to['from_attribute_name'] = $to['entity'];
         }
-        if (! isset($to['from_display_name'])) {
-            $to['from_display_name'] = '$this->id';
+        if (! isset($to['from_display'])) {
+            $to['from_display'] = '$this->id';
         }
         if (! isset($to['from_snaps'])) {
             $to['from_snaps'] = [];
@@ -430,34 +429,40 @@ function description_get_relationship()
         otherwise(in_array($association_type, ['aggregation', 'composition']), "第 $num 条记录的 association_type 只能为 aggregation 或 composition");
 
         if (! isset($res[$from_entity])) {
-            $res[$from_entity] = [];
+            $res[$from_entity] = [
+                'display_for_relationships' => [], 
+                'relationships' => [], 
+            ];
         }
 
         $to_entity_info = description_get_entity($to_entity);
-        $res[$from_entity][$to['from_attribute_name']] = [
+        $res[$from_entity]['relationships'][$to['from_attribute_name']] = [
             'entity' => $to_entity,
             'entity_display_name' => $to_entity_info['display_name'],
             'attribute_name' => $to['from_attribute_name'],
-            'display_name' => $to['from_display_name'],
             'snaps' => $to['from_snaps'],
             'relationship_type' => $relationship_type,
             'association_type' => $association_type,
         ];
+        $res[$from_entity]['display_for_relationships']['display_for_'.$to['entity'].'_'.$from['to_attribute_name']] = $from['to_display'];
 
         if (! isset($res[$to_entity])) {
-            $res[$to_entity] = [];
+            $res[$to_entity] = [
+                'display_for_relationships' => [], 
+                'relationships' => [], 
+            ];
         }
 
         $from_entity_info = description_get_entity($from_entity);
-        $res[$to_entity][$from['to_attribute_name']] = [
+        $res[$to_entity]['relationships'][$from['to_attribute_name']] = [
             'entity' => $from_entity,
             'entity_display_name' => $from_entity_info['display_name'],
             'attribute_name' => $from['to_attribute_name'],
-            'display_name' => $from['to_display_name'],
             'snaps' => $from['to_snaps'],
             'relationship_type' => 'belongs_to',
             'association_type' => null,
         ];
+        $res[$to_entity]['display_for_relationships']['display_for_'.$from['entity'].'_'.$to['from_attribute_name']] = $to['from_display'];
     }
 
     return $res;
@@ -479,7 +484,7 @@ function description_get_relationship_with_snaps_by_entity($entity_name)
 
     $relationship_infos = $container[$entity_name];
 
-    foreach ($relationship_infos as $attritube_name => &$relationship) {
+    foreach ($relationship_infos['relationships'] as $attritube_name => &$relationship) {
 
         foreach ($relationship['snaps'] as $snap_relation_to_with_dot => &$structs) {
 
@@ -487,10 +492,10 @@ function description_get_relationship_with_snaps_by_entity($entity_name)
 
             foreach (explode('.', $snap_relation_to_with_dot) as $snap_relation_to) {
 
-                otherwise(isset($container[$last_entity_name]) && isset($container[$last_entity_name][$snap_relation_to]),
+                otherwise(isset($container[$last_entity_name]) && isset($container[$last_entity_name]['relationships'][$snap_relation_to]),
                     "$entity_name 的 snap $snap_relation_to_with_dot 中 $last_entity_name 与 $snap_relation_to 没有关联关系");
 
-                $last_entity_name = $container[$last_entity_name][$snap_relation_to]['entity'];
+                $last_entity_name = $container[$last_entity_name]['relationships'][$snap_relation_to]['entity'];
             }
 
             $last_entity_info = description_get_entity($last_entity_name);

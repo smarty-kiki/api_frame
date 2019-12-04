@@ -2,7 +2,7 @@ class {{ $entity_name }} extends entity
 {
     /* generated code start */
     public $structs = [
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
         '{{ $attritube_name }}_id' => '',
 @foreach ($relationship['snaps'] as $structs)
@@ -47,7 +47,7 @@ $struct_default = $struct['database_field']['default'];
     public static $entity_description = '{{ $entity_info['description'] }}';
 
     public static $struct_types = [
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
         '{{ $attritube_name }}_id' => 'number',
 @foreach ($relationship['snaps'] as $structs)
@@ -63,7 +63,7 @@ $struct_default = $struct['database_field']['default'];
     ];
 
     public static $struct_display_names = [
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
         '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
 @foreach ($relationship['snaps'] as $structs)
@@ -79,7 +79,7 @@ $struct_default = $struct['database_field']['default'];
     ];
 
     public static $struct_descriptions = [
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
         '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
 @foreach ($relationship['snaps'] as $structs)
@@ -110,7 +110,7 @@ $struct_default = $struct['database_field']['default'];
 
     public function __construct()
     {/*^{^{^{*/
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
 $entity_name = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
@@ -183,7 +183,7 @@ $relationship_type = $relationship['relationship_type'];
 @endforeach
 @endif
 @endforeach
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
 $entity_name = $relationship['entity'];
 @endphp

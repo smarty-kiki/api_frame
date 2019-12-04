@@ -30,7 +30,7 @@ if (array_key_exists('default', $database_field)) {
 @endphp
     `{{ $struct_name }}` {{ $database_field['type'] }}{{ isset($database_field['length'])?'('.$database_field['length'].')':'' }}{{ $null_str.$default_str }},
 @endforeach
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
     `{{ $attritube_name }}_id` bigint(20) UNSIGNED NOT NULL,
 @foreach ($relationship['snaps'] as $structs)
@@ -62,7 +62,7 @@ if (array_key_exists('default', $database_field)) {
 @endforeach
 @endif
 @endforeach
-@foreach ($relationship_infos as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
 $entity_name = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
