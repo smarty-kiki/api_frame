@@ -379,7 +379,7 @@ function description_get_relationship()
         return [];
     }
 
-    $relationships = yaml_parse_file($path);
+    $relationships = (array) yaml_parse_file($path);
 
     $res = [];
 
@@ -479,7 +479,10 @@ function description_get_relationship_with_snaps_by_entity($entity_name)
 
     if (! isset($container[$entity_name])) {
 
-        return [];
+        return [
+            'relationships' => [],
+            'display_for_relationships' => [],
+        ];
     }
 
     $relationship_infos = $container[$entity_name];

@@ -117,16 +117,19 @@ function _generate_controller_struct_list($struct_type)
 
 command('crud:make-from-description', '通过描述文件生成 CRUD 控制器', function ()
 {/*{{{*/
-    $entity_name = command_paramater('entity_name');
+    $entity_names = _get_entity_name_by_command_paramater();
 
-    $entity_info = description_get_entity($entity_name);
+    foreach ($entity_names as $entity_name) {
 
-    $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
+        $entity_info = description_get_entity($entity_name);
 
-    $controller_file_string = _generate_controller_file($entity_name, $entity_info, $relationship_infos);
+        $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
 
-    // 写文件
-    error_log($controller_file_string, 3, $controller_file = CONTROLLER_DIR.'/'.$entity_name.'.php');
-    echo $controller_file."\n";
-    echo "\n将 $controller_file 加入到 public/index.php 即可响应请求\n";
+        $controller_file_string = _generate_controller_file($entity_name, $entity_info, $relationship_infos);
+
+        // 写文件
+        error_log($controller_file_string, 3, $controller_file = CONTROLLER_DIR.'/'.$entity_name.'.php');
+        echo $controller_file."\n";
+        echo "\n将 $controller_file 加入到 public/index.php 即可响应请求\n";
+    }
 });/*}}}*/
