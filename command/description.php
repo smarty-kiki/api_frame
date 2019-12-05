@@ -460,7 +460,7 @@ function description_get_relationship()
             'attribute_name' => $from['to_attribute_name'],
             'snaps' => $from['to_snaps'],
             'relationship_type' => 'belongs_to',
-            'association_type' => null,
+            'association_type' => $association_type,
         ];
         $res[$to_entity]['display_for_relationships']['display_for_'.$from['entity'].'_'.$to['from_attribute_name']] = $to['from_display'];
     }

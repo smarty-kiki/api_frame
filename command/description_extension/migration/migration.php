@@ -64,14 +64,14 @@ if (array_key_exists('default', $database_field)) {
 @endforeach
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
-$entity_name = $relationship['entity'];
+$entity = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
 @endphp
 @if ($relationship_type === 'belongs_to')
-@if ($attritube_name === $entity_name)
+@if ($attritube_name === $entity)
     KEY `fk_{{ $attritube_name }}_idx` (`{{ $attritube_name }}_id`, `delete_time`),
 @else
-    KEY `fk_{{ $attritube_name }}_{{ $entity_name }}_idx` (`{{ $attritube_name }}_id`, `delete_time`),
+    KEY `fk_{{ $attritube_name }}_{{ $entity }}_idx` (`{{ $attritube_name }}_id`, `delete_time`),
 @endif
 @endif
 @endforeach

@@ -112,24 +112,51 @@ $struct_default = $struct['database_field']['default'];
     {/*^{^{^{*/
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
-$entity_name = $relationship['entity'];
+$entity = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
 @endphp
-@if ($attritube_name === $entity_name)
+@if ($attritube_name === $entity)
         $this->{{ $relationship_type }}('{{ $attritube_name }}');
 @else
 @if ($relationship_type === 'belongs_to')
-        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity_name }}', '{{ $attritube_name }}_id');
+        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity }}', '{{ $attritube_name }}_id');
 @else
-        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity_name }}');
+        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity }}');
 @endif
 @endif
 @endforeach
     }/*}}}*/
 
-    public static function create()
+@php
+$param_infos = [];
+$setting_lines = [];
+foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+    $entity = $relationship['entity'];
+    if ($relationship['relationship_type'] === 'belongs_to' && $relationship['association_type'] === 'composition') {
+        $param_infos[] = "$entity $$attritube_name";
+        $setting_lines[] = "$$entity_name->$attritube_name = $$attritube_name";
+    }
+}
+foreach ($entity_info['structs'] as $struct_name => $struct) {
+    if ($struct['require']) {
+        $param_infos[] = "$$struct_name";
+        $setting_lines[] = "$$entity_name->$struct_name = $$struct_name";
+    }
+}
+@endphp
+    public static function create({{ implode(', ', $param_infos) }})
     {/*^{^{^{*/
+@if (empty($param_infos))
         return parent::init();
+@else
+        ${{ $entity_name }} = parent::init();
+
+@foreach ($setting_lines as $setting_line)
+        {{ $setting_line }};
+@endforeach
+
+        return ${{ $entity_name }};
+@endif
     }/*}}}*/
 
     protected function struct_formaters($property)
@@ -185,13 +212,13 @@ $relationship_type = $relationship['relationship_type'];
 @endforeach
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
-$entity_name = $relationship['entity'];
+$entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 
-    public function belongs_to_{{ $attritube_name }}({{ $entity_name }} ${{ $entity_name }})
+    public function belongs_to_{{ $attritube_name }}({{ $entity }} ${{ $entity }})
     {/*^{^{^{*/
-        return $this->{{ $attritube_name }}_id == ${{ $entity_name }}->id;
+        return $this->{{ $attritube_name }}_id == ${{ $entity }}->id;
     }/*}}}*/
 @endif
 @endforeach
