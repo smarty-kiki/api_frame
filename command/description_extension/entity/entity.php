@@ -46,7 +46,7 @@ $struct_default = $struct['database_field']['default'];
     public static $entity_display_name = '{{ $entity_info['display_name'] }}';
     public static $entity_description = '{{ $entity_info['description'] }}';
 
-    public static $struct_types = [
+    public static $struct_data_types = [
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
         '{{ $attritube_name }}_id' => 'number',

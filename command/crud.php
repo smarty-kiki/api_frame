@@ -2,32 +2,14 @@
 
 function _generate_controller_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
-    $inputs = [];
-
-    foreach ($entity_info['structs'] as $struct_name => $struct) {
-        $inputs[] = $struct_name;
-    }
-
-    foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
-
-        if ($relationship['relationship_type'] === 'belongs_to') {
-            $inputs[] = $attritube_name.'_id';
-        }
-
-        foreach ($relationship['snaps'] as $structs) {
-            foreach ($structs as $struct_name => $struct) {
-                $inputs[] = $struct_name;
-            }
-        }
-    }
-
     $content = _get_controller_template_from_extension('list');
 
     otherwise($content, '没找到 controller 的 list 模版');
 
     $list_content =  blade_eval($content, [
         'entity_name' => $entity_name,
-        'entity_structs' => $inputs,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
     ]);
 
     $content = _get_controller_template_from_extension('add');
@@ -36,7 +18,8 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
 
     $add_content =  blade_eval($content, [
         'entity_name' => $entity_name,
-        'entity_structs' => $inputs,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
     ]);
 
     $content = _get_controller_template_from_extension('detail');
@@ -45,7 +28,8 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
 
     $detail_content =  blade_eval($content, [
         'entity_name' => $entity_name,
-        'entity_structs' => $inputs,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
     ]);
 
     $content = _get_controller_template_from_extension('update');
@@ -54,7 +38,8 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
 
     $update_content =  blade_eval($content, [
         'entity_name' => $entity_name,
-        'entity_structs' => $inputs,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
     ]);
 
     $content = _get_controller_template_from_extension('delete');
@@ -63,7 +48,8 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
 
     $delete_content =  blade_eval($content, [
         'entity_name' => $entity_name,
-        'entity_structs' => $inputs,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
     ]);
 
     $template = "<?php
