@@ -440,6 +440,7 @@ function description_get_relationship()
             'entity' => $to_entity,
             'entity_display_name' => $to_entity_info['display_name'],
             'attribute_name' => $to['from_attribute_name'],
+            'self_attribute_name' => $from['to_attribute_name'],
             'snaps' => $to['from_snaps'],
             'relationship_type' => $relationship_type,
             'association_type' => $association_type,
@@ -458,6 +459,7 @@ function description_get_relationship()
             'entity' => $from_entity,
             'entity_display_name' => $from_entity_info['display_name'],
             'attribute_name' => $from['to_attribute_name'],
+            'self_attribute_name' => $to['from_attribute_name'],
             'snaps' => $from['to_snaps'],
             'relationship_type' => 'belongs_to',
             'association_type' => $association_type,
@@ -511,6 +513,7 @@ function description_get_relationship_with_snaps_by_entity($entity_name)
                 otherwise(isset($last_entity_structs[$struct_name]), "$entity_name 的 snap $snap_relation_to_with_dot 中 $last_entity_name 没有字段 $struct_name");
 
                 $tmp = $last_entity_structs[$struct_name];
+                $tmp['target_struct_name'] = $struct_name;
                 $tmp['display_name'] = $last_entity_info['display_name'].$tmp['display_name'];
                 $tmp['description'] = '冗余自'.$last_entity_info['display_name'].','.$tmp['description'];
 

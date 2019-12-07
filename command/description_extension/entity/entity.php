@@ -187,7 +187,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endforeach
         ];
 
-        return $formaters($property) ?? false;
+        return $formaters[$property] ?? false;
     }/*}}}*/
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['data_type'] === 'enum')
@@ -216,11 +216,59 @@ $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 
-    public function belongs_to_{{ $attritube_name }}({{ $entity }} ${{ $entity }})
+    public function belongs_to_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
     {/*^{^{^{*/
-        return $this->{{ $attritube_name }}_id == ${{ $entity }}->id;
+        return $this->{{ $attritube_name }}_id == ${{ $attritube_name }}->id;
     }/*}}}*/
+@foreach ($relationship['snaps'] as $snap_relation_to_with_dot => $structs)
+@php
+$relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
+@endphp
+
+    public function prepare_set_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
+    {/*^{^{^{*/
+@foreach ($structs as $struct_name => $struct)
+        $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
+@endforeach
+
+        return ${{ $attritube_name }};
+    }/*}}}*/
+@endforeach
 @endif
 @endforeach
+@php
+$delete_relationship_lines = [];
+foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+    $entity = $relationship['entity'];
+    if ($relationship['association_type'] === 'composition') {
+        if ($relationship['relationship_type'] === 'has_many') {
+            $delete_relationship_lines[] = 'foreach ($this->'.$attritube_name.' as $'.$entity.') {'."\n";
+            $delete_relationship_lines[] = '    $'.$entity.'->delete();'."\n";
+            $delete_relationship_lines[] = "}\n";
+        } elseif ($relationship['relationship_type'] === 'has_one') {
+            $delete_relationship_lines[] = '$this->'.$attritube_name.'->delete();'."\n";
+        }
+    } elseif ($relationship['association_type'] === 'aggregation') {
+        if ($relationship['relationship_type'] === 'has_many') {
+            $delete_relationship_lines[] = 'foreach ($this->'.$attritube_name.' as $'.$entity.') {'."\n";
+            $delete_relationship_lines[] = '    $'.$entity.'->'.$relationship['self_attribute_name']."_id = 0;\n";
+            $delete_relationship_lines[] = "}\n";
+        } elseif ($relationship['relationship_type'] === 'has_one') {
+            $delete_relationship_lines[] = '$this->'.$attritube_name.'->delete();'."\n";
+        }
+    }
+}
+@endphp
+@if ($delete_relationship_lines)
+
+    public function delete()
+    {/*^{^{^{*/
+@foreach ($delete_relationship_lines as $line)
+        {{ $line }}
+@endforeach
+
+        parent::delete();
+    }/*}}}*/
+@endif
     /* generated code end */
 }
