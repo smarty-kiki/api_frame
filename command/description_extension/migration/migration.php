@@ -1,5 +1,5 @@
 # up
-CREATE TABLE `{{ $entity_name }}` (
+CREATE TABLE IF NOT EXISTS `{{ $entity_name }}` (
     `id` bigint(20) UNSIGNED NOT NULL,
     `version` int(11) NOT NULL,
     `create_time` datetime DEFAULT NULL,

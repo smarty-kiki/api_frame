@@ -270,5 +270,12 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
         parent::delete();
     }/*}}}*/
 @endif
+@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+
+    public function display_for_{{ $attritube_name }}_{{ $relationship['self_attribute_name'] }}()
+    {/*^{^{^{*/
+        return {{ $relationship['self_display']}};
+    }/*}}}*/
+@endforeach
     /* generated code end */
 }
