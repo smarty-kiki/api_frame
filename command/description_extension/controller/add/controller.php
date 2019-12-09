@@ -1,8 +1,3 @@
-if_get('/{{ english_word_pluralize($entity_name) }}/add', function ()
-{/*{^^{^^{*/
-    return render('{{ $entity_name }}/add');
-});/*}}}*/
-
 if_post('/{{ english_word_pluralize($entity_name) }}/add', function ()
 {/*{^^{^^{*/
 @php
