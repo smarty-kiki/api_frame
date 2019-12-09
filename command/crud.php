@@ -62,7 +62,7 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
 
     $content = sprintf($template, $list_content, $add_content, $detail_content, $update_content, $delete_content);
 
-    return str_replace('^', '', $content);
+    return str_replace('^^', '', $content);
 }/*}}}*/
 
 function _generate_controller_struct_add($struct_type)

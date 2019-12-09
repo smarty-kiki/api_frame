@@ -1,5 +1,5 @@
 if_post('/{{ english_word_pluralize($entity_name) }}/delete/*', function (${{ $entity_name }}_id)
-{/*{^{^{*/
+{/*{^^{^^{*/
     ${{ $entity_name }} = dao('{{ $entity_name }}')->find(${{ $entity_name }}_id);
     otherwise(${{ $entity_name }}->is_not_null(), '{{ $entity_name }} not found');
 
@@ -9,4 +9,4 @@ if_post('/{{ english_word_pluralize($entity_name) }}/delete/*', function (${{ $e
         'code' => 0,
         'msg' => '',
     ];
-});/*}^}^}*/
+});/*}}}*/

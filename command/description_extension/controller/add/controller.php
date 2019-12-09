@@ -1,10 +1,10 @@
 if_get('/{{ english_word_pluralize($entity_name) }}/add', function ()
-{/*{^{^{*/
+{/*{^^{^^{*/
     return render('{{ $entity_name }}/add');
-});/*}^}^}*/
+});/*}}}*/
 
 if_post('/{{ english_word_pluralize($entity_name) }}/add', function ()
-{/*{^{^{*/
+{/*{^^{^^{*/
 @php
 $param_infos = [];
 $setting_lines = [];
@@ -44,4 +44,4 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
         'code' => 0,
         'msg' => '',
     ];
-});/*}^}^}*/
+});/*}}}*/

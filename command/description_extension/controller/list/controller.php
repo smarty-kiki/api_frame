@@ -1,5 +1,5 @@
 if_get('/{{ english_word_pluralize($entity_name) }}', function ()
-{/*{^{^{*/
+{/*{^^{^^{*/
 @php
 $inputs = [];
 
@@ -54,4 +54,4 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
             ];
         }),
     ];
-});/*}^}^}*/
+});/*}}}*/

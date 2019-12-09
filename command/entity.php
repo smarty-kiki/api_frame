@@ -19,7 +19,7 @@ function _generate_entity_file($entity_name, $entity_info, $relationship_infos)
 
     $entity_content = sprintf($template, $entity_content);
 
-    return str_replace('^', '', $entity_content);
+    return str_replace('^^', '', $entity_content);
 }/*}}}*/
 
 function _generate_dao_file($entity_name, $entity_info, $relationship_infos)
@@ -38,7 +38,7 @@ function _generate_dao_file($entity_name, $entity_info, $relationship_infos)
 
     $dao_content = sprintf($template, $dao_content);
 
-    return str_replace('^', '', $dao_content);
+    return str_replace('^^', '', $dao_content);
 }/*}}}*/
 
 function _generate_migration_file($entity_name, $entity_info, $relationship_infos)
@@ -51,7 +51,7 @@ function _generate_migration_file($entity_name, $entity_info, $relationship_info
         'relationship_infos' => $relationship_infos,
     ]);
 
-    return str_replace('^', '', $migration_content);
+    return str_replace('^^', '', $migration_content);
 }/*}}}*/
 
 function _merge_content_by_annotate($content_outside, $content_inside)

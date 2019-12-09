@@ -109,7 +109,7 @@ $struct_default = $struct['database_field']['default'];
 @endforeach
 
     public function __construct()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 @php
 $entity = $relationship['entity'];
@@ -145,7 +145,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 }
 @endphp
     public static function create({{ implode(', ', $param_infos) }})
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
 @if (empty($param_infos))
         return parent::init();
 @else
@@ -159,8 +159,8 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endif
     }/*}}}*/
 
-    protected function struct_formaters($property)
-    {/*^{^{^{*/
+    public static function struct_formaters($property)
+    {/*^^{^^{^^{*/
         $formaters = [
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if (isset($struct['formater']))
@@ -193,18 +193,18 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @if ($struct['data_type'] === 'enum')
 
     public function get_{{ $struct_name }}_description()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
         return self::{{ strtoupper($struct_name) }}_MAPS[$this->{{ $struct_name }}];
     }/*}}}*/
 @foreach ($struct['formater'] as $value => $description)
 
     public function {{ $struct_name }}_is_{{ strtolower($value) }}()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
         return $this->{{ $struct_name }} === self::{{ strtoupper($struct_name.'_'.$value) }};
     }/*}}}*/
 
     public function set_{{ $struct_name }}_{{ strtolower($value) }}()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
         return $this->{{ $struct_name }} = self::{{ strtoupper($struct_name.'_'.$value) }};
     }/*}}}*/
 @endforeach
@@ -217,7 +217,7 @@ $entity = $relationship['entity'];
 @if ($relationship['relationship_type'] === 'belongs_to')
 
     public function belongs_to_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
         return $this->{{ $attritube_name }}_id == ${{ $attritube_name }}->id;
     }/*}}}*/
 @foreach ($relationship['snaps'] as $snap_relation_to_with_dot => $structs)
@@ -226,7 +226,7 @@ $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
     public function prepare_set_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
 @foreach ($structs as $struct_name => $struct)
         $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
 @endforeach
@@ -262,7 +262,7 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
 @if ($delete_relationship_lines)
 
     public function delete()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
 @foreach ($delete_relationship_lines as $line)
         {{ $line }}
 @endforeach
@@ -273,7 +273,7 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
 @foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
 
     public function display_for_{{ $attritube_name }}_{{ $relationship['self_attribute_name'] }}()
-    {/*^{^{^{*/
+    {/*^^{^^{^^{*/
         return {{ $relationship['self_display']}};
     }/*}}}*/
 @endforeach
