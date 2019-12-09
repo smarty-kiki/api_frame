@@ -119,22 +119,22 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
 
         $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
 
-        $path = ENTITY_DIR.'/'.$entity_name.'.php';
-        $new_content = _generate_entity_file($entity_name, $entity_info, $relationship_infos);
-        if (is_file($path)) {
-            $new_content = _merge_content_by_annotate(file_get_contents($path), $new_content);
+        $entity_path = ENTITY_DIR.'/'.$entity_name.'.php';
+        $entity_new_content = _generate_entity_file($entity_name, $entity_info, $relationship_infos);
+        if (is_file($entity_path)) {
+            $entity_new_content = _merge_content_by_annotate(file_get_contents($entity_path), $entity_new_content);
         }
-        file_put_contents($path, $new_content); echo $path."\n";
 
-        $path = DAO_DIR.'/'.$entity_name.'.php';
-        $new_content = _generate_dao_file($entity_name, $entity_info, $relationship_infos);
-        if (is_file($path)) {
-            $new_content = _merge_content_by_annotate(file_get_contents($path), $new_content);
+        $dao_path = DAO_DIR.'/'.$entity_name.'.php';
+        $dao_new_content = _generate_dao_file($entity_name, $entity_info, $relationship_infos);
+        if (is_file($dao_path)) {
+            $dao_new_content = _merge_content_by_annotate(file_get_contents($dao_path), $dao_new_content);
         }
-        file_put_contents($path, $new_content); echo $path."\n";
 
         error_log(_generate_migration_file($entity_name, $entity_info, $relationship_infos), 3, $file = migration_file_path($entity_name));
         echo $file."\n";
+        file_put_contents($entity_path, $entity_new_content); echo $entity_path."\n";
+        file_put_contents($dao_path, $dao_new_content); echo $dao_path."\n";
 
         echo "\n需要重新生成 domain/autoload.php 以加载 $entity_name\n";
     }
