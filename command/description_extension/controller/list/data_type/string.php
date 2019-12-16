@@ -1,1 +1,1 @@
-${{ $entity_name }}->{{$struct}}
+${{ $entity_name }}->{{ $struct_name }}
