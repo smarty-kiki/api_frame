@@ -68,6 +68,9 @@ then
                 if [ "$event" = "DELETE" ];then
                     echo $filename $event
 
+                    rm -rf $PROJECT_PATH/domain/dao/$entity_name.php
+                    rm -rf $PROJECT_PATH/domain/entity/$entity_name.php
+
                     /bin/bash $PROJECT_PATH/project/tool/classmap.sh $PROJECT_PATH/domain
                     ENV=$env /usr/bin/php $PROJECT_PATH/public/cli.php migrate
                 fi
