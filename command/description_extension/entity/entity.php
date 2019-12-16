@@ -225,11 +225,30 @@ $entity = $relationship['entity'];
 $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
-    public function prepare_set_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }})
+    protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }})
     {/*^^{^^{^^{*/
+@if ($relationship['association_type'] === 'composition')
+        otherwise(${{ $attribute_name }} instanceof {{ $entity }}, '{{ $attribute_name }} 类型必须为 {{ $entity }}');
+
 @foreach ($structs as $struct_name => $struct)
         $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
 @endforeach
+@else
+        otherwise(
+            ${{ $attribute_name }} instanceof {{ $entity }} ||
+            ${{ $attribute_name }} instanceof null_entity,
+        '{{ $attribute_name }} 类型必须为 {{ $entity }} 或者 null_entity');
+
+        if (${{ $attribute_name }} instanceof {{ $entity }}) {
+@foreach ($structs as $struct_name => $struct)
+            $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
+@endforeach
+        } else {
+@foreach ($structs as $struct_name => $struct)
+            $this->{{ $struct_name }} = null;
+@endforeach
+        }
+@endif
 
         return ${{ $attribute_name }};
     }/*}}}*/

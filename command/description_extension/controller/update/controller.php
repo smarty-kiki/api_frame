@@ -8,7 +8,11 @@ if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $e
 $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
+@if ($relationship['association_type'] === 'composition')
     ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', null, '{{ $attribute_name }}_id');
+@else
+    ${{ $entity_name }}->{{ $attribute_name }} = dao('{{ $entity }}')->find(input('{{ $attribute_name }}_id'));
+@endif
 @endif
 @endforeach
 @foreach ($entity_info['structs'] as $struct_name => $struct)
