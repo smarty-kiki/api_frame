@@ -78,188 +78,144 @@ function _get_migration_template_from_extension()
     return false;
 }/*}}}*/
 
-function _generate_description_file($entity_name, $display_name, $description, $entity_structs, $entity_relationships, $entity_snaps)
+function _get_struct_types_from_extension()
 {/*{{{*/
-    $structs = [];
+    $file_paths = glob(DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/*.php');
 
-    foreach ($entity_structs as $entity_struct) {
+    return array_build($file_paths, function ($k, $file_path) {
 
-        $struct_name = array_shift($entity_struct);
-
-        $tmp_struct = array_transfer($entity_struct, [
-            'datatype'           => 'type',
-            'format'             => 'format',
-            'format_description' => 'format_description',
-            'display_name'       => 'display_name',
-            'description'        => 'description',
-            'allow_null'         => 'allow_null',
-            'default'            => 'default',
-        ]);
-
-        if (is_null($tmp_struct['default']) && ! $tmp_struct['allow_null']) {
-            unset($tmp_struct['default']);
-        }
-
-        $structs[$struct_name] = $tmp_struct;
-    }
-
-    $relationships = [];
-
-    foreach ($entity_relationships as $entity_relationship) {
-
-        $relationship_name = $entity_relationship['relation_name'];
-
-        $relationships[$relationship_name] = array_transfer($entity_relationship, [
-            'relate_to' => 'entity',
-            'type'      => 'type',
-        ]);
-    }
-
-    $snaps = [];
-
-    foreach ($entity_snaps as $entity_snap) {
-
-        $snap_name = $entity_snap['snap_name'];
-
-        $snaps[$snap_name] = array_transfer($entity_snap, [
-            'structs' => 'structs',
-        ]);
-    }
-
-    $yaml = [
-        'display_name' => $display_name,
-        'description' => $description,
-        'structs' => $structs,
-        'relationships' => $relationships,
-        'snaps' => $snaps,
-    ];
-
-    return yaml_emit($yaml, YAML_UTF8_ENCODING, YAML_LN_BREAK);
+        return [$k, pathinfo($file_path)['filename']];
+    });
 }/*}}}*/
 
-command('description:make-domain-description', '通过交互式输入创建领域实体描述文件', function ()
+function _get_data_types_from_extension()
 {/*{{{*/
+    $file_paths = glob(DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/*.php');
 
-    $entity_name = command_paramater('entity_name');
+    return array_build($file_paths, function ($k, $file_path) {
 
-    $display_name = command_read("Display name:", '实体名字');
+        return [$k, pathinfo($file_path)['filename']];
+    });
+}/*}}}*/
 
-    $description = command_read("Description:", '实体描述');
+command('description:demo-description', '创建 demo description 文件', function ()
+{/*{{{*/
+    $demo_string = <<<EOF
+---
+display_name: 环境
+# description: 环境
+structs:
+  struct_name1:
+    type: ip
+    data_type: string
+    database_field:
+      type: varchar
+      length: 15
+      allow_null: true
+      default: null
+    formater:
+      - reg: /^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$/
+        failed_message: IP 不是有效的 IP 格式
+    display_name: IP 地址
+    require: true
+...
+EOF;
 
-    $entity_structs = [];
+    error_log($demo_string, 3, $description_file = DESCRIPTION_DIR.'/demo.yml'); echo $description_file."\n";
+
+});/*}}}*/
+
+command('description:make-entity-description', '通过交互式输入创建领域实体描述文件', function ()
+{/*{{{*/
+    $entity_name = command_read('Entity name:', 'new_entity');
+    $entity_display_name = command_read("Display name:", $entity_name);
+    $entity_description = command_read("Description:", $entity_display_name);
+
+    $description_info = [
+        'display_name' => $entity_display_name,
+    ];
+
+    if ($entity_description !== $entity_display_name) {
+        $description_info['description'] = $entity_description;
+    }
+
+    $description_info['structs'] = [];
+
+    $struct_type_enum = _get_struct_types_from_extension();
+    $data_type_enum = _get_data_types_from_extension();
 
     $s = 0;
-
     while (command_read_bool('Add struct')) {
-
         $s += 1;
 
-        $name = command_read("#$s Column name:", 'column'.$s);
-        $struct_display_name = command_read("#$s Display name:", '字段'.$s);
-        $struct_discription = command_read("#$s Discription:", '字段'.$s.'的描述');
+        $struct_name = command_read("#$s Name:", 'struct_'.$s);
 
-        $datatype = command_read("#$s Data type:", 0, ['varchar', 'int(11)', 'datetime', 'date', 'time', 'bigint(20)']);
-        if ($datatype === 'varchar') {
-            $datatype = $datatype.'('.command_read("#$s Varchar length:", 45).')';
+        $struct = [];
+
+        $struct['type'] = command_read("#$s Type:", 0, $struct_type_enum);
+
+        if (! command_read_bool("#$s Require:", 'y')) {
+
+            $struct['require'] = false;
         }
 
-        $allow_null = command_read_bool("#$s Allow Null", 'n');
-
-        $format = $format_description = null;
-        if ($format_type = command_read("#$s Format type:", 0, [null, 'reg', 'enum'])) {
-
-            if ($format_type === 'reg') {
-
-                $format = command_read("#$s Format reg:", null);
-
-            } elseif ($format_type === 'enum') {
-
-                $format = [];
-
-                while ($format_enum = command_read("#$s Add format enum (eg. 'valid 有效', default to quit):", null)) {
-                    $exploded_enum = explode(' ', $format_enum);
-
-                    if (count($exploded_enum) === 2)
-                    {
-                        $format[$exploded_enum[0]] = $exploded_enum[1];
-                    }
-                }
-            }
-
-            $format_description = command_read("#$s Format description:", null);
-        }
-
-        $tmp = [
-            'name' => $name,
-            'display_name' => $struct_display_name,
-            'description' => $struct_discription,
-            'datatype' => $datatype,
-            'format' => $format,
-            'format_description' => $format_description,
-            'allow_null' => $allow_null,
-        ];
-
-        if ($allow_null) {
-            $tmp['default'] = null;
-        }
-
-        $entity_structs[] = $tmp;
-
-        foreach ($entity_structs as $struct) {
-            echo json_encode($struct)."\n";
-        }
+        $description_info['structs'][$struct_name] = $struct;
     }
 
-    $entity_relationships = [];
+    $description_string = yaml_emit($description_info, YAML_UTF8_ENCODING, YAML_LN_BREAK);
+    error_log($description_string, 3, $description_file = DESCRIPTION_DIR.'/'.$entity_name.'.yml'); echo $description_file."\n";
 
-    $r = 0;
+});/*}}}*/
 
+command('description:make-relationship-description', '通过交互式输入创建领域实体关系描述文件', function ()
+{/*{{{*/
+    $path = DESCRIPTION_DIR.'/.relationship.yml';
+
+    if (! is_file($path)) {
+        file_put_contents($path, "---\n...");
+    }
+
+    $relationships = (array) yaml_parse_file($path);
+
+    $entity_names = _get_entity_name_by_command_paramater();
+
+    $s = 0;
     while (command_read_bool('Add relationship')) {
+        $s += 1;
 
-        $r += 1;
-
-        $entity_relationships[] = [
-            'type' => command_read("#$r Type:", 0, ['belongs_to', 'has_one', 'has_many']),
-            'relate_to' => command_read("#$r Relate to:", 'related_entity'.$r),
-            'relation_name' => command_read("#$r Relation name:", 'the_related_name'.$r),
+        $relationship = [
+            'from' => [
+                'entity' => '',
+                'to_attribute_name' => '',
+                'to_display' => '',
+                'to_snaps' => [],
+            ],
+            'to' => [
+                'entity' => '',
+                'from_attribute_name' => '',
+                'from_display' => '',
+                'from_snaps' => [],
+            ],
+            'relationship_type' => '',
+            'association_type' => '',
         ];
 
-        foreach ($entity_relationships as $relationship) {
-            echo json_encode($relationship)."\n";
-        }
+        $relationship['from']['entity'] = $from_entity = command_read("#$s From entity:", 0, $entity_names);
+        $relationship['from']['to_attribute_name'] = command_read("#$s From entity to attribute name:", $from_entity);
+        $relationship['from']['to_display'] = command_read("#$s From entity to display name:", '$this->id');
+
+        $relationship['to']['entity'] = $to_entity = command_read("#$s To entity:", 0, array_merge(array_diff($entity_names, [$from_entity]), [$from_entity]));
+        $relationship['to']['from_attribute_name'] = command_read("#$s To entity from attribute name:", $to_entity);
+        $relationship['to']['from_display'] = command_read("#$s To entity from display name:", '$this->id');
+
+        $relationship['relationship_type'] = command_read("#$s Relationship type:", 0, ['has_many', 'has_one']);
+        $relationship['association_type'] = command_read("#$s Association type:", 0, ['aggregation', 'composition']);
+
+        $relationships[] = $relationship;
     }
 
-    $entity_snaps = [];
-
-    $n = 0;
-
-    while (command_read_bool('Add snap')) {
-
-        $n += 1;
-
-        //todo  snap 关联关系及字段的补全能力
-        $snap_name = command_read("#$n Snap relationship name:", 'the_related_name'.$n);
-
-        $snap_structs = [];
-        while ($snap_struct = command_read("#$n Add snap struct (defqult to quit):", null)) {
-            $snap_structs[] = $snap_struct;
-        }
-
-        if ($snap_structs) {
-
-            $entity_snaps[] = [
-                'snap_name' => $snap_name,
-                'structs' => $snap_structs,
-            ];
-        }
-
-        foreach ($entity_snaps as $snap) {
-            echo json_encode($snap)."\n";
-        }
-    }
-
-    error_log(_generate_description_file($entity_name, $display_name, $description, $entity_structs, $entity_relationships, $entity_snaps), 3, $file = DESCRIPTION_DIR.'/'.$entity_name.'.yml');
-    echo $file."\n";
+    $description_string = yaml_emit($relationships, YAML_UTF8_ENCODING, YAML_LN_BREAK);
+    file_put_contents($path, $description_string); echo $path."\n";
 });/*}}}*/
 
 function description_get_entity($entity_name)
