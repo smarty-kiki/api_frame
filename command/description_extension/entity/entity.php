@@ -2,9 +2,9 @@ class {{ $entity_name }} extends entity
 {
     /* generated code start */
     public $structs = [
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attritube_name }}_id' => '',
+        '{{ $attribute_name }}_id' => '',
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
 @if (array_key_exists('default', $struct['database_field']))
@@ -47,9 +47,9 @@ $struct_default = $struct['database_field']['default'];
     public static $entity_description = '{{ $entity_info['description'] }}';
 
     public static $struct_data_types = [
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attritube_name }}_id' => 'number',
+        '{{ $attribute_name }}_id' => 'number',
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
         '{{ $struct_name }}' => '{{ $struct['data_type'] }}',
@@ -63,9 +63,9 @@ $struct_default = $struct['database_field']['default'];
     ];
 
     public static $struct_display_names = [
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
+        '{{ $attribute_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
         '{{ $struct_name }}' => '{{ $struct['display_name'] }}',
@@ -79,9 +79,9 @@ $struct_default = $struct['database_field']['default'];
     ];
 
     public static $struct_descriptions = [
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attritube_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
+        '{{ $attribute_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
         '{{ $struct_name }}' => '{{ $struct['description'] }}',
@@ -110,18 +110,18 @@ $struct_default = $struct['database_field']['default'];
 
     public function __construct()
     {/*^^{^^{^^{*/
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
 $entity = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
 @endphp
-@if ($attritube_name === $entity)
-        $this->{{ $relationship_type }}('{{ $attritube_name }}');
+@if ($attribute_name === $entity)
+        $this->{{ $relationship_type }}('{{ $attribute_name }}');
 @else
 @if ($relationship_type === 'belongs_to')
-        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity }}', '{{ $attritube_name }}_id');
+        $this->{{ $relationship_type }}('{{ $attribute_name }}', '{{ $entity }}', '{{ $attribute_name }}_id');
 @else
-        $this->{{ $relationship_type }}('{{ $attritube_name }}', '{{ $entity }}');
+        $this->{{ $relationship_type }}('{{ $attribute_name }}', '{{ $entity }}');
 @endif
 @endif
 @endforeach
@@ -130,11 +130,11 @@ $relationship_type = $relationship['relationship_type'];
 @php
 $param_infos = [];
 $setting_lines = [];
-foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
     if ($relationship['relationship_type'] === 'belongs_to' && $relationship['association_type'] === 'composition') {
-        $param_infos[] = "$entity $$attritube_name";
-        $setting_lines[] = "$$entity_name->$attritube_name = $$attritube_name";
+        $param_infos[] = "$entity $$attribute_name";
+        $setting_lines[] = "$$entity_name->$attribute_name = $$attribute_name";
     }
 }
 foreach ($entity_info['structs'] as $struct_name => $struct) {
@@ -210,51 +210,51 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endforeach
 @endif
 @endforeach
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
 $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 
-    public function belongs_to_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
+    public function belongs_to_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }})
     {/*^^{^^{^^{*/
-        return $this->{{ $attritube_name }}_id == ${{ $attritube_name }}->id;
+        return $this->{{ $attribute_name }}_id == ${{ $attribute_name }}->id;
     }/*}}}*/
 @foreach ($relationship['snaps'] as $snap_relation_to_with_dot => $structs)
 @php
 $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
-    public function prepare_set_{{ $attritube_name }}({{ $entity }} ${{ $attritube_name }})
+    public function prepare_set_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }})
     {/*^^{^^{^^{*/
 @foreach ($structs as $struct_name => $struct)
         $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
 @endforeach
 
-        return ${{ $attritube_name }};
+        return ${{ $attribute_name }};
     }/*}}}*/
 @endforeach
 @endif
 @endforeach
 @php
 $delete_relationship_lines = [];
-foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
     if ($relationship['association_type'] === 'composition') {
         if ($relationship['relationship_type'] === 'has_many') {
-            $delete_relationship_lines[] = 'foreach ($this->'.$attritube_name.' as $'.$entity.') {'."\n";
+            $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
             $delete_relationship_lines[] = '    $'.$entity.'->delete();'."\n";
             $delete_relationship_lines[] = "}\n";
         } elseif ($relationship['relationship_type'] === 'has_one') {
-            $delete_relationship_lines[] = '$this->'.$attritube_name.'->delete();'."\n";
+            $delete_relationship_lines[] = '$this->'.$attribute_name.'->delete();'."\n";
         }
     } elseif ($relationship['association_type'] === 'aggregation') {
         if ($relationship['relationship_type'] === 'has_many') {
-            $delete_relationship_lines[] = 'foreach ($this->'.$attritube_name.' as $'.$entity.') {'."\n";
+            $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
             $delete_relationship_lines[] = '    $'.$entity.'->'.$relationship['self_attribute_name']."_id = 0;\n";
             $delete_relationship_lines[] = "}\n";
         } elseif ($relationship['relationship_type'] === 'has_one') {
-            $delete_relationship_lines[] = '$this->'.$attritube_name.'->delete();'."\n";
+            $delete_relationship_lines[] = '$this->'.$attribute_name.'->delete();'."\n";
         }
     }
 }
@@ -270,9 +270,9 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
         parent::delete();
     }/*}}}*/
 @endif
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 
-    public function display_for_{{ $attritube_name }}_{{ $relationship['self_attribute_name'] }}()
+    public function display_for_{{ $attribute_name }}_{{ $relationship['self_attribute_name'] }}()
     {/*^^{^^{^^{*/
         return {{ $relationship['self_display']}};
     }/*}}}*/

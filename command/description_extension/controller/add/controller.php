@@ -3,13 +3,13 @@ if_post('/{{ english_word_pluralize($entity_name) }}/add', function ()
 @php
 $param_infos = [];
 $setting_lines = [];
-foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
     if ($relationship['relationship_type'] === 'belongs_to') {
         if ($relationship['association_type'] === 'composition') {
-            $param_infos[] = "input_entity('$entity', null, '$attritube_name"."_id')";
+            $param_infos[] = "input_entity('$entity', null, '$attribute_name"."_id')";
         } else {
-            $setting_lines[] = "$$entity_name->$attritube_name"."_id = input('$attritube_name"."_id')";
+            $setting_lines[] = "$$entity_name->$attribute_name"."_id = input('$attribute_name"."_id')";
         }
     }
 }

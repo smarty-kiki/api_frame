@@ -30,9 +30,9 @@ if (array_key_exists('default', $database_field)) {
 @endphp
     `{{ $struct_name }}` {{ $database_field['type'] }}{{ isset($database_field['length'])?'('.$database_field['length'].')':'' }}{{ $null_str.$default_str }},
 @endforeach
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-    `{{ $attritube_name }}_id` bigint(20) UNSIGNED NOT NULL,
+    `{{ $attribute_name }}_id` bigint(20) UNSIGNED NOT NULL,
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
 @php
@@ -62,16 +62,16 @@ if (array_key_exists('default', $database_field)) {
 @endforeach
 @endif
 @endforeach
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
 $entity = $relationship['entity'];
 $relationship_type = $relationship['relationship_type'];
 @endphp
 @if ($relationship_type === 'belongs_to')
-@if ($attritube_name === $entity)
-    KEY `fk_{{ $attritube_name }}_idx` (`{{ $attritube_name }}_id`, `delete_time`),
+@if ($attribute_name === $entity)
+    KEY `fk_{{ $attribute_name }}_idx` (`{{ $attribute_name }}_id`, `delete_time`),
 @else
-    KEY `fk_{{ $attritube_name }}_{{ $entity }}_idx` (`{{ $attritube_name }}_id`, `delete_time`),
+    KEY `fk_{{ $attribute_name }}_{{ $entity }}_idx` (`{{ $attribute_name }}_id`, `delete_time`),
 @endif
 @endif
 @endforeach

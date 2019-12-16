@@ -491,7 +491,7 @@ function description_get_relationship_with_snaps_by_entity($entity_name)
 
     $relationship_infos = $container[$entity_name];
 
-    foreach ($relationship_infos['relationships'] as $attritube_name => &$relationship) {
+    foreach ($relationship_infos['relationships'] as $attribute_name => &$relationship) {
 
         foreach ($relationship['snaps'] as $snap_relation_to_with_dot => &$structs) {
 

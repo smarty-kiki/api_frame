@@ -3,12 +3,12 @@ if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $e
     ${{ $entity_name }} = dao('{{ $entity_name }}')->find(${{ $entity_name }}_id);
     otherwise(${{ $entity_name }}->is_not_null(), '{{ $entity_name }} not found');
 
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
 $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
-    ${{ $entity_name }}->{{ $attritube_name }} = input_entity('{{ $entity }}', null, '{{ $attritube_name }}_id');
+    ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', null, '{{ $attribute_name }}_id');
 @endif
 @endforeach
 @foreach ($entity_info['structs'] as $struct_name => $struct)

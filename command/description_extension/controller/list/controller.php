@@ -7,10 +7,10 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
     $inputs[] = $struct_name;
 }
 
-foreach ($relationship_infos['relationships'] as $attritube_name => $relationship) {
+foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
 
     if ($relationship['relationship_type'] === 'belongs_to') {
-        $inputs[] = $attritube_name.'_id';
+        $inputs[] = $attribute_name.'_id';
     }
 
     foreach ($relationship['snaps'] as $structs) {
@@ -43,9 +43,9 @@ foreach ($relationship_infos['relationships'] as $attritube_name => $relationshi
 @foreach ($entity_name::$struct_data_types as $struct => $type)
                     '{{ $struct }}' => {{ blade_eval(_generate_controller_struct_list($type), ['entity_name' => $entity_name, 'struct' => $struct]) }},
 @endforeach
-@foreach ($relationship_infos['relationships'] as $attritube_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-                    '{{ $attritube_name }}_display' => ${{ $entity_name }}->{{ $attritube_name }}->display_for_{{ $relationship['self_attribute_name'] }}_{{ $attritube_name }}(),
+                    '{{ $attribute_name }}_display' => ${{ $entity_name }}->{{ $attribute_name }}->display_for_{{ $relationship['self_attribute_name'] }}_{{ $attribute_name }}(),
 @endif
 @endforeach
                     'create_time' => ${{ $entity_name }}->create_time,
