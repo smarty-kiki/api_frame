@@ -113,6 +113,7 @@ $struct_default = $struct['database_field']['default'];
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
 $entity = $relationship['entity'];
+$self_entity_name = $relationship['self_attribute_name'];
 $relationship_type = $relationship['relationship_type'];
 @endphp
 @if ($attribute_name === $entity)
@@ -121,7 +122,11 @@ $relationship_type = $relationship['relationship_type'];
 @if ($relationship_type === 'belongs_to')
         $this->{{ $relationship_type }}('{{ $attribute_name }}', '{{ $entity }}', '{{ $attribute_name }}_id');
 @else
+    @if ($self_entity_name === $entity_name)
         $this->{{ $relationship_type }}('{{ $attribute_name }}', '{{ $entity }}');
+@else
+        $this->{{ $relationship_type }}('{{ $attribute_name }}', '{{ $entity }}', '{{ $self_entity_name }}_id');
+@endif
 @endif
 @endif
 @endforeach
