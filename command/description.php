@@ -28,9 +28,9 @@ function _get_entity_name_by_command_paramater()
     return $entity_names;
 }/*}}}*/
 
-function _get_struct_controller_from_extension($action, $type)
+function _get_data_type_controller_from_extension($action, $data_type)
 {/*{{{*/
-    $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/struct/'.$type.'.php';
+    $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/data_type/'.$data_type.'.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }

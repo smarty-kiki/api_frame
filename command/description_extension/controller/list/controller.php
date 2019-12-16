@@ -40,8 +40,8 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
                 null,
                 [
                     'id' => ${{ $entity_name }}->id,
-@foreach ($entity_name::$struct_data_types as $struct => $type)
-                    '{{ $struct }}' => {{ blade_eval(_generate_controller_struct_list($type), ['entity_name' => $entity_name, 'struct' => $struct]) }},
+@foreach ($entity_name::$struct_data_types as $struct => $data_type)
+                    '{{ $struct }}' => {{ blade_eval(_generate_controller_data_type_list($data_type), ['entity_name' => $entity_name, 'struct' => $struct]) }},
 @endforeach
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')

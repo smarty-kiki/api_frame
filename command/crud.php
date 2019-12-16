@@ -65,38 +65,38 @@ function _generate_controller_file($entity_name, $entity_info, $relationship_inf
     return str_replace('^^', '', $content);
 }/*}}}*/
 
-function _generate_controller_struct_add($struct_type)
+function _generate_controller_data_type_add($data_type)
 {/*{{{*/
-    $content = _get_struct_controller_from_extension('add', $struct_type);
+    $content = _get_data_type_controller_from_extension('add', $data_type);
 
-    otherwise($content, '没找到 '.$struct_type.' 的 add 模版');
+    otherwise($content, '没找到 '.$data_type.' 的 add 模版');
 
     return $content;
 }/*}}}*/
 
-function _generate_controller_struct_detail($struct_type)
+function _generate_controller_data_type_detail($data_type)
 {/*{{{*/
-    $content = _get_struct_controller_from_extension('detail', $struct_type);
+    $content = _get_data_type_controller_from_extension('detail', $data_type);
 
-    otherwise($content, '没找到 '.$struct_type.' 的 detail 模版');
+    otherwise($content, '没找到 '.$data_type.' 的 detail 模版');
 
     return $content;
 }/*}}}*/
 
-function _generate_controller_struct_update($struct_type)
+function _generate_controller_data_type_update($data_type)
 {/*{{{*/
-    $content = _get_struct_controller_from_extension('update', $struct_type);
+    $content = _get_data_type_controller_from_extension('update', $data_type);
 
-    otherwise($content, '没找到 '.$struct_type.' 的 update 模版');
+    otherwise($content, '没找到 '.$data_type.' 的 update 模版');
 
     return $content;
 }/*}}}*/
 
-function _generate_controller_struct_list($struct_type)
+function _generate_controller_data_type_list($data_type)
 {/*{{{*/
-    $content = _get_struct_controller_from_extension('list', $struct_type);
+    $content = _get_data_type_controller_from_extension('list', $data_type);
 
-    otherwise($content, '没找到 '.$struct_type.' 的 list 模版');
+    otherwise($content, '没找到 '.$data_type.' 的 list 模版');
 
     return $content;
 }/*}}}*/
