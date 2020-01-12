@@ -1,0 +1,1 @@
+* * * * * BH=`git log -1 --format="%H"` && cd /var/www/api_frame && git pull origin master && git checkout -f master && AH=`git log -1 --format="%H"` && [[ $BH != $AH ]] && /bin/bash /var/www/api_frame/project/tool/after_push.sh
