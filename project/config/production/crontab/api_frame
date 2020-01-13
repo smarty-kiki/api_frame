@@ -1,1 +1,1 @@
-* * * * * root cd /var/www/api_frame && BH=`git log -1 --format="%H"` && git pull origin master && git checkout -f master && AH=`git log -1 --format="%H"` && [[ $BH != $AH ]] && /bin/bash /var/www/api_frame/project/tool/after_push.sh
+* * * * * root /bin/bash /var/www/api_frame/project/tool/check_update.sh
