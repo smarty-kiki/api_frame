@@ -34,12 +34,12 @@
 │   │   │   ├── nginx (nginx 配置)  
 │   │   │   │   └── api_frame.conf (框架推荐的 nginx 配置)  
 │   │   │   └── supervisor  (supervisor 配置)  
-│   │   │       └── queue_worker.conf (worker 的管理配置)  
+│   │   │       └── api_frame_queue_worker.conf (worker 的管理配置)  
 │   │   └── production (线上环境)   
 │   │       ├── nginx  
 │   │       │   └── api_frame.conf  
 │   │       └── supervisor  
-│   │           └── queue_worker.conf  
+│   │           └── api_frame_queue_worker.conf  
 │   ├── tool (工具脚本目录)  
 │   │   ├── classmap.sh (生成 ORM load 文件)  
 │   │   ├── naming_project.sh (快速修改本项目中的 nginx、supervisor 等配置中与项目目录有关的项目名称方便创建新项目使用)  
