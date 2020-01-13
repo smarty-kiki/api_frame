@@ -1,6 +1,8 @@
 #!/bin/bash
 
-ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/../..
+
+cd $ROOT_DIR
 
 BH=`git log -1 --format="%H"`
 git pull origin master
