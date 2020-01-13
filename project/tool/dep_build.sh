@@ -107,7 +107,7 @@ fi
 
 BRANCH=$2
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/../..
+ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../..
 
 # ------------------ add frame ------------------
 FRAME_DIR=$ROOT_DIR/frame
