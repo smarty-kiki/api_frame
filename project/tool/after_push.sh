@@ -14,3 +14,4 @@ ln -fs $ROOT_DIR/project/config/production/supervisor/api_frame_queue_worker.con
 /usr/bin/supervisorctl restart api_frame_queue_worker:*
 
 ln -fs $ROOT_DIR/project/config/production/crontab/api_frame /etc/cron.d/api_frame
+# echo 1
