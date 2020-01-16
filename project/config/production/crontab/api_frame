@@ -1,1 +1,1 @@
-* * * * * root /bin/bash /var/www/api_frame/project/tool/check_update.sh
+* * * * * root /bin/bash /var/www/api_frame/project/tool/production/check_update.sh

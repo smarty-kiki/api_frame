@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../..
+ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../..
 
 cd $ROOT_DIR
 
@@ -10,5 +10,5 @@ git checkout -f master
 AH=`git log -1 --format="%H"`
 
 if [ $BH != $AH ];then
-    /bin/bash $ROOT_DIR/project/tool/after_push.sh
+    /bin/bash $ROOT_DIR/project/tool/production/after_push.sh
 fi
