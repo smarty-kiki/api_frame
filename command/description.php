@@ -234,6 +234,8 @@ function description_get_entity($entity_name)
 
     foreach ($description['structs'] as $struct_name => &$struct) {
 
+        $formater_from_description_file = $struct['formater'] ?? [];
+
         if (isset($struct['type'])) {
 
             $struct = array_replace_recursive(description_get_struct_type($struct['type']), $struct);
@@ -261,6 +263,13 @@ function description_get_entity($entity_name)
         }
 
         if ($struct['data_type'] === 'enum') {
+
+            if ($formater_from_description_file) {
+
+                echo "$entity_name 的 structs $struct_name 的 data_type 为 enum，用描述文件中的 formater 覆盖 struct_type 中的 formater 设置\n";
+
+                $struct['formater'] = $formater_from_description_file;
+            }
 
             otherwise(isset($struct['formater']), 'data_type 为 enum 时需要设置 formater');
             otherwise(is_array($struct['formater']), 'data_type 为 enum 时 formater 需要是数组');
