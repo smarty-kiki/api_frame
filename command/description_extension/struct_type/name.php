@@ -3,12 +3,12 @@
 return [
     'data_type' => 'string',
     'database_field' => [
-        'length' => 15,
+        'length' => 30,
     ],
     'formater' => [
         [
-            'function' => 'mb_strlen($value) <= 15',
-            'failed_message' => '名称不能超过 15 个字',
+            'function' => 'mb_strlen($value) <= 30',
+            'failed_message' => '名称不能超过 30 个字',
         ],
     ],
     'display_name' => '名称',

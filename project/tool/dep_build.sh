@@ -120,7 +120,7 @@ dep_frame_$TYPE
 DEP_FILE=$ROOT_DIR/dep_service_list
 if [ ! -f $DEP_FILE ]
 then
-    echo "DEP_FILE 不存在，检查 $DEP_FILE"
+    echo "$DEP_FILE 无配置，不加载相关依赖系统"
     exit
 fi
 

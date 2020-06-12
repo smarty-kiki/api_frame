@@ -4,7 +4,7 @@ class {{ $entity_name }} extends entity
     public $structs = [
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attribute_name }}_id' => '',
+        '{{ $attribute_name }}_id' => 0,
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
 @if (array_key_exists('default', $struct['database_field']))
