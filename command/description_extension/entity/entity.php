@@ -239,7 +239,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endforeach
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @php
-    $entity = $relationship['entity'];
+$entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 
@@ -249,7 +249,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
     }/*}}}*/
 @foreach ($relationship['snaps'] as $snap_relation_to_with_dot => $structs)
 @php
-    $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
+$relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
     protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }})
