@@ -149,7 +149,7 @@ $relationship_type = $relationship['relationship_type'];
     }/*}}}*/
 
 @php
-    $param_infos = [];
+$param_infos = [];
 $setting_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
@@ -167,123 +167,123 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endphp
     public static function create({{ implode(', ', $param_infos) }})
     {/*^^{^^{^^{*/
-        @if (empty($param_infos))
-            return parent::init();
-        @else
-            ${{ $entity_name }} = parent::init();
+@if (empty($param_infos))
+        return parent::init();
+@else
+        ${{ $entity_name }} = parent::init();
 
-        @foreach ($setting_lines as $setting_line)
-            {{ $setting_line }};
-        @endforeach
+@foreach ($setting_lines as $setting_line)
+        {{ $setting_line }};
+@endforeach
 
-            return ${{ $entity_name }};
-        @endif
+        return ${{ $entity_name }};
+@endif
     }/*}}}*/
 
-public static function struct_formaters($property)
-{/*^^{^^{^^{*/
-    $formaters = [
-        @foreach ($entity_info['structs'] as $struct_name => $struct)
-        @if (isset($struct['formater']))
-        @if ($struct['data_type'] === 'enum')
-        '{{ $struct_name }}' => self::{{ strtoupper($struct_name) }}_MAPS,
-        @else
+    public static function struct_formaters($property)
+    {/*^^{^^{^^{*/
+        $formaters = [
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@if (isset($struct['formater']))
+@if ($struct['data_type'] === 'enum')
+            '{{ $struct_name }}' => self::{{ strtoupper($struct_name) }}_MAPS,
+@else
             '{{ $struct_name }}' => [
-                @foreach ($struct['formater'] as $formater)
+@foreach ($struct['formater'] as $formater)
                 [
-                    @if (isset($formater['reg']))
+@if (isset($formater['reg']))
                     'reg' => '{{ $formater['reg'] }}',
                     'failed_message' => '{{ $formater['failed_message'] }}',
-                    @elseif (isset($formater['function']))
+@elseif (isset($formater['function']))
                     'function' => function ($value) {
                         return {{ $formater['function'] }};
                     },
                     'failed_message' => '{{ $formater['failed_message'] }}',
-                    @endif
+@endif
                 ],
-                @endforeach
+@endforeach
             ],
-            @endif
-            @endif
-            @endforeach
+@endif
+@endif
+@endforeach
         ];
 
-    return $formaters[$property] ?? false;
-}/*}}}*/
+        return $formaters[$property] ?? false;
+    }/*}}}*/
 @foreach ($entity_info['structs'] as $struct_name => $struct)
-    @if ($struct['data_type'] === 'enum')
+@if ($struct['data_type'] === 'enum')
 
     public function get_{{ $struct_name }}_description()
-{/*^^{^^{^^{*/
-    @if (! $struct['require'])
+    {/*^^{^^{^^{*/
+@if (! $struct['require'])
         if ($this->{{ $struct_name }} === '') {
             return '';
         }
 
-    @endif
+@endif
         return self::{{ strtoupper($struct_name) }}_MAPS[$this->{{ $struct_name }}];
-}/*}}}*/
+    }/*}}}*/
 @foreach ($struct['formater'] as $value => $description)
 
     public function {{ $struct_name }}_is_{{ strtolower($value) }}()
-{/*^^{^^{^^{*/
-    return $this->{{ $struct_name }} === self::{{ strtoupper($struct_name.'_'.$value) }};
-}/*}}}*/
+    {/*^^{^^{^^{*/
+        return $this->{{ $struct_name }} === self::{{ strtoupper($struct_name.'_'.$value) }};
+    }/*}}}*/
 
-public function set_{{ $struct_name }}_{{ strtolower($value) }}()
-{/*^^{^^{^^{*/
-    return $this->{{ $struct_name }} = self::{{ strtoupper($struct_name.'_'.$value) }};
-}/*}}}*/
+    public function set_{{ $struct_name }}_{{ strtolower($value) }}()
+    {/*^^{^^{^^{*/
+        return $this->{{ $struct_name }} = self::{{ strtoupper($struct_name.'_'.$value) }};
+    }/*}}}*/
 @endforeach
-    @endif
-    @endforeach
-    @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
-    @php
+@endif
+@endforeach
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@php
     $entity = $relationship['entity'];
 @endphp
-    @if ($relationship['relationship_type'] === 'belongs_to')
+@if ($relationship['relationship_type'] === 'belongs_to')
 
     public function belongs_to_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }})
     {/*^^{^^{^^{*/
         return $this->{{ $attribute_name }}_id == ${{ $attribute_name }}->id;
     }/*}}}*/
 @foreach ($relationship['snaps'] as $snap_relation_to_with_dot => $structs)
-    @php
+@php
     $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
     protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }})
     {/*^^{^^{^^{*/
-        @if ($relationship['association_type'] === 'composition')
-            otherwise(${{ $attribute_name }} instanceof {{ $entity }}, '{{ $attribute_name }} 类型必须为 {{ $entity }}');
+@if ($relationship['association_type'] === 'composition')
+        otherwise(${{ $attribute_name }} instanceof {{ $entity }}, '{{ $attribute_name }} 类型必须为 {{ $entity }}');
 
-        @foreach ($structs as $struct_name => $struct)
-            $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
-        @endforeach
-            @else
-                otherwise(
-                    ${{ $attribute_name }} instanceof {{ $entity }} ||
-                    ${{ $attribute_name }} instanceof null_entity,
-                    '{{ $attribute_name }} 类型必须为 {{ $entity }} 或者 null_entity');
+@foreach ($structs as $struct_name => $struct)
+        $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
+@endforeach
+@else
+        otherwise(
+            ${{ $attribute_name }} instanceof {{ $entity }} ||
+            ${{ $attribute_name }} instanceof null_entity,
+            '{{ $attribute_name }} 类型必须为 {{ $entity }} 或者 null_entity');
 
         if (${{ $attribute_name }} instanceof {{ $entity }}) {
-            @foreach ($structs as $struct_name => $struct)
-                $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
-            @endforeach
+@foreach ($structs as $struct_name => $struct)
+            $this->{{ $struct_name }} = ${{ implode('->', $relationship_attribute_names) }}->{{ $struct['target_struct_name'] }};
+@endforeach
         } else {
-            @foreach ($structs as $struct_name => $struct)
-                $this->{{ $struct_name }} = null;
-            @endforeach
+@foreach ($structs as $struct_name => $struct)
+            $this->{{ $struct_name }} = null;
+@endforeach
         }
-        @endif
+@endif
 
-            return ${{ $attribute_name }};
+        return ${{ $attribute_name }};
     }/*}}}*/
 @endforeach
-    @endif
-    @endforeach
-    @php
-    $delete_relationship_lines = [];
+@endif
+@endforeach
+@php
+$delete_relationship_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
     if ($relationship['association_type'] === 'composition') {
@@ -305,18 +305,18 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     }
 }
 @endphp
-    @if ($delete_relationship_lines)
+@if ($delete_relationship_lines)
 
     public function delete()
     {/*^^{^^{^^{*/
-        @foreach ($delete_relationship_lines as $line)
-    {{ $line }}
-    @endforeach
+@foreach ($delete_relationship_lines as $line)
+        {{ $line }}
+@endforeach
 
-    parent::delete();
+        parent::delete();
     }/*}}}*/
 @endif
-    @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 
     public function display_for_{{ $attribute_name }}_{{ $relationship['self_attribute_name'] }}()
     {/*^^{^^{^^{*/
