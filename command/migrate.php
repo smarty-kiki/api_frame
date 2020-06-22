@@ -174,14 +174,14 @@ function _migration_detail_diff_to_sql($new, $old)
     $field_sql_string = function ($field, $table) {
 
         switch ($field['Null']) {
-            case 'NO':
-                $null = ' not null';
-                break;
-            case 'YES':
-                $null = ' null';
-                break;
-            default:
-                $null = '';
+        case 'NO':
+            $null = ' not null';
+            break;
+        case 'YES':
+            $null = ' null';
+            break;
+        default:
+            $null = '';
         }
 
         $collation = ($table['Collation'] == $field['Collation'] || $field['Collation'] === null)? '': (' character set '.(explode('_', $field['Collation'])[0]).' collate '.$field['Collation']);
@@ -277,9 +277,9 @@ function _migration_detail_diff_to_sql($new, $old)
                         || (
                             (
                                 $new_field['Collation'] !== $old_field['Collation']
-//                                && ! (
-//                                    $new_field['Collation'] == $new_table['Collation'] && $old_field['Collation'] == $old['table'][$table_name]['Collation']
-//                                )
+                                //                                && ! (
+                                //                                    $new_field['Collation'] == $new_table['Collation'] && $old_field['Collation'] == $old['table'][$table_name]['Collation']
+                                //                                )
                             )
                             || (
                                 $new_field['Collation'] !== $new_table['Collation'] && not_null($new_field['Collation'])
@@ -365,7 +365,7 @@ command('migrate:install', '初始化 migrate 所需的表结构', function ()
             `migration` varchar(255) collate utf8_unicode_ci not null,
             `batch` int(11) not null,
             primary key (`id`)
-        ) engine=innodb default charset=utf8 collate=utf8_unicode_ci');
+    ) engine=innodb default charset=utf8 collate=utf8_unicode_ci');
 });/*}}}*/
 
 command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
@@ -435,6 +435,16 @@ command('migrate:make', '新建 migration', function ()
     $new_db_detail = _migration_db_detail();
 
     _migration_reset();
+    $tables = db_query('show table status');
+    if ($tables) {
+        foreach ($tables as $key_table => $table) {
+            $table_name = $table['Name'];
+            if ($table_name !== MIGRATION_TABLE) {
+                db_structure("drop table `$table_name`");
+            }
+        }
+    }
+
     _migration_run(_migration_files());
     $old_db_detail = _migration_db_detail();
 
@@ -446,8 +456,12 @@ command('migrate:make', '新建 migration', function ()
         $file = migration_file_path($name);
         _migration_file_implode($up_sqls, $down_sqls, $file);
         echo "generate $file success!\n";
+
+        _migration_run(_migration_files());
     } else {
         echo "\033[31mno different!\n\033[0m";
+
+        _migration_run(_migration_files());
     }
 });/*}}}*/
 
@@ -469,7 +483,6 @@ command('migrate:generate-diff', '生成 tmp migration 与正式 migration 的�
         _migration_reset();
         _migration_run(_migration_tmp_files());
         $new_db_detail = _migration_db_detail();
-        _migration_reset();
 
         $up_sqls = _migration_detail_diff_to_sql($new_db_detail, $old_db_detail);
         $down_sqls = _migration_detail_diff_to_sql($old_db_detail, $new_db_detail);
@@ -479,8 +492,14 @@ command('migrate:generate-diff', '生成 tmp migration 与正式 migration 的�
             $file = migration_file_path('diff_generated');
             _migration_file_implode($up_sqls, $down_sqls, $file);
             echo "generate $file success!\n";
+
+            _migration_reset();
+            _migration_run(_migration_files());
         } else {
             echo "\033[31mno different!\n\033[0m";
+
+            _migration_reset();
+            _migration_run(_migration_files());
         }
     }
 });/*}}}*/
