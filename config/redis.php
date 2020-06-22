@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     'midwares' => [
         'default' => 'local',
         'idgenter' => 'local',
@@ -33,5 +34,5 @@ return [
                 Redis::OPT_SERIALIZER => Redis::SERIALIZER_PHP,
             ],
         ],
-    ]
+    ],
 ];
