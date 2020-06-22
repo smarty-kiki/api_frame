@@ -115,7 +115,7 @@ command('crud:make-from-description', '通过描述文件生成 CRUD 控制器',
 
         // 写文件
         error_log($controller_file_string, 3, $controller_file = CONTROLLER_DIR.'/'.$entity_name.'.php');
-        echo $controller_file."\n";
-        echo "\n将 $controller_file 加入到 public/index.php 即可响应请求\n";
+        echo "generate $controller_file success!\n";
+        echo "todo ".ROOT_DIR."/public/index.php include $controller_file\n";
     }
 });/*}}}*/

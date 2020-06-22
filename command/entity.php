@@ -131,12 +131,14 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
             $dao_new_content = _merge_content_by_annotate(file_get_contents($dao_path), $dao_new_content);
         }
 
-        error_log(_generate_migration_file($entity_name, $entity_info, $relationship_infos), 3, $file = migration_file_path($entity_name));
-        echo $file."\n";
-        file_put_contents($entity_path, $entity_new_content); echo $entity_path."\n";
-        file_put_contents($dao_path, $dao_new_content); echo $dao_path."\n";
+        $migration_tmp_path = migration_tmp_file_path($entity_name);
+        $migration_content = _generate_migration_file($entity_name, $entity_info, $relationship_infos);
 
-        echo "\n需要重新生成 domain/autoload.php 以加载 $entity_name\n";
+        file_put_contents($entity_path, $entity_new_content); echo "generate $entity_path success!\n";
+        file_put_contents($dao_path, $dao_new_content); echo "generate $dao_path success!\n";
+        file_put_contents($migration_tmp_path, $migration_content); echo "generate $migration_tmp_path success!\n";
+
+        echo "todo ".ROOT_DIR."/domain/autoload.php generate\n";
     }
 });/*}}}*/
 
