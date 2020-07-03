@@ -5,11 +5,11 @@ return [
     'formater' => [
         [
             'function' => 'mb_strlen($value) <= 11',
-            'failed_message' => 'ID 不能超过 15 个字',
+            'failed_message' => '不能超过 11 位',
         ],
         [
             'function' => 'is_numeric($value)',
-            'failed_message' => 'ID 必须为整数',
+            'failed_message' => '必须为整数',
         ],
     ],
     'display_name' => 'ID',
