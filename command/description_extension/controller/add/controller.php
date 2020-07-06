@@ -1,6 +1,7 @@
 if_post('/{{ english_word_pluralize($entity_name) }}/add', function ()
 {/*{^^{^^{*/
 @php
+$input_infos = [];
 $param_infos = [];
 $setting_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
@@ -14,13 +15,33 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     }
 }
 foreach ($entity_info['structs'] as $struct_name => $struct) {
+    $input_infos[] = "$$struct_name = input('$struct_name')";
+
     if ($struct['require']) {
-        $param_infos[] = "input('$struct_name')";
+        $param_infos[] = "$$struct_name";
     } else {
-        $setting_lines[] = "$$entity_name->$struct_name = input('$struct_name')";
+        $setting_lines[] = "$$entity_name->$struct_name = $$struct_name";
     }
 }
 @endphp
+@foreach ($input_infos as $input_info)
+    {{ $input_info }};
+@endforeach
+
+@if ($entity_info['repeat_check_structs'])
+@php
+$repeat_check_structs = $entity_info['repeat_check_structs'];
+$param_infos = [];
+$msg_infos = [];
+foreach ($repeat_check_structs as $struct_name) {
+    $param_infos[] = "$$struct_name";
+    $msg_infos[] = $entity_info['structs'][$struct_name]['display_name'];
+}
+@endphp
+    $another_{{ $entity_name }} = dao('{{ $entity_name }}')->find_by_{{ implode('_and_', $repeat_check_structs) }}({{ implode(', ', $param_infos) }});
+    otherwise($another_{{ $entity_name }}->is_null(), '已经存在相同{{ implode('和', $msg_infos) }}的{{ $entity_info['display_name'] }} [ID: '.$another_{{ $entity_name }}->id.']');
+@endif
+
 @if (empty($param_infos))
     ${{ $entity_name }} = {{ $entity_name }}::create();
 @else

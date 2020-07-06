@@ -228,9 +228,8 @@ function description_get_entity($entity_name)
 
     otherwise(isset($description['display_name']), "$path 中需设置 display_name");
 
-    if (! isset($description['description'])) {
-        $description['description'] = $description['display_name'];
-    }
+    $description['description'] = $description['description'] ?? $description['display_name'];
+    $description['repeat_check_structs'] = $description['repeat_check_structs'] ?? [];
 
     foreach ($description['structs'] as $struct_name => &$struct) {
 
@@ -247,20 +246,9 @@ function description_get_entity($entity_name)
 
         $struct = array_replace_recursive(description_get_data_type($struct['data_type']), $struct);
 
-        if (! isset($struct['require'])) {
-
-            $struct['require'] = true;
-        }
-
-        if (! isset($struct['display_name'])) {
-
-            $struct['display_name'] = $struct_name;
-        }
-
-        if (! isset($struct['description'])) {
-
-            $struct['description'] = $struct['display_name'];
-        }
+        $struct['require'] = $struct['require'] ?? true;
+        $struct['display_name'] = $struct['display_name'] ?? $struct_name;
+        $struct['description'] = $struct['description'] ?? $struct['display_name'];
 
         if ($struct['data_type'] === 'enum') {
 
@@ -283,16 +271,11 @@ function description_get_entity($entity_name)
 
                     if (isset($formater['reg'])) {
 
-                        if (! isset($formater['failed_message'])) {
+                        $formater['failed_message'] = $formater['failed_message'] ?? "$struct_name 需满足正则表达式 {$formater['reg']}";
 
-                            $formater['failed_message'] = "$struct_name 需满足正则表达式 {$formater['reg']}";
-                        }
                     } elseif (isset($formater['function'])) {
 
-                        if (! isset($formater['failed_message'])) {
-
-                            $formater['failed_message'] = "$struct_name 需满足逻辑 {$formater['function']}";
-                        }
+                        $formater['failed_message'] = $formater['failed_message'] ?? "$struct_name 需满足逻辑 {$formater['function']}";
                     }
                 }
             }
