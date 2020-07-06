@@ -229,7 +229,6 @@ function description_get_entity($entity_name)
     otherwise(isset($description['display_name']), "$path 中需设置 display_name");
 
     $description['description'] = $description['description'] ?? $description['display_name'];
-    $description['repeat_check_structs'] = $description['repeat_check_structs'] ?? [];
 
     foreach ($description['structs'] as $struct_name => &$struct) {
 
@@ -280,6 +279,12 @@ function description_get_entity($entity_name)
                 }
             }
         }
+    }
+
+    $description['repeat_check_structs'] = $description['repeat_check_structs'] ?? [];
+
+    foreach ($description['repeat_check_structs'] as $struct_name) {
+        otherwise(isset($description['structs'][$struct_name]), $entity_name.' description repeat_check_structs 中的 '.$struct_name.' 在 structs 中不存在');
     }
 
     return $description;
