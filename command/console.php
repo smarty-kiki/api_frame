@@ -149,15 +149,60 @@ function _get_defined_entity_completion_infos()
     return $entity_infos;
 }/*}}}*/
 
+function _get_defined_entity_relation_completion_infos()
+{/*{{{*/
+    $relation_infos = [];
+
+    $entity_paths = glob(DOMAIN_DIR.'/entity/*.php');
+
+    foreach ($entity_paths as $entity_path) {
+
+        $code = file_get_contents($entity_path);
+
+        $relation_info = [];
+
+        $entity_name = '';
+
+        foreach (explode("\n", $code) as $code_line)
+        {
+            $match = [];
+            preg_match_all('/^class ([a-z_]*) .*$/', $code_line, $match);
+
+            if ($match[1]) {
+                $entity_name = $match[1][0];
+            }
+
+            $match = [];
+            preg_match_all('/\$this->(belongs_to|has_many|has_one)\((.*)\);/', $code_line, $match);
+            if ($match[0]) {
+
+                $param_string = str_replace(['\'', '"', ' '], '', $match[2][0]);
+                $params = explode(',', $param_string);
+
+                $relation_info[$params[0]] = [
+                    'type' => $match[1][0],
+                    'entity' => ($params[1] ?? $params[0]),
+                ];
+            }
+        }
+
+        if ($entity_name) {
+            $relation_infos[$entity_name] = $relation_info;
+        }
+    }
+
+    return $relation_infos;
+}/*}}}*/
+
 command('console', '终端模式', function ()
 {/*{{{*/
     error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 
     $function_infos = _get_defined_function_completion_infos();
     $entity_infos = _get_defined_entity_completion_infos();
+    $relation_infos = _get_defined_entity_relation_completion_infos();
 
     $plural_to_entity = [];
-    $entity_to_plural = [];
 
     foreach ($entity_infos as $entity_name => $entity_info) {
 
@@ -167,15 +212,10 @@ command('console', '终端模式', function ()
         if ($pluralize_entity_name !== $entity_name) {
             $plural_to_entity[$pluralize_entity_name] = $entity_name;
         }
-
-        $entity_to_plural[$entity_name] = [
-            'single' => $entity_name,
-            'plural' => $pluralize_entity_name,
-        ];
     }
 
     command_read_completions(function ($buffer_info) use (
-        $function_infos, $entity_infos, $plural_to_entity, $entity_to_plural
+        $function_infos, $entity_infos, $plural_to_entity, $relation_infos
     ) {
         $completions = [];
 
@@ -199,7 +239,7 @@ command('console', '终端模式', function ()
             // 如果开头变量名是个实体名，给补全中加入 dao 及方法
             $match = [];
             preg_match_all('/^\$(.*) = .*$/', $line_buffer_before_block, $match);
-            if (isset($match[1])) {
+            if ($match[1]) {
                 $param_name = array_pop($match[1]);
                 if (isset($plural_to_entity[$param_name])) {
                     $entity_name = $plural_to_entity[$param_name];
@@ -216,16 +256,51 @@ command('console', '终端模式', function ()
                 }
             }
 
-            // 如果当前光标正在一个实体名的变量后，给补全中加入实体方法和属性
+            // 如果当前光标正在一个实体名的变量后，给补全中加入实体方法、属性、关联关系
             $match = [];
             preg_match_all('/.*\$(.*)->$/', $line_buffer_before_block, $match);
-            if (isset($match[1])) {
+            if ($match[1]) {
                 $param_name = array_pop($match[1]);
                 if (isset($entity_infos[$param_name])) {
                     $entity_info = $entity_infos[$param_name];
                     $completions = array_merge($completions, $entity_info['structs'], $entity_info['public_functions']);
+
+                    if (isset($relation_infos[$param_name])) {
+                        $completions = array_merge($completions, array_keys($relation_infos[$param_name]));
+                    }
                 }
             }
+
+            // 如果当前光标正在一个实体名变量后的关联关系后，给补全中加入最末端关联关系实体的方法、属性、关联关系
+            $match = [];
+            preg_match_all('/\$(.*?)->(.*->)$/', $line_buffer_before_block, $match);
+            if ($match[1] && $match[2]) {
+                $entity_name = array_pop($match[1]);
+                $relation_str = $match[2][0];
+                $relation_arr = explode('->', $relation_str);
+                $matched = true;
+                foreach ($relation_arr as $relation) {
+                    if (isset($relation_infos[$entity_name])) {
+                        if (isset($relation_infos[$entity_name][$relation])) {
+                            if ($relation_infos[$entity_name][$relation]['type'] !== 'has_many') {
+                                $entity_name = $relation_infos[$entity_name][$relation]['entity'];
+                            } else {
+                                $matched = false;
+                            }
+                        }
+                    }
+                }
+
+                if ($matched && isset($entity_infos[$entity_name])) {
+                    $entity_info = $entity_infos[$entity_name];
+                    $completions = array_merge($completions, $entity_info['structs'], $entity_info['public_functions']);
+
+                    if (isset($relation_infos[$entity_name])) {
+                        $completions = array_merge($completions, array_keys($relation_infos[$entity_name]));
+                    }
+                }
+            }
+
 
             if (! ends_with($line_buffer_before_block, ['>', '$', '"', '\'', ')', '}', ']'])) { // 只要光标前的字符不是这些特殊字符，就给补全中加入已注册的函数
                 $completions = array_merge($completions, $function_infos);
