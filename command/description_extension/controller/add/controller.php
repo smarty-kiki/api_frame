@@ -31,14 +31,14 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @if ($entity_info['repeat_check_structs'])
 @php
 $repeat_check_structs = $entity_info['repeat_check_structs'];
-$param_infos = [];
+$dao_param_infos = [];
 $msg_infos = [];
 foreach ($repeat_check_structs as $struct_name) {
-    $param_infos[] = "$$struct_name";
+    $dao_param_infos[] = "$$struct_name";
     $msg_infos[] = $entity_info['structs'][$struct_name]['display_name'];
 }
 @endphp
-    $another_{{ $entity_name }} = dao('{{ $entity_name }}')->find_by_{{ implode('_and_', $repeat_check_structs) }}({{ implode(', ', $param_infos) }});
+    $another_{{ $entity_name }} = dao('{{ $entity_name }}')->find_by_{{ implode('_and_', $repeat_check_structs) }}({{ implode(', ', $dao_param_infos) }});
     otherwise($another_{{ $entity_name }}->is_null(), '已经存在相同{{ implode('和', $msg_infos) }}的{{ $entity_info['display_name'] }} [ID: '.$another_{{ $entity_name }}->id.']');
 @endif
 
