@@ -4,6 +4,7 @@ define('DESCRIPTION_DIR', DOMAIN_DIR.'/description');
 define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
 define('DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_type');
 define('DESCRIPTION_DATA_TYPE_EXTENSION_DIR', DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/data_type');
+define('DESCRIPTION_STRUCT_GROUP_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_group');
 define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
 define('DESCRIPTION_ENTITY_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/entity');
 define('DESCRIPTION_DAO_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/dao');
@@ -118,6 +119,8 @@ structs:
         failed_message: IP 不是有效的 IP 格式
     display_name: IP 地址
     require: true
+repeat_check_structs:
+  - struct_name1
 ...
 EOF;
 
@@ -230,6 +233,18 @@ function description_get_entity($entity_name)
 
     $description['description'] = $description['description'] ?? $description['display_name'];
 
+    $description['struct_groups'] = $description['struct_groups'] ?? [];
+
+    foreach ($description['struct_groups'] as &$struct_group) {
+        if (is_array($struct_group)) {
+            $struct_group_type = key($struct_group);
+            $struct_group = description_get_struct_group($struct_group_type, $struct_group[$struct_group_type]);
+        } else {
+            $struct_group = description_get_struct_group($struct_group);
+        }
+        $description['structs'] = array_replace($struct_group['structs'], $description['structs']);
+    }
+
     foreach ($description['structs'] as $struct_name => &$struct) {
 
         $formater_from_description_file = $struct['formater'] ?? [];
@@ -304,6 +319,36 @@ function description_get_struct_type($struct_type)
     if (! isset($res['description'])) {
         $res['description'] = $res['display_name'];
     }
+
+    return $res;
+}/*}}}*/
+
+function description_get_struct_group($struct_group_type, $struct_group_info = [])
+{/*{{{*/
+    $path = DESCRIPTION_STRUCT_GROUP_EXTENSION_DIR.'/'.$struct_group_type.'.yml';
+
+    otherwise(is_file($path), "字段类型组 $struct_group_type 配置文件没找到");
+
+    $group_origin_str = $group_str = file_get_contents($path);
+
+    $res = [
+        'type' => $struct_group_type,
+        'structs' => [],
+        'struct_name_maps' => [],
+    ];
+
+    if ($struct_group_info) {
+        foreach ($struct_group_info as $key => $value) {
+            $group_str = str_replace('$('.$key.')', $value, $group_str);
+        }
+    }
+
+    $res['structs'] = yaml_parse($group_str);
+
+    $res['struct_name_maps'] = array_combine(
+        array_keys(yaml_parse($group_origin_str)),
+        array_keys($res['structs'])
+    );
 
     return $res;
 }/*}}}*/

@@ -1,0 +1,6 @@
+$(name)_start_time:
+  type: datetime
+  display_name: $(display_name)开始时间
+$(name)_end_time:
+  type: datetime
+  display_name: $(display_name)结束时间
