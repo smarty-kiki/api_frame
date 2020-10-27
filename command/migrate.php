@@ -154,7 +154,7 @@ function _migration_db_detail()
             if ($indexes) {
                 $res_indexes = [];
                 foreach ($indexes as $key_index => $index) {
-                    if (! isset($indexes[$index['Key_name']])) {
+                    if (! isset($res_indexes[$index['Key_name']])) {
                         $index['Column_name'] = [$index['Seq_in_index'] => $index['Column_name']];
                         $res_indexes[$index['Key_name']] = $index;
                     } else {
