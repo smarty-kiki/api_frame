@@ -289,7 +289,9 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     if ($relationship['association_type'] === 'composition') {
         if ($relationship['relationship_type'] === 'has_many') {
             $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
-            $delete_relationship_lines[] = '    $'.$entity.'->delete();'."\n";
+            $delete_relationship_lines[] = '    if ($'.$entity.'->'.$relationship['self_attribute_name'].'_id === $this->id) {'."\n";
+            $delete_relationship_lines[] = '        $'.$entity.'->delete();'."\n";
+            $delete_relationship_lines[] = "    }\n";
             $delete_relationship_lines[] = "}\n";
         } elseif ($relationship['relationship_type'] === 'has_one') {
             $delete_relationship_lines[] = '$this->'.$attribute_name.'->delete();'."\n";
@@ -297,7 +299,9 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     } elseif ($relationship['association_type'] === 'aggregation') {
         if ($relationship['relationship_type'] === 'has_many') {
             $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
-            $delete_relationship_lines[] = '    $'.$entity.'->'.$relationship['self_attribute_name']."_id = 0;\n";
+            $delete_relationship_lines[] = '    if ($'.$entity.'->'.$relationship['self_attribute_name'].'_id === $this->id) {'."\n";
+            $delete_relationship_lines[] = '        $'.$entity.'->'.$relationship['self_attribute_name']."_id = 0;\n";
+            $delete_relationship_lines[] = "    }\n";
             $delete_relationship_lines[] = "}\n";
         } elseif ($relationship['relationship_type'] === 'has_one') {
             $delete_relationship_lines[] = '$this->'.$attribute_name.'->delete();'."\n";
