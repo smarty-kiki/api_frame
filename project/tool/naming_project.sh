@@ -22,6 +22,7 @@ sed_name $ROOT_DIR/project/config/development/supervisor/$1_queue_worker.conf $1
 sed_name $ROOT_DIR/project/config/production/nginx/$1.conf $1
 sed_name $ROOT_DIR/project/config/production/supervisor/$1_queue_worker.conf $1
 sed_name $ROOT_DIR/project/tool/start_development_server.sh $1
+sed_name $ROOT_DIR/project/tool/start_development_server.bat $1
 sed_name $ROOT_DIR/project/tool/development/after_env_start.sh $1
 sed_name $ROOT_DIR/project/tool/production/after_push.sh $1
 sed_name $ROOT_DIR/project/tool/production/check_update.sh $1
