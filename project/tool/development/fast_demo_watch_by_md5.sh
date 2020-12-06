@@ -71,7 +71,7 @@ generate_file()
 
             done
 
-        ) | column -t &
+        ) | column -t
     fi
 }
 
