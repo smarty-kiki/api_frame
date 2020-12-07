@@ -93,8 +93,8 @@ do
         then
             generate_file MODIFY $new_file_name
         else
-            generate_file DELETE $new_file_name
-             generate_file CREATE $new_file_name
+            generate_file DELETE $old_file_name
+            generate_file CREATE $new_file_name
         fi
     fi
 
@@ -110,7 +110,7 @@ do
     create_line=`echo "$diff_result" | grep '>'`
     if [ "$create_line" != "" ]
     then
-        file_name=`echo $create_line | awk '{print $2}'`
+        file_name=`echo $create_line | awk '{print $3}'`
         generate_file CREATE $file_name
     fi
 
