@@ -8,7 +8,7 @@ get_relative_path()
 add_gitignore()
 {
     echo "\n$1" >> $ROOT_DIR/.gitignore
-    cat $ROOT_DIR/.gitignore | sort | uniq > $ROOT_DIR/.gitignore.tmp
+    cat $ROOT_DIR/.gitignore | sort -r | uniq > $ROOT_DIR/.gitignore.tmp
     mv $ROOT_DIR/.gitignore.tmp $ROOT_DIR/.gitignore
 }
 
