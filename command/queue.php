@@ -22,7 +22,7 @@ command('queue:status', '队列状态', function ()
     $tube = command_paramater('tube', 'default');
     $config_key = command_paramater('config_key', 'default');
 
-    echo queue_status($tube, $config_key);
+    echo queue_status($tube, $config_key)."\n";
 });/*}}}*/
 
 command('queue:pause', '暂停队列任务派发', function ()
