@@ -75,10 +75,10 @@ function _migration_file_implode($ups, $downs, $filepath)
 
 function _migration_run($files)
 {/*{{{*/
-    $old_migrations = db_query_column('migration', 'select * from '.MIGRATION_TABLE);
+    $old_migrations = db_query_column('migration', 'select * from '.MIGRATION_TABLE, [], 'migrate');
     $new_migrations = array_diff($files, $old_migrations);
 
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE, [], 'migrate');
 
     foreach ($new_migrations as $filename) {
         $filepath = MIGRATION_DIR.'/'.$filename;
@@ -86,13 +86,13 @@ function _migration_run($files)
         list($ups, $downs) = _migration_file_explode($filepath);
 
         foreach ($ups as $up) {
-            db_structure($up);
+            db_structure($up, 'migrate');
         }
 
         db_insert('insert into '.MIGRATION_TABLE.' set migration = :migration, batch = :batch', [
             ':migration' => $filename,
             ':batch' => $last_batch + 1,
-        ]);
+        ], 'migrate');
 
         echo "migrate $filepath success up!\n";
     }
@@ -100,7 +100,7 @@ function _migration_run($files)
 
 function _migration_reset()
 {/*{{{*/
-    $migrations = db_query_column('migration', 'select migration from '.MIGRATION_TABLE.' order by id desc');
+    $migrations = db_query_column('migration', 'select migration from '.MIGRATION_TABLE.' order by id desc', [], 'migrate');
 
     foreach ($migrations as $filename) {
 
@@ -111,7 +111,7 @@ function _migration_reset()
             list($ups, $downs) = _migration_file_explode($filepath);
 
             foreach ($downs as $down) {
-                db_structure($down);
+                db_structure($down, 'migrate');
             }
 
             echo "migrate $filepath success down!\n";
@@ -121,7 +121,7 @@ function _migration_reset()
         }
     }
 
-    db_delete('delete from '.MIGRATION_TABLE);
+    db_delete('delete from '.MIGRATION_TABLE, [], 'migrate');
 }/*}}}*/
 
 function _migration_db_detail()
@@ -131,14 +131,14 @@ function _migration_db_detail()
         'field' => [],
         'index' => [],
     ];
-    $tables = db_query('show table status');
+    $tables = db_query('show table status', [], 'migrate');
 
     if ($tables) {
         foreach ($tables as $key_table => $table) {
             $table_name = $table['Name'];
             $detail['table'][$table_name] = $table;
 
-            $fields = db_query("show full fields from `$table_name`");
+            $fields = db_query("show full fields from `$table_name`", [], 'migrate');
             if ($fields) {
                 $detail['field'][$table_name] = array_build($fields, function ($key, $value) {
                     return [
@@ -150,7 +150,7 @@ function _migration_db_detail()
                 $detail['field'][$table_name] = [];
             }
 
-            $indexes = db_query("show index from `$table_name`");
+            $indexes = db_query("show index from `$table_name`", [], 'migrate');
             if ($indexes) {
                 $res_indexes = [];
                 foreach ($indexes as $key_index => $index) {
@@ -373,12 +373,12 @@ command('migrate:install', '初始化 migrate 所需的表结构', function ()
             `migration` varchar(255) collate utf8_unicode_ci not null,
             `batch` int(11) not null,
             primary key (`id`)
-        ) engine=innodb default charset=utf8 collate=utf8_unicode_ci');
+        ) engine=innodb default charset=utf8 collate=utf8_unicode_ci', 'migrate');
 });/*}}}*/
 
 command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
 {/*{{{*/
-    db_structure('drop table `'.MIGRATION_TABLE.'`');
+    db_structure('drop table `'.MIGRATION_TABLE.'`', 'migrate');
 });/*}}}*/
 
 command('migrate', '执行 migrate', function ()
@@ -396,10 +396,10 @@ command('migrate:dry-run', '展示将要跑的 sql', function ()
 
     $files = $is_tmp_files ? _migration_tmp_files(): _migration_files();
 
-    $old_migrations = db_query_column('migration', 'select * from '.MIGRATION_TABLE);
+    $old_migrations = db_query_column('migration', 'select * from '.MIGRATION_TABLE, [], 'migrate');
     $new_migrations = array_diff($files, $old_migrations);
 
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE, [], 'migrate');
 
     foreach ($new_migrations as $filename) {
         list($ups, $downs) = _migration_file_explode(MIGRATION_DIR.'/'.$filename);
@@ -414,10 +414,10 @@ command('migrate:dry-run', '展示将要跑的 sql', function ()
 
 command('migrate:rollback', '回滚最后一次 migrate', function ()
 {/*{{{*/
-    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE);
+    $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE, [], 'migrate');
     $last_batch_migrations = db_query_column('migration', 'select migration from '.MIGRATION_TABLE.' where batch = :batch order by id desc', [
         ':batch' => $last_batch,
-    ]);
+    ], 'migrate');
 
     foreach ($last_batch_migrations as $filename) {
         $filepath = MIGRATION_DIR.'/'.$filename;
@@ -427,7 +427,7 @@ command('migrate:rollback', '回滚最后一次 migrate', function ()
             list($ups, $downs) = _migration_file_explode($filepath);
 
             foreach ($downs as $down) {
-                db_structure($down);
+                db_structure($down, 'migrate');
             }
 
             echo "migrate $filepath success down!\n";
@@ -439,7 +439,7 @@ command('migrate:rollback', '回滚最后一次 migrate', function ()
 
     db_delete('delete from '.MIGRATION_TABLE.' where batch = :batch', [
         ':batch' => $last_batch,
-    ]);
+    ], 'migrate');
 });/*}}}*/
 
 command('migrate:make', '新建 migration', function ()
@@ -449,12 +449,12 @@ command('migrate:make', '新建 migration', function ()
     $new_db_detail = _migration_db_detail();
 
     _migration_reset();
-    $tables = db_query('show table status');
+    $tables = db_query('show table status', [], 'migrate');
     if ($tables) {
         foreach ($tables as $key_table => $table) {
             $table_name = $table['Name'];
             if ($table_name !== MIGRATION_TABLE) {
-                db_structure("drop table `$table_name`");
+                db_structure("drop table `$table_name`", 'migrate');
             }
         }
     }

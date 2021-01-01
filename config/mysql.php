@@ -2,6 +2,7 @@
 
 return [
     'midwares' => [
+        'migrate' => 'local',
         'entity' => 'local',
         'default' => 'local',
     ],
