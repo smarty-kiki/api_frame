@@ -17,19 +17,25 @@ if_has_exception(function ($ex) {
     header('Content-type: application/json');
 
     return json([
-        'succ' => false,
+        'code' => $ex->getCode(),
         'msg' => $ex->getMessage(),
+        'data' => [],
     ]);
 });
 
 if_verify(function ($action, $args) {
+
     return unit_of_work(function () use ($action, $args){
 
         $data = call_user_func_array($action, $args);
 
         header('Content-type: application/json');
 
-        return json($data);
+        return json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data,
+        ]);
     });
 });
 
@@ -38,8 +44,9 @@ if_verify(function ($action, $args) {
 // init 404 handler
 if_not_found(function () {
     return json([
-        'succ' => false,
+        'code' => 0,
         'msg' => '404 not found',
+        'data' => [],
     ]);
 });
 
