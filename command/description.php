@@ -105,6 +105,10 @@ command('description:demo-description', '创建 demo description 文件', functi
 ---
 display_name: 环境
 # description: 环境
+struct_groups:
+  closed_time_interval:
+    name: check
+    display_name: 检查
 structs:
   struct_name1:
     type: ip
