@@ -75,6 +75,12 @@ $relationship_type = $relationship['relationship_type'];
 @endif
 @endif
 @endforeach
+@if ($entity_info['repeat_check_structs'])
+@php
+$repeat_check_structs = $entity_info['repeat_check_structs'];
+@endphp
+    key `idx_{{ implode('_and_', $repeat_check_structs) }}` (`{{ implode('`, `', $repeat_check_structs) }}`, `delete_time`),
+@endif
     primary key (`id`)
 ) engine=innodb default charset=utf8;
 

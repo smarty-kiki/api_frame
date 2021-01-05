@@ -31,11 +31,7 @@ if_verify(function ($action, $args) {
 
         header('Content-type: application/json');
 
-        return json([
-            'code' => 0,
-            'msg' => '',
-            'data' => $data,
-        ]);
+        return json($data);
     });
 });
 
