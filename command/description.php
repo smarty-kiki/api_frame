@@ -6,6 +6,7 @@ define('DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/stru
 define('DESCRIPTION_DATA_TYPE_EXTENSION_DIR', DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/data_type');
 define('DESCRIPTION_STRUCT_GROUP_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_group');
 define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
+define('DESCRIPTION_DOCS_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/docs');
 define('DESCRIPTION_ENTITY_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/entity');
 define('DESCRIPTION_DAO_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/dao');
 define('DESCRIPTION_MIGRATION_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/migration');
@@ -42,6 +43,36 @@ function _get_data_type_controller_from_extension($action, $data_type)
 function _get_controller_template_from_extension($action)
 {/*{{{*/
     $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/controller.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_data_type_docs_api_from_extension($action, $data_type)
+{/*{{{*/
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/api/'.$action.'/data_type/'.$data_type.'.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_docs_api_template_from_extension($action)
+{/*{{{*/
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/api/'.$action.'/docs.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_docs_entity_template_from_extension($action)
+{/*{{{*/
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/entity/'.$action.'/docs.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }

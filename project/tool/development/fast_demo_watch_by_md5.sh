@@ -46,6 +46,15 @@ generate_file()
                     ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-from-description --entity_name=$entity_name
                     /bin/sed -i "/init\ controller/a\include\ CONTROLLER_DIR\.\'\/$entity_name\.php\'\;" $ROOT_DIR/public/index.php
                     echo include $ROOT_DIR/controller/$entity_name.php success!
+
+                    rm -rf $ROOT_DIR/docs/api/$entity_name.md
+                    grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+                    mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    echo delete $ROOT_DIR/docs/api/$entity_name.md success!
+                    ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-docs-from-description --entity_name=$entity_name
+                    menu_name=`cat $ROOT_DIR/domain/description/$entity_name.yml | head -n 2 | tail -n 1 | cut -d ' ' -f 2`
+                    /bin/sed -i "/接口文档/a\\ \ \-\ \[$menu_name\]\(api\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
+                    echo include $ROOT_DIR/docs/api/$entity_name.md success!
                 fi
 
                 if [ "$event" = "DELETE" ];then
@@ -64,6 +73,11 @@ generate_file()
                     grep -v "'\/$entity_name\." $ROOT_DIR/public/index.php > /tmp/index.php
                     mv /tmp/index.php $ROOT_DIR/public/index.php
                     echo delete $ROOT_DIR/controller/$entity_name.php success!
+
+                    rm -rf $ROOT_DIR/docs/api/$entity_name.md
+                    grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+                    mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    echo delete $ROOT_DIR/docs/api/$entity_name.md success!
 
                     /bin/bash $ROOT_DIR/project/tool/classmap.sh $ROOT_DIR/domain
                     ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php migrate -tmp_files

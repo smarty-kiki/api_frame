@@ -2,15 +2,19 @@
 
 ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../..
 ROOT_DIR=`readlink -f $ROOT_DIR`
-LOCK_FILE=/tmp/description_watch.lock
+OLD_MTIME_FILE=/tmp/fast_demo_watch_mtime.old
+NEW_MTIME_FILE=/tmp/fast_demo_watch_mtime.new
 env=development
 
-inotifywait -qm -e CREATE -e MODIFY -e DELETE $ROOT_DIR/domain/description/ | while read -r directory event filenames;do
-if [ "${filenames##*.}" = "yml" ]
-then
-    if [ ! -f $LOCK_FILE ]
+find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 stat -c '%y %n' > $OLD_MTIME_FILE
+
+generate_file()
+{
+    event=$1
+    filenames=$(basename "$2")
+
+    if [ "${filenames##*.}" = "yml" ]
     then
-        echo $$ > $LOCK_FILE
         (
             if [ "$filenames" = ".relationship.yml" ]
             then
@@ -81,8 +85,48 @@ then
 
             done
 
-            rm -rf $LOCK_FILE
-        ) | column -t &
+        ) | column -t
     fi
-fi
+}
+
+
+
+while true
+do
+    sleep 1
+    find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 stat -c '%y %n' > $NEW_MTIME_FILE
+    diff_result=`diff -y --suppress-common-lines -W 300 $OLD_MTIME_FILE $NEW_MTIME_FILE`
+
+    # MODIFY
+    diff_line=`echo "$diff_result" | grep '|'`
+    if [ "$diff_line" != "" ]
+    then
+        old_file_name=`echo $diff_line | awk '{print $4}'`
+        new_file_name=`echo $diff_line | awk '{print $9}'`
+        if [ "$old_file_name" = "$new_file_name" ]
+        then
+            generate_file MODIFY $new_file_name
+        else
+            generate_file DELETE $old_file_name
+            generate_file CREATE $new_file_name
+        fi
+    fi
+
+    # DELETE
+    delete_line=`echo "$diff_result" | grep '<'`
+    if [ "$delete_line" != "" ]
+    then
+        file_name=`echo $delete_line | awk '{print $4}'`
+        generate_file DELETE $file_name
+    fi
+
+    # CREATE
+    create_line=`echo "$diff_result" | grep '>'`
+    if [ "$create_line" != "" ]
+    then
+        file_name=`echo $create_line | awk '{print $5}'`
+        generate_file CREATE $file_name
+    fi
+
+    cp $NEW_MTIME_FILE $OLD_MTIME_FILE
 done
