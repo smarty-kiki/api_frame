@@ -9,6 +9,7 @@ define('DOMAIN_DIR', ROOT_DIR.'/domain');
 define('COMMAND_DIR', ROOT_DIR.'/command');
 define('CONTROLLER_DIR', ROOT_DIR.'/controller');
 define('QUEUE_JOB_DIR', COMMAND_DIR.'/queue_job');
+define('DOCS_DIR', ROOT_DIR.'/docs');
 
 include FRAME_DIR.'/function.php';
 include FRAME_DIR.'/entity.php';

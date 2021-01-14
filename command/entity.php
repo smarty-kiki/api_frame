@@ -54,6 +54,43 @@ function _generate_migration_file($entity_name, $entity_info, $relationship_info
     return str_replace('^^', '', $migration_content);
 }/*}}}*/
 
+function _generate_docs_entity_file($entity_name, $entity_info, $relationship_infos)
+{/*{{{*/
+    $content = _get_docs_entity_template_from_extension();
+
+    $entity_content =  blade_eval($content, [
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $template = "# {$entity_info['display_name']}  
+{$entity_info['description']}
+
+%s";
+
+    $entity_content = sprintf($template, $entity_content);
+
+    return str_replace('^^', '', $entity_content);
+}/*}}}*/
+
+function _generate_docs_entity_relationship_file($all_relationship_infos)
+{/*{{{*/
+    $content = _get_docs_entity_relationship_template_from_extension();
+
+    $relationship_content =  blade_eval($content, [
+        'all_relationship_infos' => $all_relationship_infos,
+    ]);
+
+    $template = "# 实体关联
+
+%s";
+
+    $relationship_content = sprintf($template, $relationship_content);
+
+    return str_replace('^^', '', $relationship_content);
+}/*}}}*/
+
 function _merge_content_by_annotate($content_outside, $content_inside)
 {/*{{{*/
     static $annotate_start = '/* generated code start */';
@@ -139,6 +176,33 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
         file_put_contents($migration_tmp_path, $migration_content); echo "generate $migration_tmp_path success!\n";
 
         echo "todo ".ROOT_DIR."/domain/autoload.php generate\n";
+    }
+});/*}}}*/
+
+command('entity:make-docs-from-description', '从实体描述文件初始化 entity、dao、migration', function ()
+{/*{{{*/
+    $entity_names = _get_entity_name_by_command_paramater();
+
+    $all_relationship_infos = description_get_relationship();
+
+    $docs_entity_relationship_file_string = _generate_docs_entity_relationship_file($all_relationship_infos);
+
+    $docs_entity_relationship_file_relative_path = 'entity/relationship.md';
+    error_log($docs_entity_relationship_file_string, 3, $docs_entity_relationship_file = DOCS_DIR.'/'.$docs_entity_relationship_file_relative_path);
+    echo "generate $docs_entity_relationship_file success!\n";
+
+    foreach ($entity_names as $entity_name) {
+
+        $entity_info = description_get_entity($entity_name);
+
+        $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
+
+        $docs_entity_file_string = _generate_docs_entity_file($entity_name, $entity_info, $relationship_infos);
+
+        $docs_entity_file_relative_path = 'entity/'.$entity_name.'.md';
+        error_log($docs_entity_file_string, 3, $docs_entity_file = DOCS_DIR.'/'.$docs_entity_file_relative_path);
+        echo "generate $docs_entity_file success!\n";
+        echo "todo ".DOCS_DIR."/sidebar.md include $docs_entity_file_relative_path\n";
     }
 });/*}}}*/
 

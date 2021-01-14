@@ -2,4 +2,4 @@
   - [开始上手](intro.md)
 - 接口文档
 - 实体说明
-  - [商品](entity/goods.md)
+  - [实体关联](entity/relationship.md)

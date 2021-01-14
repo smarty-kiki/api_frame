@@ -70,9 +70,9 @@ function _get_docs_api_template_from_extension($action)
     return false;
 }/*}}}*/
 
-function _get_docs_entity_template_from_extension($action)
+function _get_entity_template_from_extension()
 {/*{{{*/
-    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/entity/'.$action.'/docs.php';
+    $path = DESCRIPTION_ENTITY_EXTENSION_DIR.'/entity.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
@@ -80,9 +80,19 @@ function _get_docs_entity_template_from_extension($action)
     return false;
 }/*}}}*/
 
-function _get_entity_template_from_extension()
+function _get_docs_entity_template_from_extension()
 {/*{{{*/
-    $path = DESCRIPTION_ENTITY_EXTENSION_DIR.'/entity.php';
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/entity/entity/docs.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_docs_entity_relationship_template_from_extension()
+{/*{{{*/
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/entity/relationship/docs.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
@@ -303,8 +313,6 @@ function description_get_entity($entity_name)
 
             if ($formater_from_description_file) {
 
-                echo "$entity_name 的 structs $struct_name 的 data_type 为 enum，用描述文件中的 formater 覆盖 struct_type 中的 formater 设置\n";
-
                 $struct['formater'] = $formater_from_description_file;
             }
 
@@ -477,6 +485,7 @@ function description_get_relationship()
             'self_display' => $from['to_display'],
             'snaps' => $to['from_snaps'],
             'relationship_type' => $relationship_type,
+            'reverse_relationship_type' => 'belongs_to',
             'association_type' => $association_type,
         ];
         $res[$from_entity]['display_for_relationships']['display_for_'.$to['entity'].'_'.$from['to_attribute_name']] = $from['to_display'];
@@ -497,6 +506,7 @@ function description_get_relationship()
             'self_display' => $to['from_display'],
             'snaps' => $from['to_snaps'],
             'relationship_type' => 'belongs_to',
+            'reverse_relationship_type' => $relationship_type,
             'association_type' => $association_type,
         ];
         $res[$to_entity]['display_for_relationships']['display_for_'.$from['entity'].'_'.$to['from_attribute_name']] = $to['from_display'];

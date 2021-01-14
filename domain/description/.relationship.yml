@@ -8,7 +8,7 @@
         - name
   to:
     entity: good
-    from_attribute_name: good
+    from_attribute_name: goods
     from_display: "$this->id"
     from_snaps: []
   relationship_type: has_many

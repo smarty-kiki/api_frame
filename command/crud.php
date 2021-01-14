@@ -1,7 +1,5 @@
 <?php
 
-define('DOCS_DIR', ROOT_DIR.'/docs');
-
 function _generate_controller_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
     $content = _get_controller_template_from_extension('list');
@@ -71,7 +69,7 @@ function _generate_controller_data_type_add($data_type)
 {/*{{{*/
     $content = _get_data_type_controller_from_extension('add', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 add 模版');
+    otherwise($content, '没找到 controller/add/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -80,7 +78,7 @@ function _generate_controller_data_type_detail($data_type)
 {/*{{{*/
     $content = _get_data_type_controller_from_extension('detail', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 detail 模版');
+    otherwise($content, '没找到 controller/detail/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -89,7 +87,7 @@ function _generate_controller_data_type_update($data_type)
 {/*{{{*/
     $content = _get_data_type_controller_from_extension('update', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 update 模版');
+    otherwise($content, '没找到 controller/update/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -98,7 +96,7 @@ function _generate_controller_data_type_list($data_type)
 {/*{{{*/
     $content = _get_data_type_controller_from_extension('list', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 list 模版');
+    otherwise($content, '没找到 controller/list/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -155,7 +153,7 @@ function _generate_docs_api_file($entity_name, $entity_info, $relationship_infos
         'relationship_infos' => $relationship_infos,
     ]);
 
-    $template = "#{$entity_info['display_name']}  
+    $template = "# {$entity_info['display_name']}  
 {$entity_info['description']}
 
 %s
@@ -173,7 +171,7 @@ function _generate_docs_api_data_type_add($data_type)
 {/*{{{*/
     $content = _get_data_type_docs_api_from_extension('add', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 add 模版');
+    otherwise($content, '没找到 docs/api/add/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -182,7 +180,7 @@ function _generate_docs_api_data_type_detail($data_type)
 {/*{{{*/
     $content = _get_data_type_docs_api_from_extension('detail', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 detail 模版');
+    otherwise($content, '没找到 docs/api/detail/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -191,7 +189,7 @@ function _generate_docs_api_data_type_update($data_type)
 {/*{{{*/
     $content = _get_data_type_docs_api_from_extension('update', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 update 模版');
+    otherwise($content, '没找到 docs/api/update/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -200,7 +198,7 @@ function _generate_docs_api_data_type_list($data_type)
 {/*{{{*/
     $content = _get_data_type_docs_api_from_extension('list', $data_type);
 
-    otherwise($content, '没找到 '.$data_type.' 的 list 模版');
+    otherwise($content, '没找到 docs/api/list/data_type/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
@@ -240,6 +238,6 @@ command('crud:make-docs-from-description', '通过描述文件生成 CRUD 相关
         $docs_api_file_relative_path = 'api/'.$entity_name.'.md';
         error_log($docs_api_file_string, 3, $docs_api_file = DOCS_DIR.'/'.$docs_api_file_relative_path);
         echo "generate $docs_api_file success!\n";
-        echo "todo ".ROOT_DIR."/docs/sidebar.md include $docs_api_file_relative_path\n";
+        echo "todo ".DOCS_DIR."/sidebar.md include $docs_api_file_relative_path\n";
     }
 });/*}}}*/

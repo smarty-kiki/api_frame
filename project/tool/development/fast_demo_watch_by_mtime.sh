@@ -38,6 +38,17 @@ generate_file()
                     /bin/bash $ROOT_DIR/project/tool/classmap.sh $ROOT_DIR/domain
                     ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php migrate -tmp_files
 
+                    rm -rf $ROOT_DIR/docs/entity/$entity_name.md
+                    rm -rf $ROOT_DIR/docs/entity/relationship.md
+                    grep -v "\(entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+                    mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    echo delete $ROOT_DIR/docs/entity/$entity_name.md success!
+
+                    ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php entity:make-docs-from-description --entity_name=$entity_name
+                    menu_name=`cat $ROOT_DIR/domain/description/$entity_name.yml | head -n 2 | tail -n 1 | cut -d ' ' -f 2`
+                    /bin/sed -i "/实体关联/a\\ \ \-\ \[$menu_name\]\(entity\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
+                    echo include $ROOT_DIR/docs/entity/$entity_name.md success!
+
                     rm -rf $ROOT_DIR/controller/$entity_name.php
                     grep -v "'\/$entity_name\." $ROOT_DIR/public/index.php > /tmp/index.php
                     mv /tmp/index.php $ROOT_DIR/public/index.php
@@ -50,10 +61,14 @@ generate_file()
                     rm -rf $ROOT_DIR/docs/api/$entity_name.md
                     grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
                     mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    grep -v "\($entity_name\)" $ROOT_DIR/docs/coverpage.md > /tmp/coverpage.md
+                    mv /tmp/coverpage.md $ROOT_DIR/docs/coverpage.md
                     echo delete $ROOT_DIR/docs/api/$entity_name.md success!
+
                     ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-docs-from-description --entity_name=$entity_name
                     menu_name=`cat $ROOT_DIR/domain/description/$entity_name.yml | head -n 2 | tail -n 1 | cut -d ' ' -f 2`
                     /bin/sed -i "/接口文档/a\\ \ \-\ \[$menu_name\]\(api\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
+                    /bin/sed -i "/系统的能力/a\\-\ $menu_name管理\ \($entity_name\)" $ROOT_DIR/docs/coverpage.md
                     echo include $ROOT_DIR/docs/api/$entity_name.md success!
                 fi
 
@@ -69,6 +84,12 @@ generate_file()
                     rm -rf $ROOT_DIR/domain/entity/$entity_name.php
                     echo delete $ROOT_DIR/domain/entity/$entity_name.php success!
 
+                    rm -rf $ROOT_DIR/docs/entity/$entity_name.md
+                    rm -rf $ROOT_DIR/docs/entity/relationship.md
+                    grep -v "\(entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+                    mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    echo delete $ROOT_DIR/docs/entity/$entity_name.md success!
+
                     rm -rf $ROOT_DIR/controller/$entity_name.php
                     grep -v "'\/$entity_name\." $ROOT_DIR/public/index.php > /tmp/index.php
                     mv /tmp/index.php $ROOT_DIR/public/index.php
@@ -77,6 +98,8 @@ generate_file()
                     rm -rf $ROOT_DIR/docs/api/$entity_name.md
                     grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
                     mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
+                    grep -v "\($entity_name\)" $ROOT_DIR/docs/coverpage.md > /tmp/coverpage.md
+                    mv /tmp/coverpage.md $ROOT_DIR/docs/coverpage.md
                     echo delete $ROOT_DIR/docs/api/$entity_name.md success!
 
                     /bin/bash $ROOT_DIR/project/tool/classmap.sh $ROOT_DIR/domain
