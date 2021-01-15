@@ -1,16 +1,2 @@
 ---
-- from:
-    entity: cate
-    to_attribute_name: cate
-    to_display: "$this->id"
-    to_snaps:
-      cate:
-        - name
-  to:
-    entity: good
-    from_attribute_name: goods
-    from_display: "$this->id"
-    from_snaps: []
-  relationship_type: has_many
-  association_type: composition
 ...
