@@ -22,6 +22,15 @@ function _generate_entity_file($entity_name, $entity_info, $relationship_infos)
     return str_replace('^^', '', $entity_content);
 }/*}}}*/
 
+function _generate_entity_struct_group_type($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_entity_template_from_extension($struct_group_type);
+
+    otherwise($content, '没找到 entity/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
 function _generate_dao_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
     $content = _get_dao_template_from_extension();
@@ -39,6 +48,15 @@ function _generate_dao_file($entity_name, $entity_info, $relationship_infos)
     $dao_content = sprintf($template, $dao_content);
 
     return str_replace('^^', '', $dao_content);
+}/*}}}*/
+
+function _generate_dao_struct_group_type($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_dao_template_from_extension($struct_group_type);
+
+    otherwise($content, '没找到 dao/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
 }/*}}}*/
 
 function _generate_migration_file($entity_name, $entity_info, $relationship_infos)

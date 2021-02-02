@@ -40,6 +40,16 @@ function _get_data_type_controller_from_extension($action, $data_type)
     return false;
 }/*}}}*/
 
+function _get_struct_group_controller_from_extension($action, $struct_group_type)
+{/*{{{*/
+    $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/struct_group/'.$struct_group_type.'.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
 function _get_controller_template_from_extension($action)
 {/*{{{*/
     $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/controller.php';
@@ -80,6 +90,16 @@ function _get_entity_template_from_extension()
     return false;
 }/*}}}*/
 
+function _get_struct_group_entity_template_from_extension($struct_group_type)
+{/*{{{*/
+    $path = DESCRIPTION_ENTITY_EXTENSION_DIR.'/struct_group/'.$struct_group_type.'.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
 function _get_docs_entity_template_from_extension()
 {/*{{{*/
     $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/entity/entity/docs.php';
@@ -103,6 +123,16 @@ function _get_docs_entity_relationship_template_from_extension()
 function _get_dao_template_from_extension()
 {/*{{{*/
     $path = DESCRIPTION_DAO_EXTENSION_DIR.'/dao.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_struct_group_dao_template_from_extension($struct_group_type)
+{/*{{{*/
+    $path = DESCRIPTION_DAO_EXTENSION_DIR.'/struct_group/'.$struct_group_type.'.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }
@@ -147,7 +177,7 @@ command('description:demo-description', '创建 demo description 文件', functi
 display_name: 环境
 # description: 环境
 struct_groups:
-  closed_time_interval:
+  - closed_time_interval:
     name: check
     display_name: 检查
 structs:
@@ -280,13 +310,19 @@ function description_get_entity($entity_name)
 
     $description['struct_groups'] = $description['struct_groups'] ?? [];
 
-    foreach ($description['struct_groups'] as &$struct_group) {
+    foreach ($description['struct_groups'] as $key => &$struct_group) {
         if (is_array($struct_group)) {
             $struct_group_type = key($struct_group);
             $struct_group = description_get_struct_group($struct_group_type, $struct_group[$struct_group_type]);
         } else {
             $struct_group = description_get_struct_group($struct_group);
         }
+
+        foreach ($struct_group['structs'] as &$struct) {
+            $struct['struct_group_type'] = $struct_group_type;
+            $struct['struct_group_index'] = $key;
+        }
+
         $description['structs'] = array_replace($struct_group['structs'], $description['structs']);
     }
 
@@ -378,6 +414,7 @@ function description_get_struct_group($struct_group_type, $struct_group_info = [
         'type' => $struct_group_type,
         'structs' => [],
         'struct_name_maps' => [],
+        'struct_group_info' => $struct_group_info,
     ];
 
     if ($struct_group_info) {

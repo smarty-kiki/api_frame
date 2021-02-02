@@ -101,6 +101,15 @@ function _generate_controller_data_type_list($data_type)
     return $content;
 }/*}}}*/
 
+function _generate_controller_struct_group_list($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_controller_from_extension('list', $struct_group_type);
+
+    otherwise($content, '没找到 controller/list/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
 function _generate_docs_api_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
     $content = _get_docs_api_template_from_extension('list');
