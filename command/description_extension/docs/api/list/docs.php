@@ -28,6 +28,9 @@
 @endforeach
 @endforeach
 @endforeach
+@foreach ($entity_info['struct_groups'] as $struct_group)
+{{ blade_eval(_generate_docs_api_struct_group_list($struct_group['type']), ['struct_group_info' => $struct_group['struct_group_info'], 'structs' => $struct_group['structs'], 'struct_name_map' => $struct_group['struct_name_maps']]) }}
+@endforeach
 
 **返回值：**  
 ```json

@@ -327,11 +327,9 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         return {{ $relationship['self_display']}};
     }/*}}}*/
 @endforeach
-@if (not_empty($entity_info['struct_groups']))
 @foreach ($entity_info['struct_groups'] as $struct_group)
 
 {{ blade_eval(_generate_entity_struct_group_type($struct_group['type']), ['struct_group_info' => $struct_group['struct_group_info'], 'structs' => $struct_group['structs'], 'struct_name_map' => $struct_group['struct_name_maps']]) }}
 @endforeach
-@endif
     /* generated code end */
 }

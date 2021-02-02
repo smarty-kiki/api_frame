@@ -27,12 +27,10 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         {{ implode(', ', array_map(function($v) { return "'".$v."'"; }, $inputs)) }}
 
     );
-@if (not_empty($entity_info['struct_groups']))
 @foreach ($entity_info['struct_groups'] as $struct_group)
 
 {{ blade_eval(_generate_controller_struct_group_list($struct_group['type']), ['struct_group_info' => $struct_group['struct_group_info'], 'structs' => $struct_group['structs'], 'struct_name_map' => $struct_group['struct_name_maps']]) }}
 @endforeach
-@endif
 
     $inputs = array_filter($inputs, 'not_null');
 

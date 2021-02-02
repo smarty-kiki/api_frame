@@ -212,6 +212,15 @@ function _generate_docs_api_data_type_list($data_type)
     return $content;
 }/*}}}*/
 
+function _generate_docs_api_struct_group_list($data_type)
+{/*{{{*/
+    $content = _get_struct_group_docs_api_from_extension('list', $data_type);
+
+    otherwise($content, '没找到 docs/api/list/struct_group/'.$data_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
 command('crud:make-from-description', '通过描述文件生成 CRUD 控制器', function ()
 {/*{{{*/
     $entity_names = _get_entity_name_by_command_paramater();

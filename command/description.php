@@ -70,6 +70,16 @@ function _get_data_type_docs_api_from_extension($action, $data_type)
     return false;
 }/*}}}*/
 
+function _get_struct_group_docs_api_from_extension($action, $data_type)
+{/*{{{*/
+    $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/api/'.$action.'/struct_group/'.$data_type.'.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
 function _get_docs_api_template_from_extension($action)
 {/*{{{*/
     $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/api/'.$action.'/docs.php';
@@ -318,10 +328,11 @@ function description_get_entity($entity_name)
             $struct_group = description_get_struct_group($struct_group);
         }
 
-        foreach ($struct_group['structs'] as &$struct) {
+        $struct_group['structs'] = array_map(function ($struct) use ($struct_group_type, $key) {
             $struct['struct_group_type'] = $struct_group_type;
             $struct['struct_group_index'] = $key;
-        }
+            return $struct;
+        }, $struct_group['structs']);
 
         $description['structs'] = array_replace($struct_group['structs'], $description['structs']);
     }
