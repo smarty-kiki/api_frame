@@ -28,6 +28,8 @@ sed_name $ROOT_DIR/project/tool/production/after_push.sh $1
 sed_name $ROOT_DIR/project/tool/production/check_update.sh $1
 
 # docs
+sed_name $ROOT_DIR/README.md $1
+
 sed_name $ROOT_DIR/docs/index.html $1
 sed_name $ROOT_DIR/docs/README.md $1
 sed_name $ROOT_DIR/docs/coverpage.md $1
