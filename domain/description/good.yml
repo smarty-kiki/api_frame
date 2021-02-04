@@ -1,7 +1,0 @@
----
-display_name: 商品
-structs:
-  name:
-    type: name
-repeat_check_structs: []
-...
