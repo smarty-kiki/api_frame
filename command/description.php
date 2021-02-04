@@ -162,7 +162,7 @@ function _get_migration_template_from_extension()
 
 function _get_struct_types_from_extension()
 {/*{{{*/
-    $file_paths = glob(DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/*.php');
+    $file_paths = glob(DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/*.yml');
 
     return array_build($file_paths, function ($k, $file_path) {
 
@@ -172,7 +172,7 @@ function _get_struct_types_from_extension()
 
 function _get_data_types_from_extension()
 {/*{{{*/
-    $file_paths = glob(DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/*.php');
+    $file_paths = glob(DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/*.yml');
 
     return array_build($file_paths, function ($k, $file_path) {
 
@@ -397,11 +397,11 @@ function description_get_entity($entity_name)
 
 function description_get_struct_type($struct_type)
 {/*{{{*/
-    $path = DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/'.$struct_type.'.php';
+    $path = DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/'.$struct_type.'.yml';
 
     otherwise(is_file($path), "字段类型 $struct_type 配置文件没找到");
 
-    $res = include $path;
+    $res = (array) yaml_parse_file($path);
 
     otherwise(isset($res['data_type']), "$path 中需设置 data_type");
     otherwise(isset($res['display_name']), "$path 中需设置 display_name");
@@ -446,11 +446,11 @@ function description_get_struct_group($struct_group_type, $struct_group_info = [
 
 function description_get_data_type($data_type)
 {/*{{{*/
-    $path = DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/'.$data_type.'.php';
+    $path = DESCRIPTION_DATA_TYPE_EXTENSION_DIR.'/'.$data_type.'.yml';
 
     otherwise(is_file($path), "数据类型 $data_type 配置文件没找到");
 
-    $res = include $path;
+    $res = (array) yaml_parse_file($path);
 
     otherwise(isset($res['database_field']), "$path 中需设置 database_field");
     otherwise(array_key_exists('type', $res['database_field']), "$path 中的 database_field 中需设置 type");
