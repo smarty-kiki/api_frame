@@ -1,5 +1,8 @@
 database_field:
   type: int
-  length: 11
+  length: $(length)
   allow_null: false
+  default: $(default)
+option:
+  length: 11
   default: 0

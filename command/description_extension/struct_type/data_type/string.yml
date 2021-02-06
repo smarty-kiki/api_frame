@@ -1,5 +1,7 @@
 database_field:
   type: varchar
-  length: 255
+  length: $(length)
   allow_null: true
   default: null
+option:
+  length: 255
