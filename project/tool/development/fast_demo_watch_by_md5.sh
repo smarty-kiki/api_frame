@@ -24,8 +24,8 @@ do
     then
         echo "$diff_line" | while read line
     do
-        old_file_name=`echo $line | awk '{print $4}'`
-        new_file_name=`echo $line | awk '{print $9}'`
+        old_file_name=`echo $line | awk '{print $2}'`
+        new_file_name=`echo $line | awk '{print $5}'`
         if [ "$old_file_name" = "$new_file_name" ]
         then
             generate_file MODIFY $new_file_name
@@ -42,7 +42,7 @@ do
     then
         echo "$delete_line" | while read line
     do
-        file_name=`echo $line | awk '{print $4}'`
+        file_name=`echo $line | awk '{print $2}'`
         generate_file DELETE $file_name
     done
     fi
@@ -53,7 +53,7 @@ do
     then
         echo "$create_line" | while read line
     do
-        file_name=`echo $line | awk '{print $5}'`
+        file_name=`echo $line | awk '{print $3}'`
         generate_file CREATE $file_name
     done
     fi
