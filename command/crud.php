@@ -101,6 +101,33 @@ function _generate_controller_data_type_list($data_type)
     return $content;
 }/*}}}*/
 
+function _generate_controller_struct_group_add($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_controller_from_extension('add', $struct_group_type);
+
+    otherwise($content, '没找到 controller/add/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
+function _generate_controller_struct_group_detail($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_controller_from_extension('detail', $struct_group_type);
+
+    otherwise($content, '没找到 controller/detail/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
+function _generate_controller_struct_group_update($struct_group_type)
+{/*{{{*/
+    $content = _get_struct_group_controller_from_extension('update', $struct_group_type);
+
+    otherwise($content, '没找到 controller/update/struct_group/'.$struct_group_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
 function _generate_controller_struct_group_list($struct_group_type)
 {/*{{{*/
     $content = _get_struct_group_controller_from_extension('list', $struct_group_type);
@@ -208,6 +235,33 @@ function _generate_docs_api_data_type_list($data_type)
     $content = _get_data_type_docs_api_from_extension('list', $data_type);
 
     otherwise($content, '没找到 docs/api/list/data_type/'.$data_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
+function _generate_docs_api_struct_group_add($data_type)
+{/*{{{*/
+    $content = _get_struct_group_docs_api_from_extension('add', $data_type);
+
+    otherwise($content, '没找到 docs/api/add/struct_group/'.$data_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
+function _generate_docs_api_struct_group_detail($data_type)
+{/*{{{*/
+    $content = _get_struct_group_docs_api_from_extension('detail', $data_type);
+
+    otherwise($content, '没找到 docs/api/detail/struct_group/'.$data_type.'.php 模版');
+
+    return $content;
+}/*}}}*/
+
+function _generate_docs_api_struct_group_update($data_type)
+{/*{{{*/
+    $content = _get_struct_group_docs_api_from_extension('update', $data_type);
+
+    otherwise($content, '没找到 docs/api/update/struct_group/'.$data_type.'.php 模版');
 
     return $content;
 }/*}}}*/
