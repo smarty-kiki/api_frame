@@ -7,9 +7,13 @@ env=development
 event=$1
 filenames=$(basename "$2")
 
+echog()
+{
+    php -r "echo \"\033[32m\"; echo '$1'; echo \"\033[0m\n\";" >&2
+}
+
 if [ "${filenames##*.}" = "yml" ]
 then
-    (
     if [ "$filenames" = ".relationship.yml" ]
     then
         filenames=`ls $ROOT_DIR/domain/description/`
@@ -18,11 +22,11 @@ then
 
     for filename in $filenames
     do
+        (
         entity_name=${filename%.*}
 
-
         if [ "$event" = "CREATE" ] || [ "$event" = "MODIFY" ];then
-            echo "\033[32mwatch $filename generate \033[0m"
+            echog "watch $filename generate"
 
             ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php migrate:reset
             rm -rf $ROOT_DIR/command/migration/tmp/*[0-9]_$entity_name.sql
@@ -67,7 +71,8 @@ then
         fi
 
         if [ "$event" = "DELETE" ];then
-            echo "\033[32mwatch $filename delete \033[0m"
+
+            echog "watch $filename delete"
 
             ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php migrate:reset
             rm -rf $ROOT_DIR/command/migration/tmp/*[0-9]_$entity_name.sql
@@ -100,7 +105,6 @@ then
             ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php migrate -tmp_files
         fi
 
+        ) | column -t | perl -pe "s/(^migrate|^include)|(delete)|(todo)|(^generate)/\\e[1;34m\$1\\e[0m\\e[1;31m\$2\\e[0m\e[1;30m\$3\\e[0m\e[1;32m\$4\\e[0m/gi"
     done
-
-    ) | column -t
 fi
