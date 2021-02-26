@@ -446,6 +446,7 @@ command('migrate:make', '新建 migration', function ()
 {/*{{{*/
     $name = command_paramater('name');
 
+    _migration_run(_migration_files());
     $new_db_detail = _migration_db_detail();
 
     _migration_reset();
