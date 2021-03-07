@@ -43,9 +43,6 @@ $struct_default = $struct['database_field']['default'];
 @endforeach
     ];
 
-    public static $entity_display_name = '{{ $entity_info['display_name'] }}';
-    public static $entity_description = '{{ $entity_info['description'] }}';
-
     public static $struct_data_types = [
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
@@ -78,21 +75,6 @@ $struct_default = $struct['database_field']['default'];
 @endforeach
     ];
 
-    public static $struct_descriptions = [
-@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
-@if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attribute_name }}_id' => '{{ $relationship['entity_display_name'] }}ID',
-@foreach ($relationship['snaps'] as $structs)
-@foreach ($structs as $struct_name => $struct)
-        '{{ $struct_name }}' => '{{ $struct['description'] }}',
-@endforeach
-@endforeach
-@endif
-@endforeach
-@foreach ($entity_info['structs'] as $struct_name => $struct)
-        '{{ $struct_name }}' => '{{ $struct['description'] }}',
-@endforeach
-    ];
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['data_type'] === 'enum')
 
