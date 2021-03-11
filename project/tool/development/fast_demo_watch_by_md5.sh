@@ -5,12 +5,14 @@ ROOT_DIR=`readlink -f $ROOT_DIR`
 OLD_MD5_FILE=/tmp/fast_demo_watch_md5.old
 NEW_MD5_FILE=/tmp/fast_demo_watch_md5.new
 
-find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 md5sum > $OLD_MD5_FILE
-
 generate_file()
 {
     /bin/sh $ROOT_DIR/project/tool/development/fast_demo_generate_file.sh $1 $2
 }
+
+generate_file INIT whatever
+
+find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 md5sum > $OLD_MD5_FILE
 
 while true
 do

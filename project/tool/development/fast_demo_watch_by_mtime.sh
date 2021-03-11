@@ -5,12 +5,14 @@ ROOT_DIR=`readlink -f $ROOT_DIR`
 OLD_MTIME_FILE=/tmp/fast_demo_watch_mtime.old
 NEW_MTIME_FILE=/tmp/fast_demo_watch_mtime.new
 
-find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 stat -c '%y %n' > $OLD_MTIME_FILE
-
 generate_file()
 {
     /bin/sh $ROOT_DIR/project/tool/development/fast_demo_generate_file.sh $1 $2
 }
+
+generate_file INIT whatever
+
+find $ROOT_DIR/domain/description/ -type f -print0 | xargs -0 stat -c '%y %n' > $OLD_MTIME_FILE
 
 while true
 do

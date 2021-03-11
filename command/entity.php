@@ -166,9 +166,9 @@ function _merge_content_by_annotate($content_outside, $content_inside)
 
 command('entity:make-from-description', '从实体描述文件初始化 entity、dao、migration', function ()
 {/*{{{*/
-    $entity_names = _get_entity_name_by_command_paramater();
+    $entity_name = command_paramater('entity_name', '');
 
-    foreach ($entity_names as $entity_name) {
+    if ($entity_name) {
 
         $entity_info = description_get_entity($entity_name);
 
@@ -189,17 +189,15 @@ command('entity:make-from-description', '从实体描述文件初始化 entity�
         $migration_tmp_path = migration_tmp_file_path($entity_name);
         $migration_content = _generate_migration_file($entity_name, $entity_info, $relationship_infos);
 
-        file_put_contents($entity_path, $entity_new_content); echo "generate $entity_path success!\n";
-        file_put_contents($dao_path, $dao_new_content); echo "generate $dao_path success!\n";
-        file_put_contents($migration_tmp_path, $migration_content); echo "generate $migration_tmp_path success!\n";
-
-        echo "todo ".ROOT_DIR."/domain/autoload.php generate\n";
+        file_put_contents($entity_path, $entity_new_content); echo "$entity_path\n";
+        file_put_contents($dao_path, $dao_new_content); echo "$dao_path\n";
+        file_put_contents($migration_tmp_path, $migration_content); echo "$migration_tmp_path\n";
     }
 });/*}}}*/
 
 command('entity:make-docs-from-description', '从实体描述文件初始化 entity、dao、migration', function ()
 {/*{{{*/
-    $entity_names = _get_entity_name_by_command_paramater();
+    $entity_name = command_paramater('entity_name', '');
 
     $all_relationship_infos = description_get_relationship();
 
@@ -207,9 +205,9 @@ command('entity:make-docs-from-description', '从实体描述文件初始化 ent
 
     $docs_entity_relationship_file_relative_path = 'entity/relationship.md';
     error_log($docs_entity_relationship_file_string, 3, $docs_entity_relationship_file = DOCS_DIR.'/'.$docs_entity_relationship_file_relative_path);
-    echo "generate $docs_entity_relationship_file success!\n";
+    echo $docs_entity_relationship_file."\n";
 
-    foreach ($entity_names as $entity_name) {
+    if ($entity_name) {
 
         $entity_info = description_get_entity($entity_name);
 
@@ -219,8 +217,7 @@ command('entity:make-docs-from-description', '从实体描述文件初始化 ent
 
         $docs_entity_file_relative_path = 'entity/'.$entity_name.'.md';
         error_log($docs_entity_file_string, 3, $docs_entity_file = DOCS_DIR.'/'.$docs_entity_file_relative_path);
-        echo "generate $docs_entity_file success!\n";
-        echo "todo ".DOCS_DIR."/sidebar.md include $docs_entity_file_relative_path\n";
+        echo $docs_entity_file."\n";
     }
 });/*}}}*/
 

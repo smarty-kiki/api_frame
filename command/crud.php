@@ -277,9 +277,11 @@ function _generate_docs_api_struct_group_list($data_type)
 
 command('crud:make-from-description', '通过描述文件生成 CRUD 控制器', function ()
 {/*{{{*/
-    $entity_names = _get_entity_name_by_command_paramater();
+    $entity_name = command_paramater('entity_name', '');
 
-    foreach ($entity_names as $entity_name) {
+    if ($entity_name) {
+
+        $output_file_name = command_paramater('output_file', '');
 
         $entity_info = description_get_entity($entity_name);
 
@@ -287,18 +289,21 @@ command('crud:make-from-description', '通过描述文件生成 CRUD 控制器',
 
         $controller_file_string = _generate_controller_file($entity_name, $entity_info, $relationship_infos);
 
+        if (empty($output_file_name)) {
+            $output_file_name = CONTROLLER_DIR.'/'.$entity_name.'.php';
+        }
+
         // 写文件
-        error_log($controller_file_string, 3, $controller_file = CONTROLLER_DIR.'/'.$entity_name.'.php');
-        echo "generate $controller_file success!\n";
-        echo "todo ".ROOT_DIR."/public/index.php include $controller_file\n";
+        error_log($controller_file_string, 3, $output_file_name);
+        echo $output_file_name."\n";
     }
 });/*}}}*/
 
 command('crud:make-docs-from-description', '通过描述文件生成 CRUD 相关接口文档', function ()
 {/*{{{*/
-    $entity_names = _get_entity_name_by_command_paramater();
+    $entity_name = command_paramater('entity_name', '');
 
-    foreach ($entity_names as $entity_name) {
+    if ($entity_name) {
 
         $entity_info = description_get_entity($entity_name);
 
@@ -309,7 +314,6 @@ command('crud:make-docs-from-description', '通过描述文件生成 CRUD 相关
         // 写文件
         $docs_api_file_relative_path = 'api/'.$entity_name.'.md';
         error_log($docs_api_file_string, 3, $docs_api_file = DOCS_DIR.'/'.$docs_api_file_relative_path);
-        echo "generate $docs_api_file success!\n";
-        echo "todo ".DOCS_DIR."/sidebar.md include $docs_api_file_relative_path\n";
+        echo $docs_api_file."\n";
     }
 });/*}}}*/

@@ -11,25 +11,6 @@ define('DESCRIPTION_ENTITY_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/entity');
 define('DESCRIPTION_DAO_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/dao');
 define('DESCRIPTION_MIGRATION_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/migration');
 
-function _get_entity_name_by_command_paramater()
-{/*{{{*/
-    $entity_name = command_paramater('entity_name', '*');
-
-    if ($entity_name === '*') {
-
-        $file_paths = glob(DESCRIPTION_DIR.'/*.yml');
-
-        $entity_names = array_build($file_paths, function ($k, $file_path) {
-
-            return [$k, pathinfo($file_path)['filename']];
-        });
-    } else {
-        $entity_names = [$entity_name];
-    }
-
-    return $entity_names;
-}/*}}}*/
-
 function _get_data_type_controller_from_extension($action, $data_type)
 {/*{{{*/
     $path = DESCRIPTION_CONTROLLER_EXTENSION_DIR.'/'.$action.'/data_type/'.$data_type.'.php';
@@ -265,7 +246,12 @@ command('description:make-relationship-description', '通过交互式输入创�
 
     $relationships = (array) yaml_parse_file($path);
 
-    $entity_names = _get_entity_name_by_command_paramater();
+    $file_paths = glob(DESCRIPTION_DIR.'/*.yml');
+
+    $entity_names = array_build($file_paths, function ($k, $file_path) {
+
+        return [$k, pathinfo($file_path)['filename']];
+    });
 
     $s = 0;
     while (command_read_bool('Add relationship')) {
