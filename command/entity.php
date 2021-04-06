@@ -235,10 +235,11 @@ command('entity:restep-last-id', '刷新 ID 生成器的最新 id', function ()
         $table = reset($v);
         if ($table !== MIGRATION_TABLE) {
 
-            $max_id = db_query_value('id', 'select id from '.$table.' order by id desc');
+            $cache_key = $table.IDGENTER_CACHE_KEY_SUFFIX;
+
+            $max_id = db_query_value('id', 'select id from `'.$table.'` order by id desc');
             if ($max_id > 0) {
 
-                $cache_key = $table.IDGENTER_CACHE_KEY_SUFFIX;
                 $max_id_info = '';
 
                 $now_last_id = cache_get($cache_key);
@@ -250,6 +251,9 @@ command('entity:restep-last-id', '刷新 ID 生成器的最新 id', function ()
                 $res = cache_increment($cache_key, $max_id);
                 $max_id_infos[$table] = $max_id_info.$max_id;
                 $col_width = max($col_width, (strlen($table) + 3));
+            } else {
+
+                cache_delete($cache_key);
             }
         }
     }
