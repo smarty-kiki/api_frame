@@ -37,8 +37,10 @@
 {
     "code": 0,
     "msg": "",
-    "count": 0, // 查询出来的{{ $entity_info['display_name'] }}数量
-    "data": [], // 查询出来的{{ $entity_info['display_name'] }}数组
+    "data": [
+        "count": 0, // 查询出来的{{ $entity_info['display_name'] }}数量
+        "{{ english_word_pluralize($entity_name) }}": [] // 查询出来的{{ $entity_info['display_name'] }}数组
+    ],
 }
 ```
 {{ $entity_info['display_name'] }}数组包含多个{{ $entity_info['display_name'] }}结构，单个结构的格式为

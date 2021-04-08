@@ -5,14 +5,12 @@ if_get('/', function ()
     return 'hello world';
 });
 
-if_get('/exception', function ()
+if_get('/health_check', function ()
 {
-    otherwise_error_code(10001,
-        1 === 2,
-        [
-            ':replace' => '1 不等于 2',
-        ]
-    );
+    return 'ok';
+});
 
-    return 'whatever';
+if_get('/error_code_maps', function ()
+{
+    return config('error_code');
 });

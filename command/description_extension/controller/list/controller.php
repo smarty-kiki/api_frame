@@ -37,10 +37,8 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     ${{ english_word_pluralize($entity_name) }} = dao('{{ $entity_name }}')->find_all_by_column($inputs);
 
     return [
-        'code' => 0,
-        'msg'  => '',
         'count' => count(${{ english_word_pluralize($entity_name) }}),
-        'data' => array_build(${{ english_word_pluralize($entity_name) }}, function ($id, ${{ $entity_name }}) {
+        '{{ english_word_pluralize($entity_name) }}' => array_build(${{ english_word_pluralize($entity_name) }}, function ($id, ${{ $entity_name }}) {
             return [
                 null,
                 [

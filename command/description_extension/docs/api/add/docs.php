@@ -39,6 +39,9 @@ foreach ($repeat_check_structs as $struct_name) {
 {
     "code": 0,
     "msg": "",
+    "data": [
+        "id": 1 //{{ $entity_info['display_name'] }} id
+    ]
 }
 ```
 

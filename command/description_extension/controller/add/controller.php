@@ -18,6 +18,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
     $input_infos[] = "$$struct_name = input('$struct_name')";
 
     if ($struct['require']) {
+        $input_infos[] = "otherwise_error_code('".strtoupper($entity_name.'_REQUIRE_'.$struct_name)."', $$struct_name)";
         $param_infos[] = "$$struct_name";
     } else {
         $setting_lines[] = "$$entity_name->$struct_name = $$struct_name";
@@ -27,7 +28,6 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @foreach ($input_infos as $input_info)
     {{ $input_info }};
 @endforeach
-
 @if ($entity_info['repeat_check_structs'])
 @php
 $repeat_check_structs = $entity_info['repeat_check_structs'];
@@ -38,8 +38,9 @@ foreach ($repeat_check_structs as $struct_name) {
     $msg_infos[] = $entity_info['structs'][$struct_name]['display_name'];
 }
 @endphp
+
     $another_{{ $entity_name }} = dao('{{ $entity_name }}')->find_by_{{ implode('_and_', $repeat_check_structs) }}({{ implode(', ', $dao_param_infos) }});
-    otherwise($another_{{ $entity_name }}->is_null(), '已经存在相同{{ implode('和', $msg_infos) }}的{{ $entity_info['display_name'] }} [ID: '.$another_{{ $entity_name }}->id.']');
+    otherwise_error_code('{{ strtoupper($entity_name.'_DUPLICATED') }}', $another_{{ $entity_name }}->is_null(), [':{{ $entity_name }}_id' => $another_{{ $entity_name }}->id]);
 @endif
 
 @if (empty($param_infos))
@@ -57,7 +58,6 @@ foreach ($repeat_check_structs as $struct_name) {
 @endif
 
     return [
-        'code' => 0,
-        'msg' => '',
+        'id' => ${{ $entity_name }}->id,
     ];
 });/*}}}*/

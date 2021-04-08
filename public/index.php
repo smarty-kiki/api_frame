@@ -12,13 +12,19 @@ register_shutdown_function('http_fatel_err_action');
 
 if_has_exception(function ($ex) {
 
-    log_exception($ex);
+    $error_info = otherwise_get_error_info($ex);
+
+    if ($ex instanceof business_exception) {
+        log_module('business_exception', $error_info['message']);
+    } else {
+        log_exception($ex);
+    }
 
     header('Content-type: application/json');
 
     return json([
-        'code' => $ex->getCode(),
-        'msg' => $ex->getMessage(),
+        'code' => $error_info['code'],
+        'msg' => $error_info['message'],
         'data' => [],
     ]);
 });
@@ -27,11 +33,15 @@ if_verify(function ($action, $args) {
 
     return unit_of_work(function () use ($action, $args){
 
-        $data = call_user_func_array($action, $args);
+        $res = [
+            'code' => 0,
+            'msg'  => '',
+            'data' => call_user_func_array($action, $args),
+        ];
 
         header('Content-type: application/json');
 
-        return json($data);
+        return json($res);
     });
 });
 

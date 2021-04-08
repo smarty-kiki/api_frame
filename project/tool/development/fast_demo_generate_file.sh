@@ -16,7 +16,7 @@ echog()
     php -r "echo \"\033[32m\"; echo '$1'; echo \"\033[0m\n\";" >&2
 }
 
-alias echo_filter='column -t | perl -pe "s/(^migrate|^include)|(^delete|^uninclude)|(^todo)|(^generate)/\\e[1;34m\$1\\e[0m\\e[1;31m\$2\\e[0m\e[1;30m\$3\\e[0m\e[1;32m\$4\\e[0m/gi"'
+alias echo_filter='column -t | perl -pe "s/(^migrate|^include)|(^delete|^uninclude|^clean)|(^todo)|(^generate)/\\e[1;34m\$1\\e[0m\\e[1;31m\$2\\e[0m\e[1;30m\$3\\e[0m\e[1;32m\$4\\e[0m/gi"'
 
 if [ "$event" = "INIT" ]
 then
@@ -111,6 +111,12 @@ then
             /bin/sed -i "/init\ controller/a\include\ CONTROLLER_DIR\.\'\/$entity_name\.php\'\;" $ROOT_DIR/public/index.php
             echo include $ROOT_DIR/controller/$entity_name.php success!
 
+            error_code_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-error-code-from-description --entity_name=$entity_name`
+            echo generate $error_code_file success!
+
+            error_code_doc_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-error-code-docs-from-description --entity_name=$entity_name`
+            echo generate $error_code_doc_file success!
+
             rm -rf $ROOT_DIR/docs/api/$entity_name.md
             grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
             mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
@@ -148,6 +154,12 @@ then
             grep -v "'\/$entity_name\." $ROOT_DIR/public/index.php > /tmp/index.php
             mv /tmp/index.php $ROOT_DIR/public/index.php
             echo delete $ROOT_DIR/controller/$entity_name.php success!
+
+            sed -i "/\/\*\ generated\ ${entity_name}\ start\ \*\//,/\/\*\ generated\ ${entity_name}\ end\ \*\//d" $ROOT_DIR/config/error_code.php
+            echo clean $ROOT_DIR/config/error_code.php success!
+
+            sed -i "/\[\^\_\^\]:\ ${entity_name}_start/,/\[\^\_\^\]:\ ${entity_name}_end/d" $ROOT_DIR/docs/error_code.md
+            echo clean $ROOT_DIR/docs/error_code.md success!
 
             rm -rf $ROOT_DIR/docs/api/$entity_name.md
             grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
