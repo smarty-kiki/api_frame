@@ -82,7 +82,7 @@ $repeat_check_structs = $entity_info['repeat_check_structs'];
     key `idx_{{ implode('_and_', $repeat_check_structs) }}` (`{{ implode('`, `', $repeat_check_structs) }}`, `delete_time`),
 @endif
     primary key (`id`)
-) engine=innodb default charset=utf8;
+) engine=innodb default charset=utf8mb4;
 
 # down
 drop table `{{ $entity_name }}`;
