@@ -9,3 +9,4 @@ mysql -e "create database \`default\`;\
 
 ENV=development php $ROOT_DIR/public/cli.php migrate:install
 ENV=development php $ROOT_DIR/public/cli.php migrate
+ENV=development php $ROOT_DIR/public/cli.php migrate -tmp_files
