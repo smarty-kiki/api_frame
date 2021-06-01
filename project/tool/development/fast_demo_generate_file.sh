@@ -81,8 +81,11 @@ then
             if [ -r $output_controller_file ]
             then
                 output_controller_file=$controller_file_new
+                output_controller_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-from-description --entity_name=$entity_name --output_file=$output_controller_file`
+            else
+                output_controller_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-from-description --entity_name=$entity_name --output_file=$output_controller_file`
+                cp $output_controller_file $controller_file_old
             fi
-            output_controller_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-from-description --entity_name=$entity_name --output_file=$output_controller_file`
             echo generate $output_controller_file success!
             if [ -r $controller_file_new ]
             then
