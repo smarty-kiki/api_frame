@@ -19,6 +19,7 @@ mv $ROOT_DIR/project/config/production/supervisor/api_frame_queue_worker.conf $R
 
 sed_name $ROOT_DIR/project/config/development/nginx/$1.conf $1
 sed_name $ROOT_DIR/project/config/development/supervisor/$1_queue_worker.conf $1
+sed_name $ROOT_DIR/project/config/development/supervisor/queue_job_watch.conf $1
 sed_name $ROOT_DIR/project/config/production/nginx/$1.conf $1
 sed_name $ROOT_DIR/project/config/production/supervisor/$1_queue_worker.conf $1
 sed_name $ROOT_DIR/project/tool/start_development_server.sh $1
