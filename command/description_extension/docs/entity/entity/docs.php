@@ -18,12 +18,12 @@ entity ..> Serializable
 {{ $entity_name }} --> entity
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-{{ $entity_name }} "{{ $relationship['reverse_relationship_type'] === 'has_many'? '*':'1' }}" <--{{ $relationship['association_type'] === 'composition'? '*': 'o' }} "1" {{ $relationship['entity'] }} : {{ english_word_camelize($relationship['association_type']) }}  
+{{ $entity_name }} "{{ $relationship['reverse_relationship_type'] === 'has_many'? '*':'1' }}" <--{{ $relationship['association_type'] === 'composition'? '*': 'o' }} "1" {{ $relationship['entity'] }} : {{ $attribute_name }}  
 @php
 $diagram_infos[] = $attribute_name.'_id';
 @endphp
 @else
-{{ $entity_name }} "1" {{ $relationship['association_type'] === 'composition'? '*': 'o' }}--> "{{ $relationship['relationship_type'] === 'has_many'? '*':'1' }}" {{ $relationship['entity'] }} : {{ english_word_camelize($relationship['association_type']) }}  
+{{ $entity_name }} "1" {{ $relationship['association_type'] === 'composition'? '*': 'o' }}--> "{{ $relationship['relationship_type'] === 'has_many'? '*':'1' }}" {{ $relationship['entity'] }} : {{ $attribute_name }}  
 @endif
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
@@ -63,12 +63,12 @@ $diagram_infos = [
 erDiagram
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-    {{ $entity_name }} {{ $relationship['reverse_relationship_type'] === 'has_many'? '}': '|' }}{{ $relationship['association_type'] === 'composition'? '|': 'o' }}--|| {{ $relationship['entity'] }} : {{ english_word_camelize($relationship['association_type']) }}  
+    {{ $entity_name }} {{ $relationship['reverse_relationship_type'] === 'has_many'? '}': '|' }}{{ $relationship['association_type'] === 'composition'? '|': 'o' }}--|| {{ $relationship['entity'] }} : {{ $attribute_name }}  
 @php
 $diagram_infos[$attribute_name.'_id'] = 'id';
 @endphp
 @else
-    {{ $entity_name }} ||--{{ $relationship['association_type'] === 'composition'? '|': 'o' }}{{ $relationship['relationship_type'] === 'has_many'? '{':'|' }} {{ $relationship['entity'] }} : {{ english_word_camelize($relationship['association_type']) }}  
+    {{ $entity_name }} ||--{{ $relationship['association_type'] === 'composition'? '|': 'o' }}{{ $relationship['relationship_type'] === 'has_many'? '{':'|' }} {{ $relationship['entity'] }} : {{ $attribute_name }}  
 @endif
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
