@@ -27,7 +27,7 @@ $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 @if ($relationship['require'])
-    ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', null, '{{ $attribute_name }}_id');
+    ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', '{{ $attribute_name }}_id', true);
 @else
     ${{ $entity_name }}->{{ $attribute_name }} = dao('{{ $entity }}')->find(input('{{ $attribute_name }}_id'));
 @endif
