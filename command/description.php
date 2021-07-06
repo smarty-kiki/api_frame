@@ -201,7 +201,7 @@ structs:
       length: 15
       allow_null: true
       default: null
-    formater:
+    validator:
       - reg: /^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$/
         failed_message: IP 不是有效的 IP 格式
     display_name: IP 地址
@@ -351,7 +351,7 @@ function description_get_entity($entity_name)
 
         foreach ($description['structs'] as $struct_name => &$struct) {
 
-            $formater_from_description_file = $struct['formater'] ?? [];
+            $validator_from_description_file = $struct['validator'] ?? [];
 
             if (isset($struct['type'])) {
 
@@ -370,28 +370,28 @@ function description_get_entity($entity_name)
 
             if ($struct['data_type'] === 'enum') {
 
-                if ($formater_from_description_file) {
+                if ($validator_from_description_file) {
 
-                    $struct['formater'] = $formater_from_description_file;
+                    $struct['validator'] = $validator_from_description_file;
                 }
 
-                otherwise(isset($struct['formater']), 'data_type 为 enum 时需要设置 formater');
-                otherwise(is_array($struct['formater']), 'data_type 为 enum 时 formater 需要是数组');
+                otherwise(isset($struct['validator']), 'data_type 为 enum 时需要设置 validator');
+                otherwise(is_array($struct['validator']), 'data_type 为 enum 时 validator 需要是数组');
             } else {
 
-                if (isset($struct['formater'])) {
+                if (isset($struct['validator'])) {
 
-                    foreach ($struct['formater'] as &$formater) {
+                    foreach ($struct['validator'] as &$validator) {
 
-                        otherwise(is_array($formater), 'formater 中的元素需要是数组');
+                        otherwise(is_array($validator), 'validator 中的元素需要是数组');
 
-                        if (isset($formater['reg'])) {
+                        if (isset($validator['reg'])) {
 
-                            $formater['failed_message'] = $formater['failed_message'] ?? "$struct_name 需满足正则表达式 {$formater['reg']}";
+                            $validator['failed_message'] = $validator['failed_message'] ?? "$struct_name 需满足正则表达式 {$validator['reg']}";
 
-                        } elseif (isset($formater['function'])) {
+                        } elseif (isset($validator['function'])) {
 
-                            $formater['failed_message'] = $formater['failed_message'] ?? "$struct_name 需满足逻辑 {$formater['function']}";
+                            $validator['failed_message'] = $validator['failed_message'] ?? "$struct_name 需满足逻辑 {$validator['function']}";
                         }
                     }
                 }

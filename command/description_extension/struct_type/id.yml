@@ -1,5 +1,5 @@
 data_type: number
-formater:
+validator:
   - function: 'mb_strlen($value) <= $(length)'
     failed_message: 不能超过 $(length) 位
   - function: 'is_numeric($value)'

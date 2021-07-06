@@ -78,12 +78,12 @@ $struct_default = $struct['database_field']['default'];
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['data_type'] === 'enum')
 
-@foreach ($struct['formater'] as $value => $description)
+@foreach ($struct['validator'] as $value => $description)
     const {{ strtoupper($struct_name.'_'.$value) }} = '{{ strtoupper($value) }}';
 @endforeach
 
     const {{ strtoupper($struct_name) }}_MAPS = [
-@foreach ($struct['formater'] as $value => $description)
+@foreach ($struct['validator'] as $value => $description)
         self::{{ strtoupper($struct_name.'_'.$value) }} => '{{ $description }}',
 @endforeach
     ];
@@ -162,25 +162,25 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endif
     }/*}}}*/
 
-    public static function struct_formaters($property)
+    public static function struct_validators($property)
     {/*^^{^^{^^{*/
-        $formaters = [
+        $validators = [
 @foreach ($entity_info['structs'] as $struct_name => $struct)
-@if (isset($struct['formater']))
+@if (isset($struct['validator']))
 @if ($struct['data_type'] === 'enum')
             '{{ $struct_name }}' => self::{{ strtoupper($struct_name) }}_MAPS,
 @else
             '{{ $struct_name }}' => [
-@foreach ($struct['formater'] as $formater)
+@foreach ($struct['validator'] as $validator)
                 [
-@if (isset($formater['reg']))
-                    'reg' => '{{ $formater['reg'] }}',
-                    'failed_message' => '{{ $formater['failed_message'] }}',
-@elseif (isset($formater['function']))
+@if (isset($validator['reg']))
+                    'reg' => '{{ $validator['reg'] }}',
+                    'failed_message' => '{{ $validator['failed_message'] }}',
+@elseif (isset($validator['function']))
                     'function' => function ($value) {
-                        return {{ $formater['function'] }};
+                        return {{ $validator['function'] }};
                     },
-                    'failed_message' => '{{ $formater['failed_message'] }}',
+                    'failed_message' => '{{ $validator['failed_message'] }}',
 @endif
                 ],
 @endforeach
@@ -190,7 +190,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endforeach
         ];
 
-        return $formaters[$property] ?? false;
+        return $validators[$property] ?? false;
     }/*}}}*/
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['data_type'] === 'enum')
@@ -205,7 +205,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endif
         return self::{{ strtoupper($struct_name) }}_MAPS[$this->{{ $struct_name }}];
     }/*}}}*/
-@foreach ($struct['formater'] as $value => $description)
+@foreach ($struct['validator'] as $value => $description)
 
     public function {{ $struct_name }}_is_{{ strtolower($value) }}()
     {/*^^{^^{^^{*/

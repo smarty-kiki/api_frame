@@ -138,7 +138,7 @@ $diagram_infos[$struct_name] = $struct['data_type'];
 
 |常量键名|常量值|常量含义|
 |----|----|----|
-@foreach ($struct['formater'] as $value => $description)
+@foreach ($struct['validator'] as $value => $description)
 |{{ $entity_name }}::{{ strtoupper($struct_name.'_'.$value) }}|{{ strtoupper($value) }}|{{ $entity_info['display_name'] }}{{ $struct['display_name'] }}{{ $description}}|
 @endforeach
 
@@ -147,7 +147,7 @@ $diagram_infos[$struct_name] = $struct['data_type'];
 |方法|作用|
 |----|----|
 |${{ $entity_name }}->get_{{ $struct_name }}_description()|获取{{ $entity_info['display_name'] }}的当前{{ $struct['display_name'] }}的文字描述|
-@foreach ($struct['formater'] as $value => $description)
+@foreach ($struct['validator'] as $value => $description)
 |${{ $entity_name }}->{{ $struct_name }}_is_{{ strtolower($value) }}()|判断当前{{ $struct['display_name'] }}是否是 `{{ $description }}`|
 |${{ $entity_name }}->set_{{ $struct_name }}_{{ strtolower($value) }}()|设置当前{{ $struct['display_name'] }}为 `{{ $description }}`|
 @endforeach
