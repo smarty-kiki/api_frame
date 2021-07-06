@@ -33,7 +33,7 @@ foreach ($repeat_check_structs as $struct_name) {
 |----|----|----|----|
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-@if ($relationship['association_type'] === 'composition')
+@if ($relationship['require'])
 |{{ $attribute_name.'_id' }}|id|必传|设置{{ $entity_info['display_name'] }}所属的{{ $relationship['entity_display_name'] }}，此处传{{ $relationship['entity_display_name'] }}的`id`|
 @else
 |{{ $attribute_name.'_id' }}|id|可选|设置{{ $entity_info['display_name'] }}所属的{{ $relationship['entity_display_name'] }}，此处传{{ $relationship['entity_display_name'] }}的`id`|

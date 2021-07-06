@@ -26,7 +26,7 @@ foreach ($repeat_check_structs as $struct_name) {
 $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
-@if ($relationship['association_type'] === 'composition')
+@if ($relationship['require'])
     ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', null, '{{ $attribute_name }}_id');
 @else
     ${{ $entity_name }}->{{ $attribute_name }} = dao('{{ $entity }}')->find(input('{{ $attribute_name }}_id'));

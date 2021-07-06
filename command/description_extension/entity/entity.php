@@ -93,7 +93,7 @@ $struct_default = $struct['database_field']['default'];
     public static $struct_is_required = [
 @foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
 @if ($relationship['relationship_type'] === 'belongs_to')
-        '{{ $attribute_name }}_id' => {{ $relationship['association_type'] === 'composition'? 'true': 'false' }},
+        '{{ $attribute_name }}_id' => {{ $relationship['require']? 'true': 'false' }},
 @foreach ($relationship['snaps'] as $structs)
 @foreach ($structs as $struct_name => $struct)
         '{{ $struct_name }}' => {{ $struct['require']? 'true': 'false' }},
@@ -135,7 +135,7 @@ $param_infos = [];
 $setting_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
-    if ($relationship['relationship_type'] === 'belongs_to' && $relationship['association_type'] === 'composition') {
+    if ($relationship['relationship_type'] === 'belongs_to' && $relationship['require']) {
         $param_infos[] = "$entity $$attribute_name";
         $setting_lines[] = "$$entity_name->$attribute_name = $$attribute_name";
     }
@@ -236,7 +236,7 @@ $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 
     protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }})
     {/*^^{^^{^^{*/
-@if ($relationship['association_type'] === 'composition')
+@if ($relationship['require'])
         otherwise(${{ $attribute_name }} instanceof {{ $entity }}, '{{ $attribute_name }} 类型必须为 {{ $entity }}');
 
 @foreach ($structs as $struct_name => $struct)
@@ -268,7 +268,7 @@ $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 $delete_relationship_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
-    if ($relationship['association_type'] === 'composition') {
+    if ($relationship['associate_delete']) {
         if ($relationship['relationship_type'] === 'has_many') {
             $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
             $delete_relationship_lines[] = '    if ($'.$entity.'->'.$relationship['self_attribute_name'].'_id === $this->id) {'."\n";
@@ -278,7 +278,7 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         } elseif ($relationship['relationship_type'] === 'has_one') {
             $delete_relationship_lines[] = '$this->'.$attribute_name.'->delete();'."\n";
         }
-    } elseif ($relationship['association_type'] === 'aggregation') {
+    } else {
         if ($relationship['relationship_type'] === 'has_many') {
             $delete_relationship_lines[] = 'foreach ($this->'.$attribute_name.' as $'.$entity.') {'."\n";
             $delete_relationship_lines[] = '    if ($'.$entity.'->'.$relationship['self_attribute_name'].'_id === $this->id) {'."\n";

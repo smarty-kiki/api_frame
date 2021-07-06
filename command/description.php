@@ -292,7 +292,8 @@ command('description:make-relationship-description', '通过交互式输入创�
                 'from_snaps' => [],
             ],
             'relationship_type' => '',
-            'association_type' => '',
+            'associate_delete' => '',
+            'require' => '',
         ];
 
         $relationship['from']['entity'] = $from_entity = command_read("#$s From entity:", 0, $entity_names);
@@ -304,7 +305,8 @@ command('description:make-relationship-description', '通过交互式输入创�
         $relationship['to']['from_display'] = command_read("#$s To entity from display name:", '$this->id');
 
         $relationship['relationship_type'] = command_read("#$s Relationship type:", 0, ['has_many', 'has_one']);
-        $relationship['association_type'] = command_read("#$s Association type:", 0, ['aggregation', 'composition']);
+        $relationship['associate_delete'] = command_read_bool("#$s Associate delete:");
+        $relationship['require'] = command_read_bool("#$s Require:");
 
         $relationships[] = $relationship;
     }
@@ -525,7 +527,8 @@ function description_get_relationship()
             otherwise(isset($relationship['from']), "第 $num 条记录需要设置 from");
             otherwise(isset($relationship['to']), "第 $num 条记录需要设置 to");
             otherwise(isset($relationship['relationship_type']), "第 $num 条记录需要设置 relationship_type");
-            otherwise(isset($relationship['association_type']), "第 $num 条记录需要设置 association_type");
+            otherwise(isset($relationship['associate_delete']), "第 $num 条记录需要设置 associate_delete");
+            otherwise(isset($relationship['require']), "第 $num 条记录需要设置 require");
 
             // from
             $from = $relationship['from'];
@@ -560,8 +563,11 @@ function description_get_relationship()
             $relationship_type = $relationship['relationship_type'];
             otherwise(in_array($relationship_type, ['has_many', 'has_one']), "第 $num 条记录的 relationship_type 只能为 has_many 或 has_one");
 
-            $association_type = $relationship['association_type'];
-            otherwise(in_array($association_type, ['aggregation', 'composition']), "第 $num 条记录的 association_type 只能为 aggregation 或 composition");
+            $associate_delete = $relationship['associate_delete'];
+            otherwise(is_bool($associate_delete), "第 $num 条记录的 associate_delete 只能为布尔值");
+
+            $require = $relationship['require'];
+            otherwise(is_bool($require), "第 $num 条记录的 require 只能为布尔值");
 
             if (! isset($res[$from_entity])) {
                 $res[$from_entity] = [
@@ -580,7 +586,8 @@ function description_get_relationship()
                 'snaps' => $to['from_snaps'],
                 'relationship_type' => $relationship_type,
                 'reverse_relationship_type' => 'belongs_to',
-                'association_type' => $association_type,
+                'associate_delete' => $associate_delete,
+                'require' => $require,
             ];
             $res[$from_entity]['display_for_relationships']['display_for_'.$to['entity'].'_'.$from['to_attribute_name']] = $from['to_display'];
 
@@ -601,7 +608,8 @@ function description_get_relationship()
                 'snaps' => $from['to_snaps'],
                 'relationship_type' => 'belongs_to',
                 'reverse_relationship_type' => $relationship_type,
-                'association_type' => $association_type,
+                'associate_delete' => $associate_delete,
+                'require' => $require,
             ];
             $res[$to_entity]['display_for_relationships']['display_for_'.$from['entity'].'_'.$to['from_attribute_name']] = $to['from_display'];
         }

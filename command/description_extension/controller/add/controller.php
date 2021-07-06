@@ -7,7 +7,7 @@ $setting_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
     $entity = $relationship['entity'];
     if ($relationship['relationship_type'] === 'belongs_to') {
-        if ($relationship['association_type'] === 'composition') {
+        if ($relationship['require']) {
             $param_infos[] = "input_entity('$entity', null, '$attribute_name"."_id')";
         } else {
             $setting_lines[] = "$$entity_name->$attribute_name = dao('$entity')->find(input('{$attribute_name}_id'))";
