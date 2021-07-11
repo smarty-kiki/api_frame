@@ -1,9 +1,15 @@
 if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $entity_name }}_id)
 {/*{^^{^^{*/
-@foreach ($entity_info['structs'] as $struct_name => $struct)
-    ${{ $struct_name }} = input('{{ $struct_name }}');
-@endforeach
+@php
+$list_infos = [];
+foreach ($entity_info['structs'] as $struct_name => $struct) {
+    $list_infos[] = "$struct_name";
+}
+@endphp
+@if ($list_infos)
+    list(${{ implode(', $', $list_infos) }}) = input_list('{{ implode("', '", $list_infos) }}');
 
+@endif
     ${{ $entity_name }} = dao('{{ $entity_name }}')->find(${{ $entity_name }}_id);
     otherwise_error_code('{{ strtoupper($entity_name.'_NOT_FOUND') }}', ${{ $entity_name }}->is_not_null());
 @if ($entity_info['repeat_check_structs'])
@@ -29,12 +35,16 @@ $entity = $relationship['entity'];
 @if ($relationship['require'])
     ${{ $entity_name }}->{{ $attribute_name }} = input_entity('{{ $entity }}', '{{ $attribute_name }}_id', true);
 @else
-    ${{ $entity_name }}->{{ $attribute_name }} = dao('{{ $entity }}')->find(input('{{ $attribute_name }}_id'));
+    ${{ $attribute_name }} = input_entity('{{ $entity }}', '{{ $attribute_name }}_id');
+    if (${{ $attribute_name }}->is_not_null()) {
+        ${{ $entity_name }}->{{ $attribute_name }} = ${{ $attribute_name }};
+    }
+
 @endif
 @endif
 @endforeach
 @foreach ($entity_info['structs'] as $struct_name => $struct)
-    ${{ $entity_name }}->{{ $struct_name }} = ${{ $struct_name }};
+    if (not_null(${{ $struct_name }})) { ${{ $entity_name }}->{{ $struct_name }} = ${{ $struct_name }}; }
 @endforeach
 
     return true;

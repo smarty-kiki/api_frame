@@ -2,6 +2,7 @@ if_post('/{{ english_word_pluralize($entity_name) }}/add', function ()
 {/*{^^{^^{*/
 @php
 $input_infos = [];
+$list_infos = [];
 $param_infos = [];
 $setting_lines = [];
 foreach ($relationship_infos['relationships'] as $attribute_name => $relationship) {
@@ -10,32 +11,36 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         if ($relationship['require']) {
             $param_infos[] = "input_entity('$entity', '$attribute_name"."_id', true)";
         } else {
-            $setting_lines[] = "$$entity_name->$attribute_name = dao('$entity')->find(input('{$attribute_name}_id'))";
+            $setting_lines[] = "\${$attribute_name} = input_entity('$entity', '$attribute_name"."_id');";
+            $setting_lines[] = "if (\${$attribute_name}->is_not_null()) {";
+            $setting_lines[] = "    $$entity_name->$attribute_name = $$attribute_name;";
+            $setting_lines[] = "}\n";
         }
     }
 }
 foreach ($entity_info['structs'] as $struct_name => $struct) {
-    $input_infos[] = "$$struct_name = input('$struct_name')";
-
     if ($struct['require']) {
-        $input_infos[] = "otherwise_error_code('".strtoupper($entity_name.'_REQUIRE_'.$struct_name)."', $$struct_name)";
+        $input_infos[] = "$$struct_name = input('$struct_name');";
+        $input_infos[] = "otherwise_error_code('".strtoupper($entity_name.'_REQUIRE_'.$struct_name)."', not_null($$struct_name));\n";
         $param_infos[] = "$$struct_name";
     } else {
-        $setting_lines[] = "$$entity_name->$struct_name = $$struct_name";
+        $list_infos[] = "$struct_name";
+        $setting_lines[] = "if (not_null(\${$struct_name})) { \${$entity_name}->$struct_name = \${$struct_name}; }";
     }
 }
 @endphp
 @foreach ($input_infos as $input_info)
-    {{ $input_info }};
+    {{ $input_info."\n" }}
 @endforeach
+@if ($list_infos)
+    list(${{ implode(', $', $list_infos) }}) = input_list('{{ implode("', '", $list_infos) }}');
+@endif
 @if ($entity_info['repeat_check_structs'])
 @php
 $repeat_check_structs = $entity_info['repeat_check_structs'];
 $dao_param_infos = [];
-$msg_infos = [];
 foreach ($repeat_check_structs as $struct_name) {
     $dao_param_infos[] = "$$struct_name";
-    $msg_infos[] = $entity_info['structs'][$struct_name]['display_name'];
 }
 @endphp
 
@@ -53,7 +58,7 @@ foreach ($repeat_check_structs as $struct_name) {
 @if (! empty($setting_lines))
 
 @foreach ($setting_lines as $setting_line)
-    {{ $setting_line }};
+    {{ $setting_line."\n" }}
 @endforeach
 @endif
 
