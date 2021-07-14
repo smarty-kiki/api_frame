@@ -27,11 +27,11 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         {{ implode(', ', array_map(function($v) { return "'".$v."'"; }, $inputs)) }}
 
     );
+
 @foreach ($entity_info['struct_groups'] as $struct_group)
-
 {{ blade_eval(_generate_controller_struct_group_list($struct_group['type']), ['struct_group_info' => $struct_group['struct_group_info'], 'structs' => $struct_group['structs'], 'struct_name_map' => $struct_group['struct_name_maps']]) }}
-@endforeach
 
+@endforeach
     $inputs = array_filter($inputs, 'not_null');
 
     ${{ english_word_pluralize($entity_name) }} = dao('{{ $entity_name }}')->find_all_by_column($inputs);

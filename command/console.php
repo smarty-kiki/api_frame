@@ -238,7 +238,7 @@ command('console', '终端模式', function ()
 
             // 如果开头变量名是个实体名，给补全中加入 dao 及方法
             $match = [];
-            preg_match_all('/^\$(.*) = .*$/', $line_buffer_before_block, $match);
+            preg_match_all('/^\$(\S*)(\ *)=(\ *).*$/', $line_buffer_before_block, $match);
             if ($match[1]) {
                 $param_name = array_pop($match[1]);
                 if (isset($plural_to_entity[$param_name])) {
@@ -248,7 +248,7 @@ command('console', '终端模式', function ()
                         $entity_infos[$entity_name]['find_all_functions']:
                         $entity_infos[$entity_name]['find_one_functions']
                         as $function) {
-                        $full_line = "\$$param_name = dao('$entity_name')->".$function;
+                        $full_line = "\$$param_name".$match[2][0]."=".$match[3][0]."dao('$entity_name')->".$function;
                         if (starts_with($full_line, $line_buffer_before_block)) {
                             $completions[] = str_replace($line_buffer_before_block, '', $full_line);
                         }

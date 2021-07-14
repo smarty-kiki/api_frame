@@ -34,6 +34,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @endforeach
 @if ($list_infos)
     list(${{ implode(', $', $list_infos) }}) = input_list('{{ implode("', '", $list_infos) }}');
+
 @endif
 @if ($entity_info['repeat_check_structs'])
 @php
@@ -43,25 +44,24 @@ foreach ($repeat_check_structs as $struct_name) {
     $dao_param_infos[] = "$$struct_name";
 }
 @endphp
-
     $another_{{ $entity_name }} = dao('{{ $entity_name }}')->find_by_{{ implode('_and_', $repeat_check_structs) }}({{ implode(', ', $dao_param_infos) }});
     otherwise_error_code('{{ strtoupper($entity_name.'_DUPLICATED') }}', $another_{{ $entity_name }}->is_null(), [':{{ $entity_name }}_id' => $another_{{ $entity_name }}->id]);
-@endif
 
+@endif
 @if (empty($param_infos))
     ${{ $entity_name }} = {{ $entity_name }}::create();
+
 @else
     ${{ $entity_name }} = {{ $entity_name }}::create(
         {{ implode(",\n        ", $param_infos)."\n" }}
     );
+
 @endif
 @if (! empty($setting_lines))
-
 @foreach ($setting_lines as $setting_line)
     {{ $setting_line."\n" }}
 @endforeach
 @endif
-
     return [
         'id' => ${{ $entity_name }}->id,
     ];
