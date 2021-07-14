@@ -2,6 +2,10 @@
 
 ROOT_DIR="$(cd "$(dirname $0)" && pwd)"/../../..
 
+date > /tmp/php_exception.log
+date > /tmp/php_notice.log
+date > /tmp/php_module.log
+
 mysql -e "create database \`default\`;\
     GRANT ALL PRIVILEGES ON *.* TO 'default'@'%' IDENTIFIED BY 'password';\
     GRANT ALL PRIVILEGES ON *.* TO 'default'@'localhost' IDENTIFIED BY 'password';\
