@@ -7,7 +7,7 @@ NEW_MD5_FILE=/tmp/fast_demo_watch_md5.new
 
 generate_file()
 {
-    /bin/sh $ROOT_DIR/project/tool/development/fast_demo_generate_file.sh $1 $2
+    /bin/sh $ROOT_DIR/project/tool/development/_fast_demo_generate_file.sh $1 $2
 }
 
 generate_file INIT whatever
