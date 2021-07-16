@@ -530,6 +530,9 @@ function description_get_relationship()
             otherwise(isset($relationship['associate_delete']), "第 $num 条记录需要设置 associate_delete");
             otherwise(isset($relationship['require']), "第 $num 条记录需要设置 require");
 
+            $relationship_type = $relationship['relationship_type'];
+            otherwise(in_array($relationship_type, ['has_many', 'has_one']), "第 $num 条记录的 relationship_type 只能为 has_many 或 has_one");
+
             // from
             $from = $relationship['from'];
             otherwise(isset($from['entity']), "第 $num 条记录的 from 记录需要设置 entity");
@@ -551,7 +554,11 @@ function description_get_relationship()
             $to_entity = $to['entity'];
 
             if (! isset($to['from_attribute_name'])) {
-                $to['from_attribute_name'] = $to['entity'];
+                if ($relationship_type === 'has_many') {
+                    $to['from_attribute_name'] = english_word_pluralize($to['entity']);
+                } else {
+                    $to['from_attribute_name'] = $to['entity'];
+                }
             }
             if (! isset($to['from_display'])) {
                 $to['from_display'] = '$this->id';
@@ -559,9 +566,6 @@ function description_get_relationship()
             if (! isset($to['from_snaps'])) {
                 $to['from_snaps'] = [];
             }
-
-            $relationship_type = $relationship['relationship_type'];
-            otherwise(in_array($relationship_type, ['has_many', 'has_one']), "第 $num 条记录的 relationship_type 只能为 has_many 或 has_one");
 
             $associate_delete = $relationship['associate_delete'];
             otherwise(is_bool($associate_delete), "第 $num 条记录的 associate_delete 只能为布尔值");
