@@ -3,6 +3,8 @@
 define('MIGRATION_DIR', COMMAND_DIR.'/migration');
 define('MIGRATION_TMP_DIR_NAME', 'tmp');
 define('MIGRATION_TMP_DIR', MIGRATION_DIR.'/'.MIGRATION_TMP_DIR_NAME);
+define('MIGRATION_MERGED_DIR_NAME', 'merged');
+define('MIGRATION_MERGED_DIR', MIGRATION_DIR.'/'.MIGRATION_MERGED_DIR_NAME);
 define('MIGRATION_TABLE', 'migrations');
 define('MIGRATION_SQL_SHIFT_STRING', '    ');
 
@@ -10,7 +12,7 @@ function _migration_files()
 {/*{{{*/
     $files = scandir(MIGRATION_DIR);
 
-    return array_diff($files, ['.', '..', '.gitkeep', MIGRATION_TMP_DIR_NAME]);
+    return array_diff($files, ['.', '..', '.gitkeep', MIGRATION_TMP_DIR_NAME, MIGRATION_MERGED_DIR_NAME]);
 }/*}}}*/
 
 function _migration_tmp_files()
@@ -77,6 +79,7 @@ function _migration_run($files)
 {/*{{{*/
     $old_migrations = db_query_column('migration', 'select * from '.MIGRATION_TABLE, [], 'migrate');
     $new_migrations = array_diff($files, $old_migrations);
+    $lost_migrations = array_diff($old_migrations, $files);
 
     $last_batch = db_query_value('max_batch', 'select max(batch) max_batch from '.MIGRATION_TABLE, [], 'migrate');
 
@@ -85,14 +88,49 @@ function _migration_run($files)
 
         list($ups, $downs) = _migration_file_explode($filepath);
 
-        foreach ($ups as $up) {
-            db_structure($up, 'migrate');
-        }
+        if (count($lost_migrations) > 0) {
+            if (ends_with($filename, '_merge_generated.sql')) {
+                $sign = md5(serialize($ups).serialize($downs));
+                $dirs = scandir(MIGRATION_MERGED_DIR);
+                foreach ($dirs as $dir) {
+                    if (ends_with($dir, $sign)) {
+                        $sub_migrations = scandir(MIGRATION_MERGED_DIR.'/'.$dir);
+                        $sub_migrations = array_diff($sub_migrations, ['.', '..', '.gitkeep']);
+                        $sub_todo_migrations = array_diff($sub_migrations, $lost_migrations);
+                        $sub_mergeed_migrations = array_intersect($lost_migrations, $sub_migrations);
 
-        db_insert('insert into '.MIGRATION_TABLE.' set migration = :migration, batch = :batch', [
-            ':migration' => $filename,
-            ':batch' => $last_batch + 1,
-        ], 'migrate');
+                        foreach ($sub_todo_migrations as $sub_filename) {
+                            $sub_filepath = MIGRATION_DIR.'/'.$sub_filename;
+                            list($sub_ups, $sub_downs) = _migration_file_explode($sub_filepath);
+                            foreach ($sub_ups as $sub_up) {
+                                db_structure($sub_up, 'migrate');
+                            }
+                        }
+
+                        db_delete('delete from '.MIGRATION_TABLE.' where migration in :migrations', [
+                            ':migrations' => $sub_mergeed_migrations,
+                        ], 'migrate');
+
+                        db_insert('insert into '.MIGRATION_TABLE.' set migration = :migration, batch = :batch', [
+                            ':migration' => $filename,
+                            ':batch' => $last_batch + 1,
+                        ], 'migrate');
+
+                        break;
+                    }
+                }
+            }
+        } else {
+
+            foreach ($ups as $up) {
+                db_structure($up, 'migrate');
+            }
+
+            db_insert('insert into '.MIGRATION_TABLE.' set migration = :migration, batch = :batch', [
+                ':migration' => $filename,
+                ':batch' => $last_batch + 1,
+            ], 'migrate');
+        }
 
         echo "migrate $filepath success up!\n";
     }
@@ -477,6 +515,50 @@ command('migrate:make', '新建 migration', function ()
         echo "\033[31mno different!\n\033[0m";
 
         _migration_run(_migration_files());
+    }
+});/*}}}*/
+
+command('migrate:make-merge', '新建 migration merge', function ()
+{/*{{{*/
+    _migration_reset();
+    $old_db_detail = _migration_db_detail();
+
+    _migration_reset();
+    _migration_run(_migration_files());
+    $new_db_detail = _migration_db_detail();
+
+    $up_sqls = _migration_detail_diff_to_sql($new_db_detail, $old_db_detail);
+    $down_sqls = _migration_detail_diff_to_sql($old_db_detail, $new_db_detail);
+
+    if ($up_sqls && $down_sqls) {
+
+        $file = migration_file_path('merge_generated');
+
+        $sign = md5(serialize($up_sqls).serialize($down_sqls));
+
+        $dirs = scandir(MIGRATION_MERGED_DIR);
+        foreach ($dirs as $dir) {
+            if (ends_with($dir, $sign)) {
+                echo "\033[31mhas same merge!\n\033[0m";
+                exit;
+            }
+        }
+
+        $target_dir = MIGRATION_MERGED_DIR.'/'.date('Y_m_d_H_i_s_').$sign;
+        mkdir($target_dir);
+
+        $old_files = _migration_files();
+        foreach ($old_files as $old_file) {
+            $old_file_path = MIGRATION_DIR.'/'.$old_file;
+            copy($old_file_path, $target_dir.'/'.$old_file);
+            unlink($old_file_path);
+        }
+
+        _migration_file_implode($up_sqls, $down_sqls, $file);
+
+        echo "generate $file success!\n";
+    } else {
+        echo "\033[31mno merge!\n\033[0m";
     }
 });/*}}}*/
 
