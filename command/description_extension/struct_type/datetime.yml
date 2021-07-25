@@ -1,2 +1,5 @@
 data_type: datetime
+validator:
+  - function: 'datetime($value) === $value'
+    failed_message: 不是有效的时间格式 Y-m-d H:i:s
 display_name: 时间
