@@ -9,8 +9,6 @@ filenames=$(basename "$2")
 all_filenames=`ls $ROOT_DIR/domain/description/`
 
 controller_diff_dir=/tmp/description/controller
-rm -rf $controller_diff_dir
-mkdir -p $controller_diff_dir
 
 echog()
 {
@@ -22,6 +20,9 @@ alias echo_filter='column -t | perl -pe "s/(^migrate|^include)|(^delete|^uninclu
 if [ "$event" = "INIT" ]
 then
     (
+    rm -rf $controller_diff_dir
+    mkdir -p $controller_diff_dir
+
     for filename in $all_filenames
     do
         entity_name=${filename%.*}
@@ -88,10 +89,9 @@ then
             echo generate $output_controller_file success!
             if [ -r $controller_file_new ]
             then
-                cp $controller_file_new $controller_file_old
-
                 if [ ! -r $controller_file_old ] || test "`diff -u $controller_file $controller_file_old`"
                 then
+                    cp $controller_file_new $controller_file_old
                     controller_file_diff_str=`diff -u $controller_file_new $controller_file`
                     if test "$controller_file_diff_str"
                     then
@@ -101,6 +101,7 @@ then
                     rm $controller_file_new
                     echo delete $controller_file_new success!
                 else
+                    cp $controller_file_new $controller_file_old
                     cp $controller_file_new $controller_file
                     echo generate $controller_file success!
 
