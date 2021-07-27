@@ -37,7 +37,7 @@ then
 
     if [ "$filenames" = ".relationship.yml" ]
     then
-        filenames=$all_filenames
+        filenames=`ls $ROOT_DIR/domain/description/`
         event="MODIFY"
     fi
 
@@ -89,11 +89,10 @@ then
             echo generate $output_controller_file success!
             if [ -r $controller_file_new ]
             then
+                cp $controller_file_new $controller_file_old
 
                 if [ ! -r $controller_file_old ] || test "`diff -u $controller_file $controller_file_old`"
                 then
-                    cp $controller_file_new $controller_file_old
-
                     controller_file_diff_str=`diff -u $controller_file_new $controller_file`
                     if test "$controller_file_diff_str"
                     then
@@ -103,7 +102,6 @@ then
                     rm $controller_file_new
                     echo delete $controller_file_new success!
                 else
-                    cp $controller_file_new $controller_file_old
                     cp $controller_file_new $controller_file
                     echo generate $controller_file success!
 
