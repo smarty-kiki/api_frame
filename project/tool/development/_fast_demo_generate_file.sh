@@ -9,6 +9,7 @@ filenames=$(basename "$2")
 all_filenames=`ls $ROOT_DIR/domain/description/`
 
 controller_diff_dir=/tmp/description/controller
+rm -rf $controller_diff_dir
 mkdir -p $controller_diff_dir
 
 echog()
@@ -26,8 +27,6 @@ then
         entity_name=${filename%.*}
 
         controller_file_old=$controller_diff_dir/$entity_name.php.old
-        controller_file_new=$controller_diff_dir/$entity_name.php.new
-        rm -rf $controller_file_old $controller_file_new
         output_controller_file=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-from-description --entity_name=$entity_name --output_file=$controller_file_old`
         echo init $output_controller_file success!
     done
