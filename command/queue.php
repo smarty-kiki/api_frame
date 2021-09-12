@@ -10,6 +10,7 @@ command('queue:worker', '启动队列 worker', function ()
 
     queue_finish_action(function () {
         local_cache_delete_all();
+        beanstalk_close();
         cache_close();
         db_close();
     });
