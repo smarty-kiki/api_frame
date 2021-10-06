@@ -1,0 +1,7 @@
+data_type: string
+validator:
+  - reg: '/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/'
+    failed_message: 不是有效的电子邮箱格式
+display_name: 电子邮箱
+option:
+  length: 1000
