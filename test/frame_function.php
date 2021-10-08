@@ -736,10 +736,10 @@ class frame_function_test extends phpunit_framework_testcase
         $this->assertEquals('total 86400 seconds!', datetime_diff($time1, $time2, 'total %ts seconds!'));
     }/*}}}*/
 
-    public function test_remote()
+    public function test_http()
     {/*{{{*/
-        $this->assertEquals('"hello world"', remote_get('http://127.0.0.1/'));
-        $this->assertEquals('hello world', remote_get_json('http://127.0.0.1/'));
+        $this->assertEquals('"hello world"', http('http://127.0.0.1/'));
+        $this->assertEquals('hello world', http_json('http://127.0.0.1/'));
     }/*}}}*/
 
     public function test_instance()
