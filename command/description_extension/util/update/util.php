@@ -5,7 +5,7 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
     $entity = $relationship['entity'];
     if ($relationship['relationship_type'] === 'belongs_to') {
         if ($relationship['require']) {
-            $param_infos[] = "${$attribute_name}_id";
+            $param_infos[] = '$'.$attribute_name.'_id';
             $post_params[] = $attribute_name.'_id';
         }
     }
