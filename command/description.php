@@ -5,6 +5,7 @@ define('DESCRIPTION_EXTENSION_DIR', COMMAND_DIR.'/description_extension');
 define('DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_type');
 define('DESCRIPTION_DATA_TYPE_EXTENSION_DIR', DESCRIPTION_STRUCT_TYPE_EXTENSION_DIR.'/data_type');
 define('DESCRIPTION_STRUCT_GROUP_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/struct_group');
+define('DESCRIPTION_UTIL_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/util');
 define('DESCRIPTION_CONTROLLER_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/controller');
 define('DESCRIPTION_ERROR_CODE_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/error_code');
 define('DESCRIPTION_DOCS_EXTENSION_DIR', DESCRIPTION_EXTENSION_DIR.'/docs');
@@ -45,6 +46,16 @@ function _get_error_code_template_from_extension()
 function _get_error_code_docs_template_from_extension()
 {/*{{{*/
     $path = DESCRIPTION_DOCS_EXTENSION_DIR.'/error_code/docs.php';
+    if (is_file($path)) {
+        return file_get_contents($path);
+    }
+
+    return false;
+}/*}}}*/
+
+function _get_util_template_from_extension($action)
+{/*{{{*/
+    $path = DESCRIPTION_UTIL_EXTENSION_DIR.'/'.$action.'/util.php';
     if (is_file($path)) {
         return file_get_contents($path);
     }

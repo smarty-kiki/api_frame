@@ -208,6 +208,76 @@ function _merge_error_code_docs_content_by_annotate($entity_name, $content_outsi
     return implode("\n", $res_lines);
 }/*}}}*/
 
+function _generate_util_file($system_name, $entity_name, $entity_info, $relationship_infos)
+{/*{{{*/
+    $content = _get_util_template_from_extension('list');
+
+    otherwise($content, '没找到 util 的 list 模版');
+
+    $list_content = blade_eval($content, [
+        'system_name' => $system_name,
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $content = _get_util_template_from_extension('add');
+
+    otherwise($content, '没找到 util 的 add 模版');
+
+    $add_content = blade_eval($content, [
+        'system_name' => $system_name,
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $content = _get_util_template_from_extension('detail');
+
+    otherwise($content, '没找到 util 的 detail 模版');
+
+    $detail_content = blade_eval($content, [
+        'system_name' => $system_name,
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $content = _get_util_template_from_extension('update');
+
+    otherwise($content, '没找到 util 的 update 模版');
+
+    $update_content = blade_eval($content, [
+        'system_name' => $system_name,
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $content = _get_util_template_from_extension('delete');
+
+    otherwise($content, '没找到 util 的 delete 模版');
+
+    $delete_content = blade_eval($content, [
+        'system_name' => $system_name,
+        'entity_name' => $entity_name,
+        'entity_info' => $entity_info,
+        'relationship_infos' => $relationship_infos,
+    ]);
+
+    $template = "<?php
+
+%s
+%s
+%s
+%s
+%s";
+
+    $content = sprintf($template, $list_content, $add_content, $detail_content, $update_content, $delete_content);
+
+    return str_replace('^^', '', $content);
+}/*}}}*/
+
 function _generate_controller_file($entity_name, $entity_info, $relationship_infos)
 {/*{{{*/
     $content = _get_controller_template_from_extension('list');
@@ -503,6 +573,31 @@ command('crud:make-from-description', '通过描述文件生成 CRUD 控制器',
 
         // 写文件
         error_log($controller_file_string, 3, $output_file_name);
+        echo $output_file_name."\n";
+    }
+});/*}}}*/
+
+command('crud:make-http-client-from-description', '通过描述文件生成 CRUD 的 client 供其他项目使用', function ()
+{/*{{{*/
+    $entity_name = command_paramater('entity_name', '');
+    $system_name = command_paramater('system_name', '');
+
+    if ($entity_name && $system_name) {
+
+        $output_file_name = command_paramater('output_file', '');
+
+        $entity_info = description_get_entity($entity_name);
+
+        $relationship_infos = description_get_relationship_with_snaps_by_entity($entity_name);
+
+        $util_file_string = _generate_util_file($system_name, $entity_name, $entity_info, $relationship_infos);
+
+        if (empty($output_file_name)) {
+            $output_file_name = UTIL_DIR.'/http_client/'.$entity_name.'.php';
+        }
+
+        // 写文件
+        error_log($util_file_string, 3, $output_file_name);
         echo $output_file_name."\n";
     }
 });/*}}}*/
