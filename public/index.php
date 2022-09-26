@@ -8,7 +8,7 @@ include FRAME_DIR.'/http/php_fpm/application.php';
 
 set_error_handler('http_err_action', E_ALL);
 set_exception_handler('http_ex_action');
-register_shutdown_function('http_fatel_err_action');
+register_shutdown_function('http_fatal_err_action');
 
 if_has_exception(function ($ex) {
 
