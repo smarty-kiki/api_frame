@@ -1,0 +1,5 @@
+data_type: number
+validator:
+  - function: 'is_numeric($value)'
+    failed_message: 必须为整数
+display_name: 排序
