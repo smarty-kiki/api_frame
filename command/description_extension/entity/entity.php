@@ -147,7 +147,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
     }
 }
 @endphp
-    public static function create({{ implode(', ', $param_infos) }})
+    public static function create({{ implode(', ', $param_infos) }}): {{ $entity_name }}
     {/*^^{^^{^^{*/
 @if (empty($param_infos))
         return parent::init();
@@ -195,7 +195,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['data_type'] === 'enum')
 
-    public function get_{{ $struct_name }}_description()
+    public function get_{{ $struct_name }}_description(): string
     {/*^^{^^{^^{*/
 @if (! $struct['require'])
         if ($this->{{ $struct_name }} === '') {
@@ -207,7 +207,7 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
     }/*}}}*/
 @foreach ($struct['validator'] as $value => $description)
 
-    public function {{ $struct_name }}_is_{{ strtolower($value) }}()
+    public function {{ $struct_name }}_is_{{ strtolower($value) }}(): bool
     {/*^^{^^{^^{*/
         return $this->{{ $struct_name }} === self::{{ strtoupper($struct_name.'_'.$value) }};
     }/*}}}*/
@@ -225,7 +225,7 @@ $entity = $relationship['entity'];
 @endphp
 @if ($relationship['relationship_type'] === 'belongs_to')
 
-    public function belongs_to_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }})
+    public function belongs_to_{{ $attribute_name }}({{ $entity }} ${{ $attribute_name }}): bool
     {/*^^{^^{^^{*/
         return $this->{{ $attribute_name }}_id == ${{ $attribute_name }}->id;
     }/*}}}*/
@@ -234,7 +234,7 @@ $entity = $relationship['entity'];
 $relationship_attribute_names = explode('.', $snap_relation_to_with_dot);
 @endphp
 
-    protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }})
+    protected function prepare_set_{{ $attribute_name }}(${{ $attribute_name }}): string
     {/*^^{^^{^^{*/
 @if ($relationship['require'])
         otherwise(${{ $attribute_name }} instanceof {{ $entity }}, '{{ $attribute_name }} 类型必须为 {{ $entity }}');
