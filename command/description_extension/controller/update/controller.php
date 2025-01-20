@@ -48,5 +48,9 @@ $entity = $relationship['entity'];
     if (not_null(${{ $struct_name }})) { ${{ $entity_name }}->{{ $struct_name }} = ${{ $struct_name }}; }
 @endforeach
 
-    return true;
+    return [
+        'code' => 0,
+        'msg'  => '',
+        'data' => [],
+    ];
 });/*}}}*/

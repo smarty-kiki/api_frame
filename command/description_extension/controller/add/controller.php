@@ -49,10 +49,10 @@ foreach ($repeat_check_structs as $struct_name) {
 
 @endif
 @if (empty($param_infos))
-    ${{ $entity_name }} = {{ $entity_name }}::create();
+    $new_{{ $entity_name }} = {{ $entity_name }}::create();
 
 @else
-    ${{ $entity_name }} = {{ $entity_name }}::create(
+    $new_{{ $entity_name }} = {{ $entity_name }}::create(
         {{ implode(",\n        ", $param_infos)."\n" }}
     );
 
@@ -63,6 +63,10 @@ foreach ($repeat_check_structs as $struct_name) {
 @endforeach
 @endif
     return [
-        'id' => ${{ $entity_name }}->id,
+        'code' => 0,
+        'msg' => '',
+        'data' => [
+            'id' => $new_{{ $entity_name }}->id,
+        ],
     ];
 });/*}}}*/

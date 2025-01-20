@@ -4,7 +4,9 @@ if_get('/{{ english_word_pluralize($entity_name) }}/detail/*', function (${{ $en
     otherwise_error_code('{{ strtoupper($entity_name.'_NOT_FOUND') }}', ${{ $entity_name }}->is_not_null());
 
     return [
-        '{{ $entity_name }}' => [
+        'code' => 0,
+        'msg' => '',
+        'data' => [
             'id' => ${{ $entity_name }}->id,
 @foreach ($entity_info['structs'] as $struct_name => $struct)
             '{{ $struct_name }}' => {{ blade_eval(_generate_controller_data_type_list($struct['data_type']), ['entity_name' => $entity_name, 'struct_name' => $struct_name, 'struct' => $struct]) }},
