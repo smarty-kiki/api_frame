@@ -422,8 +422,19 @@ command('migrate:uninstall', '删除 migrate 所需的表结构', function ()
 command('migrate', '执行 migrate', function ()
 {/*{{{*/
     $is_tmp_files = command_paramater('tmp_files', false);
+    $with_tmp_files = command_paramater('with_tmp_files', false);
 
-    $files = $is_tmp_files ? _migration_tmp_files(): _migration_files();
+    $files = [];
+    if ($is_tmp_files) {
+
+        $files = _migration_tmp_files();
+    } else {
+
+        $files = _migration_files();
+        if ($with_tmp_files) {
+            $files = array_merge($files, _migration_tmp_files());
+        }
+    }
 
     _migration_run($files);
 });/*}}}*/
