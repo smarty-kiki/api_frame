@@ -2,7 +2,7 @@
 
 if_get('/', function ()
 {
-    return 'hello world';
+    return 'hello everyone';
 });
 
 if_get('/health_check', function ()
