@@ -13,6 +13,11 @@ if_post('/demos/add', function ()
         $new_demo->note = $note;
     }
 
+    queue_push('demo', [
+        'demo_id' => $new_demo->id,
+        'name' => $new_demo->name,
+    ]);
+
     return [
         'code' => 0,
         'msg' => '',
