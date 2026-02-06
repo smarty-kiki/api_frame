@@ -2,10 +2,10 @@
 
 if_post('/demos/add', function ()
 {/*{{{*/
-    $name = input('name');
+    $name = input_json('name');
     otherwise_error_code('DEMO_REQUIRE_NAME', not_null($name));
 
-    list($note) = input_list('note');
+    $note = input_json('note');
 
     $new_demo = demo::create($name);
 
@@ -29,7 +29,8 @@ if_post('/demos/add', function ()
 
 if_get('/demos', function ()
 {/*{{{*/
-    list($inputs['name'], $inputs['note']) = input_list('name', 'note');
+    $inputs['name'] = input('name');
+    $inputs['note'] = input('note');
 
     $inputs = array_filter($inputs, 'not_null');
 
@@ -74,7 +75,8 @@ if_get('/demos/detail/*', function ($demo_id)
 
 if_post('/demos/update/*', function ($demo_id)
 {/*{{{*/
-    list($name, $note) = input_list('name', 'note');
+    $name = input_json('name');
+    $note = input_json('note');
 
     $demo = dao('demo')->find($demo_id);
     otherwise_error_code('DEMO_NOT_FOUND', $demo->is_not_null());
