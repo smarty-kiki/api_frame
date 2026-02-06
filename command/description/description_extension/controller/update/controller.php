@@ -1,13 +1,9 @@
 if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $entity_name }}_id)
 {/*{^^{^^{*/
-@php
-$list_infos = [];
-foreach ($entity_info['structs'] as $struct_name => $struct) {
-    $list_infos[] = "$struct_name";
-}
-@endphp
-@if ($list_infos)
-    list(${{ implode(', $', $list_infos) }}) = input_list('{{ implode("', '", $list_infos) }}');
+@if ($entity_info['structs'])
+@foreach ($entity_info['structs'] as $struct_name => $struct) {
+    {{ "$$struct_name = input_json('$struct_name');\n" }}
+@endforeach
 
 @endif
     ${{ $entity_name }} = dao('{{ $entity_name }}')->find(${{ $entity_name }}_id);
