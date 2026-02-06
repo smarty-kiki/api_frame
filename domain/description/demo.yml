@@ -1,0 +1,13 @@
+---
+display_name: Demo
+description: 示例实体
+structs:
+  name:
+    data_type: string
+    display_name: 名称
+    require: true
+  note:
+    data_type: string
+    display_name: 备注
+    require: false
+...
