@@ -7,12 +7,18 @@
 .  
 ├── command (命令行命令文件目录)  
 │   ├── migration (数据库迁移文件目录)  
-│   ├── queue_job (队列 job 文件目录)  
-│   │   └── load.php (队列 job 加载文件)  
+│   ├── description (描述文件相关命令)  
+│   │   ├── description_extension (描述扩展目录)  
+│   │   └── description.php (description 命令)  
+│   ├── queue (队列相关命令与 job)  
+│   │   ├── queue_job (队列 job 文件目录)  
+│   │   │   └── load.php (队列 job 加载文件)  
+│   │   └── queue.php (queue 命令)  
+│   ├── console.php (终端命令)  
 │   ├── controller.php (controller 命令，可以快速的基于表结构生成 restful 接口)  
+│   ├── crud.php (crud 命令)  
 │   ├── entity.php (entity 命令)  
-│   ├── migrate.php (migrate 命令)  
-│   └── queue.php (queue 命令)  
+│   └── migrate.php (migrate 命令)  
 ├── config (配置文件目录)  
 │   ├── development (开发环境配置覆盖目录)                               
 │   ├── production (线上愿景配置覆盖目录)  
@@ -59,4 +65,3 @@
 2. 确保机器上有 docker 环境
 3. linux/mac 用户: 执行代码中的脚本快速启动环境 sh project/tool/start_development_server.sh，输入当前用户密码，此处是为了开发方便映射了 80 和 3306 端口，若不允许使用 80 可以手动修改第三条提到的脚本更换端口  
    windows 用户确保命令提示符中已经可以使用 git 后，双击 project/tool/start_development_server.bat
-

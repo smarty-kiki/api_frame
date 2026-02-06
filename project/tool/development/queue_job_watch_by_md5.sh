@@ -8,13 +8,13 @@ ROOT_DIR=`readlink -f $ROOT_DIR`
 OLD_MD5_FILE=/tmp/queue_job_watch_md5.old
 NEW_MD5_FILE=/tmp/queue_job_watch_md5.new
 
-find $ROOT_DIR/command/queue_job/ -type f -print0 | xargs -0 md5sum > $OLD_MD5_FILE
+find $ROOT_DIR/command/queue/queue_job/ -type f -print0 | xargs -0 md5sum > $OLD_MD5_FILE
 
 while true
 do
     sleep 1
 
-    find $ROOT_DIR/command/queue_job/ -type f -print0 | xargs -0 md5sum > $NEW_MD5_FILE
+    find $ROOT_DIR/command/queue/queue_job/ -type f -print0 | xargs -0 md5sum > $NEW_MD5_FILE
     diff_result=`diff -y --suppress-common-lines -W 300 $OLD_MD5_FILE $NEW_MD5_FILE`
 
     # MODIFY

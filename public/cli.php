@@ -18,7 +18,7 @@ include COMMAND_DIR.'/migrate.php';
 include COMMAND_DIR.'/description/description.php';
 include COMMAND_DIR.'/entity.php';
 include COMMAND_DIR.'/crud.php';
-include COMMAND_DIR.'/queue.php';
+include COMMAND_DIR.'/queue/queue.php';
 include COMMAND_DIR.'/console.php';
 
 // fix
