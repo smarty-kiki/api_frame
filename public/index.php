@@ -57,8 +57,8 @@ if_not_found(function () {
 });
 
 // init controller
-include CONTROLLER_DIR.'/base.php';
 include CONTROLLER_DIR.'/demo.php';
+include CONTROLLER_DIR.'/base.php';
 
 // fix
 not_found();

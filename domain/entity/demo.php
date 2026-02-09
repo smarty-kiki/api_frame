@@ -18,6 +18,7 @@ class demo extends entity
         'note' => '备注',
     ];
 
+
     public static $struct_is_required = [
         'name' => true,
         'note' => false,
@@ -27,9 +28,9 @@ class demo extends entity
     {/*{{{*/
     }/*}}}*/
 
-    public static function create($name): demo
-    {/*{{{*/
+    public static function create($name): demo    {/*{{{*/
         $demo = parent::init();
+
         $demo->name = $name;
 
         return $demo;
@@ -37,7 +38,8 @@ class demo extends entity
 
     public static function struct_validators($property)
     {/*{{{*/
-        $validators = [];
+        $validators = [
+        ];
 
         return $validators[$property] ?? false;
     }/*}}}*/

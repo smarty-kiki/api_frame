@@ -1,44 +1,18 @@
 <?php
 
-if_post('/demos/add', function ()
-{/*{{{*/
-    $name = input_json('name');
-    otherwise_error_code('DEMO_REQUIRE_NAME', not_null($name));
-
-    $note = input_json('note');
-
-    $new_demo = demo::create($name);
-
-    if (not_null($note)) {
-        $new_demo->note = $note;
-    }
-
-    queue_push('demo', [
-        'demo_id' => $new_demo->id,
-        'name' => $new_demo->name,
-    ]);
-
-    return [
-        'code' => 0,
-        'msg' => '',
-        'data' => [
-            'id' => $new_demo->id,
-        ],
-    ];
-});/*}}}*/
-
 if_get('/demos', function ()
 {/*{{{*/
-    $inputs['name'] = input('name');
-    $inputs['note'] = input('note');
+    list(
+        $inputs['name'], $inputs['note']
+    ) = input_list(
+        'name', 'note'
+    );
 
     $inputs = array_filter($inputs, 'not_null');
 
     $demos = dao('demo')->find_all_by_column($inputs);
 
     return [
-        'code' => 0,
-        'msg'  => '',
         'count' => count($demos),
         'demos' => array_build($demos, function ($id, $demo) {
             return [
@@ -55,21 +29,39 @@ if_get('/demos', function ()
     ];
 });/*}}}*/
 
+if_post('/demos/add', function ()
+{/*{{{*/
+    $name = input_json('name');
+    otherwise_error_code('DEMO_REQUIRE_NAME', not_null($name));
+
+    $note = input_json('note');
+
+    $new_demo = demo::create(
+        $name
+    );
+
+    if (not_null($note)) { $new_demo->note = $note; }
+
+    return [
+        'id' => $new_demo->id,
+        'name' => $new_demo->name,
+        'note' => $new_demo->note,
+        'create_time' => $new_demo->create_time,
+        'update_time' => $new_demo->update_time,
+    ];
+});/*}}}*/
+
 if_get('/demos/detail/*', function ($demo_id)
 {/*{{{*/
     $demo = dao('demo')->find($demo_id);
     otherwise_error_code('DEMO_NOT_FOUND', $demo->is_not_null());
 
     return [
-        'code' => 0,
-        'msg' => '',
-        'data' => [
-            'id' => $demo->id,
-            'name' => $demo->name,
-            'note' => $demo->note,
-            'create_time' => $demo->create_time,
-            'update_time' => $demo->update_time,
-        ],
+        'id' => $demo->id,
+        'name' => $demo->name,
+        'note' => $demo->note,
+        'create_time' => $demo->create_time,
+        'update_time' => $demo->update_time,
     ];
 });/*}}}*/
 
@@ -85,22 +77,20 @@ if_post('/demos/update/*', function ($demo_id)
     if (not_null($note)) { $demo->note = $note; }
 
     return [
-        'code' => 0,
-        'msg'  => '',
-        'data' => [],
+        'id' => $demo->id,
+        'name' => $demo->name,
+        'note' => $demo->note,
+        'create_time' => $demo->create_time,
+        'update_time' => $demo->update_time,
     ];
 });/*}}}*/
 
 if_post('/demos/delete/*', function ($demo_id)
 {/*{{{*/
     $demo = dao('demo')->find($demo_id);
-    otherwise_error_code('DEMO_NOT_FOUND', $demo->is_not_null());
+    otherwise_error_code('DEMO_NOT_FOUND', $demo->is_not_null(), [':id' => $demo_id]);
 
     $demo->delete();
 
-    return [
-        'code' => 0,
-        'msg' => '',
-        'data' => [],
-    ];
+    return [];
 });/*}}}*/

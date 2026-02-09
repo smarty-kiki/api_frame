@@ -4,7 +4,7 @@
 
 |错误码值|错误码描述|
 |----|----|
-|{{ strtoupper($entity_name.'_NOT_FOUND') }}|无效的 {{ $entity_name }}|
+|{{ strtoupper($entity_name.'_NOT_FOUND') }}|未找到 {{ $entity_name }} [id:]|
 @foreach ($entity_info['structs'] as $struct_name => $struct)
 @if ($struct['require'])
 |{{ strtoupper($entity_name.'_REQUIRE_'.$struct_name) }}|未传入 {{ $struct_name }}|

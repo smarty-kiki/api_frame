@@ -1,12 +1,4 @@
 
-
-
-
-
-
-
-
-
 ### 删除{{ $entity_info['display_name'] }} 
 ----
 **功能：**删除{{ $entity_info['display_name'] }}  
@@ -15,6 +7,7 @@
 ```
 /{{ english_word_pluralize($entity_name) }}/delete/{^^{^^{{ $entity_name }}_id}^^}^^  
 ```
+
 **`URL`中的变量：**  
 
 |变量键名|类型|必传|描述|
@@ -26,10 +19,7 @@
 {
     "code": 0,
     "msg": "",
-    "data": true
+    "data": []
 }
-
 ```
-
-
 

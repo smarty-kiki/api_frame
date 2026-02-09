@@ -59,14 +59,14 @@ then
 
             rm -rf $ROOT_DIR/docs/entity/$entity_name.md
             rm -rf $ROOT_DIR/docs/entity/relationship.md
-            grep -v "\(entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+            grep -v "\(../entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
             mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
             echo delete $ROOT_DIR/docs/entity/$entity_name.md success!
 
             docs_entity_files=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php entity:make-docs-from-description --entity_name=$entity_name`
             for docs_entity_file in $docs_entity_files; do echo generate $docs_entity_file success!; done
             menu_name=`cat $ROOT_DIR/domain/description/$entity_name.yml | head -n 2 | tail -n 1 | cut -d ' ' -f 2`
-            /bin/sed -i "/实体关联/a\\ \ \-\ \[$menu_name\]\(entity\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
+            /bin/sed -i "/实体关联/a\\ \ \-\ \[$menu_name\]\(../entity\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
             echo include $ROOT_DIR/docs/entity/$entity_name.md success!
 
             controller_file=$ROOT_DIR/controller/$entity_name.php
@@ -119,7 +119,7 @@ then
             echo generate $error_code_doc_file success!
 
             rm -rf $ROOT_DIR/docs/api/$entity_name.md
-            grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+            grep -v "\(../api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
             mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
             grep -v "\($entity_name\)" $ROOT_DIR/docs/coverpage.md > /tmp/coverpage.md
             mv /tmp/coverpage.md $ROOT_DIR/docs/coverpage.md
@@ -128,7 +128,7 @@ then
             docs_api_files=`ENV=$env /usr/bin/php $ROOT_DIR/public/cli.php crud:make-docs-from-description --entity_name=$entity_name`
             for docs_api_file in $docs_api_files; do echo generate $docs_api_file success!; done
             menu_name=`cat $ROOT_DIR/domain/description/$entity_name.yml | head -n 2 | tail -n 1 | cut -d ' ' -f 2`
-            /bin/sed -i "/接口文档/a\\ \ \-\ \[$menu_name\]\(api\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
+            /bin/sed -i "/接口文档/a\\ \ \-\ \[$menu_name\]\(../api\/$entity_name\.md\)" $ROOT_DIR/docs/sidebar.md
             /bin/sed -i "/系统的能力/a\\-\ $menu_name管理\ \($entity_name\)" $ROOT_DIR/docs/coverpage.md
             echo include $ROOT_DIR/docs/api/$entity_name.md success!
         fi
@@ -147,7 +147,7 @@ then
 
             rm -rf $ROOT_DIR/docs/entity/$entity_name.md
             rm -rf $ROOT_DIR/docs/entity/relationship.md
-            grep -v "\(entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+            grep -v "\(../entity/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
             mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
             echo delete $ROOT_DIR/docs/entity/$entity_name.md success!
 
@@ -163,7 +163,7 @@ then
             echo clean $ROOT_DIR/docs/error_code.md success!
 
             rm -rf $ROOT_DIR/docs/api/$entity_name.md
-            grep -v "\(api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
+            grep -v "\(../api/$entity_name.md\)" $ROOT_DIR/docs/sidebar.md > /tmp/sidebar.md
             mv /tmp/sidebar.md $ROOT_DIR/docs/sidebar.md
             grep -v "\($entity_name\)" $ROOT_DIR/docs/coverpage.md > /tmp/coverpage.md
             mv /tmp/coverpage.md $ROOT_DIR/docs/coverpage.md

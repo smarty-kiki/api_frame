@@ -1,7 +1,7 @@
 if_post('/{{ english_word_pluralize($entity_name) }}/update/*', function (${{ $entity_name }}_id)
 {/*{^^{^^{*/
 @if ($entity_info['structs'])
-@foreach ($entity_info['structs'] as $struct_name => $struct) {
+@foreach ($entity_info['structs'] as $struct_name => $struct)
     {{ "$$struct_name = input_json('$struct_name');\n" }}
 @endforeach
 
@@ -40,13 +40,28 @@ $entity = $relationship['entity'];
 @endif
 @endif
 @endforeach
+@if ($entity_info['structs'])
 @foreach ($entity_info['structs'] as $struct_name => $struct)
     if (not_null(${{ $struct_name }})) { ${{ $entity_name }}->{{ $struct_name }} = ${{ $struct_name }}; }
 @endforeach
 
+@endif
     return [
-        'code' => 0,
-        'msg'  => '',
-        'data' => [],
+        'id' => ${{ $entity_name }}->id,
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        '{{ $struct_name }}' => {{ blade_eval(_generate_controller_data_type_update($struct['data_type']), ['entity_name' => $entity_name, 'struct_name' => $struct_name, 'struct' => $struct]) }},
+@endforeach
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attribute_name }}_display' => ${{ $entity_name }}->{{ $attribute_name }}->display_for_{{ $relationship['self_attribute_name'] }}_{{ $attribute_name }}(),
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        '{{ $struct_name }}' => {{ blade_eval(_generate_controller_data_type_update($struct['data_type']), ['entity_name' => $entity_name, 'struct_name' => $struct_name, 'struct' => $struct]) }},
+@endforeach
+@endforeach
+@endif
+@endforeach
+        'create_time' => ${{ $entity_name }}->create_time,
+        'update_time' => ${{ $entity_name }}->update_time,
     ];
 });/*}}}*/

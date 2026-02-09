@@ -12,7 +12,7 @@ foreach ($relationship_infos['relationships'] as $attribute_name => $relationshi
         } else {
             $setting_lines[] = "\${$attribute_name} = input_entity('$entity', '$attribute_name"."_id');";
             $setting_lines[] = "if (\${$attribute_name}->is_not_null()) {";
-            $setting_lines[] = "    $$entity_name->$attribute_name = $$attribute_name;";
+            $setting_lines[] = "    \$new_$entity_name->$attribute_name = $$attribute_name;";
             $setting_lines[] = "}\n";
         }
     }
@@ -24,13 +24,16 @@ foreach ($entity_info['structs'] as $struct_name => $struct) {
         $param_infos[] = "$$struct_name";
     } else {
         $input_infos[] = "$$struct_name = input_json('$struct_name');";
-        $setting_lines[] = "if (not_null(\${$struct_name})) { \${$entity_name}->$struct_name = \${$struct_name}; }";
+        $setting_lines[] = "if (not_null(\${$struct_name})) { \$new_{$entity_name}->$struct_name = \${$struct_name}; }";
     }
 }
 @endphp
+@if ($input_infos)
 @foreach ($input_infos as $input_info)
     {{ $input_info."\n" }}
 @endforeach
+
+@endif
 @if ($entity_info['repeat_check_structs'])
 @php
 $repeat_check_structs = $entity_info['repeat_check_structs'];
@@ -56,12 +59,24 @@ foreach ($repeat_check_structs as $struct_name) {
 @foreach ($setting_lines as $setting_line)
     {{ $setting_line."\n" }}
 @endforeach
+
 @endif
     return [
-        'code' => 0,
-        'msg' => '',
-        'data' => [
-            'id' => $new_{{ $entity_name }}->id,
-        ],
+        'id' => $new_{{ $entity_name }}->id,
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        '{{ $struct_name }}' => {{ blade_eval(_generate_controller_data_type_add($struct['data_type']), ['entity_name' => $entity_name, 'struct_name' => $struct_name, 'struct' => $struct]) }},
+@endforeach
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        '{{ $attribute_name }}_display' => $new_{{ $entity_name }}->{{ $attribute_name }}->display_for_{{ $relationship['self_attribute_name'] }}_{{ $attribute_name }}(),
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        '{{ $struct_name }}' => {{ blade_eval(_generate_controller_data_type_add($struct['data_type']), ['entity_name' => $entity_name, 'struct_name' => $struct_name, 'struct' => $struct]) }},
+@endforeach
+@endforeach
+@endif
+@endforeach
+        'create_time' => $new_{{ $entity_name }}->create_time,
+        'update_time' => $new_{{ $entity_name }}->update_time,
     ];
 });/*}}}*/

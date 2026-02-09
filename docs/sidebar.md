@@ -1,8 +1,9 @@
 - 入门指南
-  - [开始上手](intro.md)
+  - [开始上手](../intro.md)
 - 接口文档
-  - [基础接口](api/base.md)
-  - [Demo 接口](api/demo.md)
+  - [Demo](../api/demo.md)
+  - [基础接口](../api/base.md)
 - 实体说明
-  - [实体关联](entity/relationship.md)
-  - [错误码](error_code.md)
+  - [实体关联](../entity/relationship.md)
+  - [Demo](../entity/demo.md)
+  - [错误码](../error_code.md)

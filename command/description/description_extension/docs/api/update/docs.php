@@ -3,7 +3,7 @@
 
 
 
-### 修改{{ $entity_info['display_name'] }} 
+### 修改{{ $entity_info['display_name'] }}  
 ----
 **功能：**修改{{ $entity_info['display_name'] }}  
 @if ($entity_info['repeat_check_structs'])
@@ -14,20 +14,20 @@ foreach ($repeat_check_structs as $struct_name) {
     $msg_infos[] = $entity_info['structs'][$struct_name]['display_name'];
 }
 @endphp
-**注：**不能同时存在{{ implode('和', $msg_infos) }}相同的{{ $entity_info['display_name'] }}  
+**注：**不能同时存在{{ implode('和', $msg_infos) }}相同的{{ $entity_info['display_name'] }}
 @endif
-**请求方式：**`POST`  
-**请求地址：**  
+**请求方式：**`POST`
+**请求地址：**
 ```
-/{{ english_word_pluralize($entity_name) }}/update/{^^{^^{{ $entity_name }}_id}^^}^^  
+/{{ english_word_pluralize($entity_name) }}/update/{^^{^^{{ $entity_name }}_id}^^}^^
 ```
-**`URL`中的变量：**  
+**`URL`中的变量：**
 
 |变量键名|类型|必传|描述|
 |----|----|----|----|
 |{{ $entity_name }}_id|id|必传|{{ $entity_info['display_name'] }}的主键，`id`|
 
-**参数：**  
+**参数：**
 
 |参数键名|类型|必传|描述|
 |----|----|----|----|
@@ -44,12 +44,53 @@ foreach ($repeat_check_structs as $struct_name) {
 |{{ $struct_name }}|{{ $struct['data_type'] }}|{{ $struct['require']? '必传':'可选' }}|{{ $struct['display_name'] }}|
 @endforeach
 
-**返回值：**  
+**POST请求体：**
+@php
+$jsonstr_infos = [];
+@endphp
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+@php
+$jsonstr_infos[$attribute_name.'_id'] = '此处传'.$relationship['entity_display_name'].'的 `id`';
+@endphp
+@endif
+@endforeach
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+@php
+$jsonstr_infos[$struct_name] = $struct['display_name'];
+@endphp
+@endforeach
+```json
+{{ json_encode($jsonstr_infos, JSON_UNESCAPED_UNICODE) }}
+
+```
+
+
+
+
+**返回值：**
 ```json
 {
     "code": 0,
     "msg": "",
-    "data": true
+    "data": [
+        "id": 1 //{{ $entity_info['display_name'] }} id
+@foreach ($entity_info['structs'] as $struct_name => $struct)
+        "{{ $struct_name }}": "",
+@endforeach
+@foreach ($relationship_infos['relationships'] as $attribute_name => $relationship)
+@if ($relationship['relationship_type'] === 'belongs_to')
+        "{{ $attribute_name }}_display": "",
+@foreach ($relationship['snaps'] as $structs)
+@foreach ($structs as $struct_name => $struct)
+        "{{ $struct_name }}": "",
+@endforeach
+@endforeach
+@endif
+@endforeach
+        "create_time": "2021-01-01 00:00:00",
+        "update_time": "2021-01-01 00:00:00"
+    ]
 }
 ```
 
